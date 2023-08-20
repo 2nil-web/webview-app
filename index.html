@@ -1,0 +1,25 @@
+<html>
+<button id="increment">Tap me file</button>
+<div>You tapped <span id="count">0</span> time(s).</div>
+<button id="compute">Compute file</button>
+<div>Result of computation: <span id="compute-result">0</span></div>
+<script>
+  const [incrementElement, countElement, computeElement, computeResultElement] =
+    document.querySelectorAll("#increment, #count, #compute, #compute-result");
+  document.addEventListener("DOMContentLoaded", () => {
+    incrementElement.addEventListener("click", () => {
+      window.increment().then(result => {
+        countElement.textContent = result.count;
+      });
+    });
+    computeElement.addEventListener("click", () => {
+      computeElement.disabled = true;
+      window.compute(6, 7).then(result => {
+        computeResultElement.textContent = result;
+        computeElement.disabled = false;
+      });
+    });
+  });
+</script>
+<html>
+
