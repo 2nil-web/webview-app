@@ -6,7 +6,7 @@ Application using the : [webview library](https://github.com/webview/webview.git
    
    - git to download the webview library.
    
-   - make and g++ to build the webview lib and the app under linux, WIndows and eventually MacOS.
+   - make and g++ to build the webview lib and the app under linux, Windows and eventually MacOS.
    
    - Or Visual Studio under Windows.
 
@@ -26,4 +26,4 @@ Application using the : [webview library](https://github.com/webview/webview.git
    
    - To set the webview library run the "initlib.sh" script under bash or the "initlib.bat" script under Windows cmd.
    - Then run make under gcc.
-   - Or build the webview-test.sln under MS Visual Studio.
+   - Or build the webview-app.sln under MS Visual Studio.

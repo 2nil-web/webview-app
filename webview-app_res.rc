@@ -1,0 +1,11 @@
+
+#include <windows.h>
+#include <richedit.h>
+#include "resource.h"
+
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST    "webview-app.manifest"
+
+IDI_APP ICON DISCARDABLE "webview-app.ico"
+IDI_WIN ICON DISCARDABLE "webview-app.ico"
+

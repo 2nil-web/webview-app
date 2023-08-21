@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Prerequisite are git and a c++ compiler that can be g++ or Visual Studio."
-echo "To generate the application icon you may need magick convert or provide an icon file named webview-test.ico"
+echo "To generate the application icon you may need magick convert or provide an icon file named webview-app.ico"
 
 if ! which git >/dev/null 2>&1
 then

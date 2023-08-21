@@ -1,7 +1,7 @@
 @echo off
 
 echo Prerequisite are git and the Visual Studio compiler suite for C++.
-echo To generate the application icon you may need magick convert or provide an icon file named webview-test.ico.
+echo To generate the application icon you may need magick convert or provide an icon file named webview-app.ico.
 
 where git >nul || ( echo You need git to download the webview library.; exit /b )
 

@@ -11,13 +11,14 @@ UPX=upx
 
 WVDIR=webview-gcc
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
-CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include -IWebView2/include --include=webview_mingw_support.h
-#CXXFLAGS += -Wall -Wextra -pedantic  -std=c++14
+CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include --include=webview_mingw_support.h
+CXXFLAGS += -std=c++20
+#CXXFLAGS += -Wall -Wextra -pedantic
 LDFLAGS += -static -mwindows
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
 EXEXT=.exe
-PREFIX=webview-test
+PREFIX=webview-app
 SRCS=$(wildcard *.cpp)
 OBJS=$(SRCS:.cpp=.o)
 OBJS += ${PREFIX}_res.o

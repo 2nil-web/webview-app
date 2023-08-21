@@ -9,15 +9,15 @@
 #include <thread>
 
 
-unsigned int count = 0;
 void create_bind(webview::webview &w) {
+static unsigned int count = 0;
   // A binding that increments a value and immediately returns the new value.
   w.bind("increment", [&](const std::string & /*req*/) -> std::string {
     auto count_string = std::to_string(++count);
     return "{\"count\": " + count_string + "}";
   });
 
-  // An binding that creates a new thread and returns the result at a later time.
+  // A binding that creates a new thread and returns the result at a later time.
   w.bind(
     "compute",
     [&](const std::string &seq, const std::string &req, void * /*arg*/) {
@@ -37,30 +37,26 @@ void create_bind(webview::webview &w) {
   );
 }
 
+void run_webview(bool devmode, void *wnd, int width, int height, int hints, std::string url, std::string title, std::string init_js) {
+  webview::webview w(devmode, wnd);
 
-#ifdef _WIN32
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow) {
-#else
-int main() {
-#endif
-  webview::webview w(false, nullptr);
-//  w.set_size(480, 320, WEBVIEW_HINT_NONE);
+  if (width > -1 && height > -1) w.set_size(width, height, hints);
 
   create_bind(w);
 
-  // Run the html page
-  std::string param=lpCmdLine;
-  std::cout << "Param [" << param << "]" << std::endl;
-  if (!param.empty()) {
-    w.set_title(param);
-    w.navigate(param);
+  bool html=false;
+  if (url.starts_with("html://")) {
+    if (title == "") title="HTML string";
+    url.erase(0, 7);
+    w.set_title(title);
+    w.set_html(url);
   } else {
-    w.set_title("Missing parameter");
-    w.set_html("Pass a url or an html file as parameter to the program.");
+    if (title == "") title=url;
+    w.set_title(title);
+    w.navigate(url);
   }
 
   w.run();
-
-  return 0;
 }
+
 
