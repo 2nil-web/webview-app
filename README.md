@@ -1,13 +1,29 @@
-# webview-test
+# webview-app
 
-Test of the : [webview library](https://github.com/webview/webview.git).
+Application using the : [webview library](https://github.com/webview/webview.git).
 
-Provided with a Makefile that build the test under msys/mingw64.
+1) Prerequisite to build the app are:
+   
+   - git to download the webview library.
+   
+   - make and g++ to build the webview lib and the app under linux, WIndows and eventually MacOS.
+   
+   - Or Visual Studio under Windows.
 
-The test file originate from the bind.cc example of the webview library.
+2) A Makefile is provided that allow the application build under the gcc/g++ compiler suite.
 
-The content of the 2 folders "webview" and "WebView2" comes from building the webview library with the "script/build.sh" file.
+3) An .sln file is provided that allow the build under the MS Visual Studio compiler suite.
 
-The icon is an svg built with inkscape and converted into a .ico file with magick convert.
+4) The application is written in C++.
+   
+   - It originates from the bind.cc example of the webview library.
+   - It has been tested under Windows and Linux.
+   - It remain to be tested under MacOS although it should works, as stated by the webview library documentation ...
+   - An svg icon is provided that can be used to create a .ico file with magick convert. Or provide your own .ico file.
+   - The resulting binary size  can be reduced with upx (make upx).
 
-The resulting binary size  can be reduced with upx (make upx).
+5) Built
+   
+   - To set the webview library run the "initlib.sh" script under bash or the "initlib.bat" script under Windows cmd.
+   - Then run make under gcc.
+   - Or build the webview-test.sln under MS Visual Studio.
