@@ -56,6 +56,8 @@ void run_webview(bool devmode, void *wnd, int width, int height, int hints, std:
     w.navigate(url);
   }
 
+  if (!init_js.empty()) w.init(init_js);
+
   w.run();
 }
 

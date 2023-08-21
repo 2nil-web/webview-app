@@ -11,10 +11,10 @@ extern void run_webview(bool devmode, void *wnd, int width, int height, int hint
 bool devmode=false;
 void *wnd=nullptr;
 int width=-1, height=-1, hints=0; /*
-WEBVIEW_HINT_NONE  (0) Width and height are default size
-WEBVIEW_HINT_MIN   (1) Width and height are minimum bounds
-WEBVIEW_HINT_MAX   (2) Width and height are maximum bounds
-WEBVIEW_HINT_FIXED (3) Window size is fixed
+0 Width and height are default size
+1 Width and height are minimum bounds
+2 Width and height are maximum bounds
+3 Window size is fixed
 */
 
 std::string url, title="", init_js="";
