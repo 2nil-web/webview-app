@@ -56,7 +56,7 @@ int main() {
     w.navigate(param);
   } else {
     w.set_title("Missing parameter");
-    w.set_html("Pass an html file as parameter to the program.");
+    w.set_html("Pass a url or an html file as parameter to the program.");
   }
 
   w.run();
