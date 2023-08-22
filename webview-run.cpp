@@ -1,21 +1,84 @@
 
 #include "webview.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <chrono>
 #include <string>
 #include <thread>
+#include <algorithm>
+#include <filesystem>
 
+std::string ws2s(const std::wstring& wstr)
+{
+    using convert_typeX = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+    return converterX.to_bytes(wstr);
+}
+
+std::string tmp_name() {
+  wchar_t tmpl[]=L"wvtmp.XXXXXX";
+  wchar_t *tmpname=_wmktemp(tmpl);
+  std::string tpath=std::filesystem::temp_directory_path().generic_string();
+  tpath+=ws2s(tmpname);
+  return tpath;
+}
+
+std::string exec_cmd(std::string cmd) {
+  std::string tf=tmp_name();
+  std::cout << tf << std::endl;
+  std::string fullcmd=cmd+" > "+tf;
+  std::system(fullcmd.c_str());
+  std::ifstream t(tf);
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  std::string res=buffer.str();
+  t.close();
+  //std::cout << fullcmd << " result in file '" << tf << "': " << std::endl << res << std::endl;
+  return res;
+}
+
+void replace_all(std::string &s, std::string srch, std::string repl) {
+  size_t pos=0;
+  while (pos += repl.length()) {
+    pos=s.find(srch, pos);
+    if (pos == std::string::npos) break;
+    s.replace(pos, srch.length(), repl);
+  }
+}
+
+void rep_crlf(std::string &s) {
+  replace_all(s, "\r", "\\r");
+  replace_all(s, "\n", "\\n");
+}
 
 void create_bind(webview::webview &w) {
-static unsigned int count = 0;
-  // A binding that increments a value and immediately returns the new value.
-  w.bind("increment", [&](const std::string & /*req*/) -> std::string {
-    auto count_string = std::to_string(++count);
-    return "{\"count\": " + count_string + "}";
-  });
+  // A binding that return the result of a command exec at a later time.
+  w.bind(
+    "exec_cmd",
+    [&](const std::string &seq, const std::string &req, void *) {
+      std::thread([&, seq, req] {
+        auto cmd=webview::detail::json_parse(req, "", 0);
+        std::string res_cmd=exec_cmd(cmd);
+        rep_crlf(res_cmd);
+        auto result="{\"value\": \""+res_cmd+"\"}";
+        std::cout << "SEQ " << seq << ", REQ " << cmd << std::endl << result << std::endl;
+        w.resolve(seq, 0, result);
+      }).detach();
+    },
+    nullptr
+  );
+
+  w.bind(
+    "increment",
+    [&](const std::string & /*req*/) -> std::string {
+      static unsigned int count = 0;
+      auto count_string = std::to_string(++count);
+      return "{\"count\": " + count_string + "}";
+    });
 
   // A binding that creates a new thread and returns the result at a later time.
   w.bind(
@@ -23,13 +86,15 @@ static unsigned int count = 0;
     [&](const std::string &seq, const std::string &req, void * /*arg*/) {
       // Create a thread and forget about it for the sake of simplicity.
       std::thread([&, seq, req] {
+        std::cout << "SEQ " << seq << ", REQ " << req << std::endl;
         // Simulate load.
         //std::this_thread::sleep_for(std::chrono::seconds(1));
-        // json_parse() is an implementation detail and is only used here
-        // to provide a working example.
-        auto left = std::stoll(webview::detail::json_parse(req, "", 0));
+/*        auto left = std::stoll(webview::detail::json_parse(req, "", 0));
         auto right = std::stoll(webview::detail::json_parse(req, "", 1));
-        auto result = std::to_string(left + right);
+        auto result = std::to_string(left + right);*/
+        auto left = webview::detail::json_parse(req, "", 0);
+        auto right = webview::detail::json_parse(req, "", 1);
+        auto result = "{\"value\": \"res\"}";
         w.resolve(seq, 0, result);
       }).detach();
     },

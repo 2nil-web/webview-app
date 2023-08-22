@@ -1,21 +1,38 @@
 <html>
-<button id="increment">Tap me file</button>
+<label> Command to run: <textarea style="vertical-align: top;" rows="1" cols="44" id="cmd" value="" placeholder='Enter your command and click the "Run" button.'></textarea></label>
+<input type="button" id="run_cmd" name="run_cmd" value="Run">
+<br><br>
+<textarea style="width:90%; height:30%" id="output" name="output"></textarea>
+<br><br>
+
+<button id="increment">Tap me </button>
 <div>You tapped <span id="count">0</span> time(s).</div>
 <button id="compute">Compute file</button>
 <div>Result of computation: <span id="compute-result">0</span></div>
+
+
 <script>
   const [incrementElement, countElement, computeElement, computeResultElement] =
-    document.querySelectorAll("#increment, #count, #compute, #compute-result");
+  document.querySelectorAll("#increment, #count, #compute, #compute-result");
   document.addEventListener("DOMContentLoaded", () => {
-    incrementElement.addEventListener("click", () => {
-      window.increment().then(result => {
-        countElement.textContent = result.count;
+    run_cmd.addEventListener("click", () => {
+      run_cmd.disabled = true;
+      window.exec_cmd(cmd.value).then(result => {
+        output.textContent += cmd.value+ "==>" + result.value;
+        run_cmd.disabled = false;
       });
     });
+    incrementElement.addEventListener("click", () => {
+      window.increment().then(tutu => {
+        countElement.textContent = tutu.count;
+      });
+    });
+    
     computeElement.addEventListener("click", () => {
       computeElement.disabled = true;
-      window.compute(7, 8).then(result => {
-        computeResultElement.textContent = result;
+      window.compute(cmd.value, output.value).then(result => {
+        console.log(result);
+        computeResultElement.textContent = result.value;
         computeElement.disabled = false;
       });
     });

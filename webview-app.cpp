@@ -20,17 +20,16 @@ int width=-1, height=-1, hints=0; /*
 
 std::string url, title="", init_js="";
 
-/*
 void get_args() {
+  devmode=true;
 }
-*/
 
 #ifdef _WIN32
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow) {
 #else
 int main() {
 #endif
-//  get_args();
+  get_args();
   url=std::string(lpCmdLine);
 
   if (url.empty()) {
