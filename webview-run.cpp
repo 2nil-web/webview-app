@@ -11,24 +11,10 @@
 #include <algorithm>
 #include <filesystem>
 
-std::string ws2s(const std::wstring& wstr)
-{
-    using convert_typeX = std::codecvt_utf8<wchar_t>;
-    std::wstring_convert<convert_typeX, wchar_t> converterX;
-
-    return converterX.to_bytes(wstr);
-}
-
-std::string tmp_name() {
-  wchar_t tmpl[]=L"wvtmp.XXXXXX";
-  wchar_t *tmpname=_wmktemp(tmpl);
-  std::string tpath=std::filesystem::temp_directory_path().generic_string();
-  tpath+=ws2s(tmpname);
-  return tpath;
-}
+#include "util.h"
 
 std::string exec_cmd(std::string cmd) {
-  std::string tf=tmp_name();
+  std::string tf=tempfile();
   std::cout << tf << std::endl;
   std::string fullcmd=cmd+" > "+tf;
   std::system(fullcmd.c_str());
