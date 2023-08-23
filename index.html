@@ -18,7 +18,7 @@
     run_cmd.addEventListener("click", () => {
       run_cmd.disabled = true;
       window.exec_cmd(cmd.value).then(result => {
-        output.textContent += cmd.value+ "==>" + result.value;
+        output.textContent += "'"+cmd.value+ "' ==>\n" + result.value;
         run_cmd.disabled = false;
       });
     });

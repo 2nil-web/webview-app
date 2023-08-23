@@ -13,33 +13,6 @@
 
 #include "util.h"
 
-std::string exec_cmd(std::string cmd) {
-  std::string tf=tempfile();
-  std::cout << tf << std::endl;
-  std::string fullcmd=cmd+" > "+tf;
-  std::system(fullcmd.c_str());
-  std::ifstream t(tf);
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  std::string res=buffer.str();
-  t.close();
-  //std::cout << fullcmd << " result in file '" << tf << "': " << std::endl << res << std::endl;
-  return res;
-}
-
-void replace_all(std::string &s, std::string srch, std::string repl) {
-  size_t pos=0;
-  while (pos += repl.length()) {
-    pos=s.find(srch, pos);
-    if (pos == std::string::npos) break;
-    s.replace(pos, srch.length(), repl);
-  }
-}
-
-void rep_crlf(std::string &s) {
-  replace_all(s, "\r", "\\r");
-  replace_all(s, "\n", "\\n");
-}
 
 void create_bind(webview::webview &w) {
   // A binding that return the result of a command exec at a later time.
