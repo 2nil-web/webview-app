@@ -13,7 +13,7 @@ WVDIR=webview-gcc
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include --include=webview_mingw_support.h
 CXXFLAGS += -std=c++20
-#CXXFLAGS += -Wall -Wextra -pedantic
+CXXFLAGS += -Wall -pedantic # -Wextra
 LDFLAGS += -static -mwindows
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 

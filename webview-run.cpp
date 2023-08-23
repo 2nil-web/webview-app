@@ -68,7 +68,6 @@ void run_webview(bool devmode, void *wnd, int width, int height, int hints, std:
 
   create_bind(w);
 
-  bool html=false;
   if (url.starts_with("html://")) {
     if (title == "") title="HTML string";
     url.erase(0, 7);
