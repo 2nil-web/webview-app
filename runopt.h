@@ -26,7 +26,7 @@ struct run_opt {
 };
 
 bool interp ();
-void usage(std::ostream& out = std::cout);
+std::string usage(std::ostream& out = std::cout);
 void getopt_init(int argc, char **argv, std::vector<run_opt> pOptions, const std::string pIntro="Some introductory help message", const std::string pVersion="1.0.0", const std::string copyright="");
 
 #endif /* MY_GETOPT_H */

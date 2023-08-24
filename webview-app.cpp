@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <filesystem>
 
 
 #include "util.h"
@@ -55,7 +56,7 @@ void set_hints(char, std::string, std::string val) {
 std::vector<run_opt> r_opts = {
   { "url",    'u', opt_only,  required_argument, "Provide the url. Default is to search for index.html or index.js in the current directory, this information might also be provided without the '-u' option as the last argument of the command.", set_url },
   { "html",   'm', opt_only,  required_argument, "Provide the an html string.", set_html },
-  { "", '\0', 0, 0, "\n-u and -m are mutually exclusive.", NULL },
+  { "", '\0', 0, 0, "-u and -m are mutually exclusive.", NULL },
   { "title",  't', opt_only,  required_argument, "Set the title of the webview windows, default is to display the url as title if it is provided or nothing if just an html string is provided.", set_title },
   { "js",     'j', opt_only,  required_argument, "Inject a javascript command before loading html page.", [] (char , std::string , std::string val) -> void { init_js=val; } },
   { "debug",  'd', opt_only,  no_argument,       "Activate the developper mode in the webview.",  [] (char , std::string , std::string val) -> void { devmode=true; }},
@@ -84,11 +85,18 @@ int main(int argc, char **argv, char **) {
   if (url.empty()) {
     if (optind < argc) url=argv[optind];
     else {
+      // ToDo : search for index.html or index.js in current directory
+      std::string cpath=std::filesystem::current_path().generic_string();
+      std::cout << "cpath " << cpath << std::endl;
       if (false) {
-        // ToDo : search for index.html or index.js in current directory
       } else {
         if (title.empty()) title="Missing parameter";
-        url="html://At least Pass a url, an html file or an html text as an argument to the program.<br>Also see --help option at comand line.";
+        url="html://";
+        std::string hm=usage();
+        replace_all(hm, "\r", "<br>");
+        replace_all(hm, "\n", "<br>");
+        if (!hm.empty()) url+="<pre>"+hm+"</pre>";
+
       }
     }
   }
