@@ -36,6 +36,7 @@ std::string trim(std::string& s) {
 }
 
 #ifdef _WIN32
+#ifndef UNICODE
 PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc) {
     PCHAR* argv;
     PCHAR  _argv;
@@ -110,6 +111,7 @@ PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc) {
     (*_argc) = argc;
     return argv;
 }
+#endif
 #endif
 
 std::string temppath() {

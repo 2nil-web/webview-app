@@ -1,5 +1,4 @@
 
-#include "webview.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -12,6 +11,7 @@
 #include <filesystem>
 
 #include "util.h"
+#include "webview.h"
 
 
 void create_bind(webview::webview &w) {
@@ -30,6 +30,13 @@ void create_bind(webview::webview &w) {
     },
     nullptr
   );
+
+  w.bind(
+    "exit_webapp",
+    [&](const std::string & /*req*/) -> std::string {
+      std::cout << "Exitting web app" << std::endl;
+      exit(0);
+    });
 
   w.bind(
     "increment",

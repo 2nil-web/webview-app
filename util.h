@@ -5,7 +5,12 @@
 #include <functional>
 
 #ifdef _WIN32
+#ifdef UNICODE
+#define CommandLineToArgv CommandLineToArgvW
+#else
 PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc);
+#define CommandLineToArgv CommandLineToArgvA
+#endif
 #endif
 
 std::string trim(std::string& s);

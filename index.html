@@ -2,9 +2,9 @@
 <label> Command to run: <textarea style="vertical-align: top;" rows="1" cols="44" id="cmd" value="" placeholder='Enter your command and click the "Run" button.'></textarea></label>
 <input type="button" id="run_cmd" name="run_cmd" value="Run">
 <br><br>
-<textarea style="width:95%; height:85%" id="output" name="output"></textarea>
+<textarea style="width:95%; height:80%" id="output" name="output"></textarea>
 <br><br>
-
+<input type="button" id="quit" name="quit" value="Exit web app" onclick="exit_webapp()">
 <script>
   const [incrementElement, countElement, computeElement, computeResultElement] =
   document.querySelectorAll("#increment, #count, #compute, #compute-result");
