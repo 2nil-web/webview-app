@@ -1,4 +1,10 @@
 
+ifneq ($(shell uname -s),Linux)
+ECHO=echo -e
+else
+ECHO=echo
+endif
+
 PGF=$(subst \,/,$(subst C:\,/c/,$(PROGRAMFILES)))
 PGF86=${PGF} (x86)
 PATH:=${PATH}:${PGF86}/Inno Setup 6
@@ -8,6 +14,10 @@ MAGICK=magick
 RC=windres
 STRIP=strip
 UPX=upx
+
+VERSION=$(shell git describe --abbrev=0 --tags 2>/dev/null || echo 'Unknown_version')
+COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo 'Unknown_commit')
+DECORATION=Nawak-Bidon
 
 WVDIR=webview-gcc
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
@@ -25,7 +35,9 @@ OBJS += ${PREFIX}_res.o
 
 TARGET=${PREFIX}${EXEXT}
 
-all : ${TARGET}
+.PHONY: FORCE
+
+all : version_check.txt version.h ${TARGET}
 
 ${TARGET} : ${OBJS}
 
@@ -43,6 +55,21 @@ clean :
 
 rclean :
 	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET) WebView2Loader.dll
+
+# Génération du version.h intégré dans l'appli
+version.h : version_check.txt
+	@${ECHO} "Building C++ header $@"
+	@${ECHO} "std::string name=\"${PREFIX}\", version=\"${VERSION}\", decoration=\"${DECORATION}\", commit=\"${COMMIT}\", created_at=\"${ISO8601}\";" >$@
+
+# Génération du version.json intégré dans le paquetage
+version.json : version_check.txt
+	@${ECHO} "Building json file $@"
+	@${ECHO} '{ "name":"${PREFIX}", "version":"${VERSION}", "decoration":"${DECORATION}", "commit":"${COMMIT}","created_at":"${ISO8601}" }' >$@
+
+# Pour regénérer version.h et version.json dès qu'un des champs version ou decoration ou commit, est modifié.
+version_check.txt : FORCE
+	@${ECHO} "Version:${VERSION}, decoration:${DECORATION}, commit:${COMMIT}" >new_$@
+	@if diff new_$@ $@ >/dev/null 2>&1; then rm -f new_$@; else mv -f new_$@ $@; rm -f ${PREFIX}.iss ${PREFIX}-standalone.iss; fi
 
 cfg :
 	@echo "PGF ${PGF}"

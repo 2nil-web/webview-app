@@ -8,14 +8,109 @@
 #endif
 
 #include <iostream>
-#include <iostream>
 #include <sstream>
 #include <fstream>
+#include <string>
+#include <vector>
+#include <chrono>
+#include <algorithm>
+#include <functional>
 #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
 #include <filesystem>
 #endif
 
 #include "util.h"
+
+bool any_of_ctype(const std::string s, std::function<int(int)> istype) {
+  return std::any_of(s.begin(), s.end(), [istype](char c) { return istype(c); } );
+}
+
+bool all_of_ctype(const std::string s, std::function<int(int)> istype) {
+  return std::all_of(s.begin(), s.end(), [istype](char c) { return istype(c); } );
+}
+
+std::string trim(std::string& s) {
+  s.erase(0, s.find_first_not_of(" \n\r\t"));
+  s.erase(s.find_last_not_of(" \n\r\t")+1);
+  return s;
+}
+
+#ifdef _WIN32
+PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc) {
+    PCHAR* argv;
+    PCHAR  _argv;
+    ULONG   len;
+    ULONG   argc;
+    CHAR   a;
+    ULONG   i, j;
+
+    BOOLEAN  in_QM;
+    BOOLEAN  in_TEXT;
+    BOOLEAN  in_SPACE;
+
+    len = strlen(CmdLine);
+    i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
+    argv = (PCHAR*)GlobalAlloc(GMEM_FIXED, i + (len+2)*sizeof(CHAR));
+    _argv = (PCHAR)(((PUCHAR)argv)+i);
+    argc = 0;
+    argv[argc] = _argv;
+    in_QM = FALSE;
+    in_TEXT = FALSE;
+    in_SPACE = TRUE;
+    i = 0;
+    j = 0;
+
+    while((a = CmdLine[i])) {
+        if(in_QM) {
+            if(a == '\"') {
+                in_QM = FALSE;
+            } else {
+                _argv[j] = a;
+                j++;
+            }
+        } else {
+            switch(a) {
+            case '\"':
+                in_QM = TRUE;
+                in_TEXT = TRUE;
+                if(in_SPACE) {
+                    argv[argc] = _argv+j;
+                    argc++;
+                }
+                in_SPACE = FALSE;
+                break;
+            case ' ':
+            case '\t':
+            case '\n':
+            case '\r':
+                if(in_TEXT) {
+                    _argv[j] = '\0';
+                    j++;
+                }
+                in_TEXT = FALSE;
+                in_SPACE = TRUE;
+                break;
+            default:
+                in_TEXT = TRUE;
+                if(in_SPACE) {
+                    argv[argc] = _argv+j;
+                    argc++;
+                }
+                _argv[j] = a;
+                j++;
+                in_SPACE = FALSE;
+                break;
+            }
+        }
+        i++;
+    }
+    _argv[j] = '\0';
+    argv[argc] = NULL;
+
+    (*_argc) = argc;
+    return argv;
+}
+#endif
 
 std::string temppath() {
   std::string tpath="";

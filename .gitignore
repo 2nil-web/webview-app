@@ -1,3 +1,4 @@
+
 .vs
 *.vcxproj.user
 x64
@@ -31,3 +32,8 @@ webview-vs
 *.exe
 *.out
 *.app
+
+version_check.txt
+version.h
+version.json
+*.ico
