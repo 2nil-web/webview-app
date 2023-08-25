@@ -21,6 +21,58 @@
 
 #include "util.h"
 
+#ifdef _WIN32
+// From Bjoern Hoehrmann <bjoern@hoehrmann.de>
+#define UTF8_ACCEPT 0
+static const uint8_t utf8d[] = {
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 00..1f
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 20..3f
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 40..5f
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 60..7f
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, // 80..9f
+	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7, // a0..bf
+	8,8,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, // c0..df
+	0xa,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x4,0x3,0x3, // e0..ef
+	0xb,0x6,0x6,0x6,0x5,0x8,0x8,0x8,0x8,0x8,0x8,0x8,0x8,0x8,0x8,0x8, // f0..ff
+	0x0,0x1,0x2,0x3,0x5,0x8,0x7,0x1,0x1,0x1,0x4,0x6,0x1,0x1,0x1,0x1, // s0..s0
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1, // s1..s2
+	1,2,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1, // s3..s4
+	1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,1,1,1,1,1, // s5..s6
+	1,3,1,1,1,1,1,3,1,3,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // s7..s8
+};
+
+static uint32_t decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
+	uint32_t type = utf8d[byte];
+
+	*codep = (*state != UTF8_ACCEPT) ?  (byte & 0x3fu) | (*codep << 6) : (0xff >> type) & (byte);
+	*state = utf8d[256 + *state*16 + type];
+	return *state;
+}
+
+std::string clean_utf8(const char *cs) {
+  uint8_t *s=(uint8_t *)cs;
+	uint32_t codepoint, state = 0;
+  std::string ss;
+
+	while (*s) {
+		decode(&state, &codepoint, *s);
+    if (state == UTF8_ACCEPT) ss+=*s;
+    else {
+      ss+=' ';
+      state=UTF8_ACCEPT;
+    }
+    s++;
+  }
+
+	return ss;
+}
+#else
+std::string clean_utf8(const char *cs) {
+  return cs;
+}
+#endif
+
+
 bool any_of_ctype(const std::string s, std::function<int(int)> istype) {
   return std::any_of(s.begin(), s.end(), [istype](char c) { return istype(c); } );
 }
@@ -155,7 +207,7 @@ std::string tempfile(std::string tpath, std::string pfx) {
 
 std::string exec_cmd(std::string cmd) {
   std::string tf=tempfile();
-  std::cout << tf << std::endl;
+  //std::cout << tf << std::endl;
   std::string fullcmd=cmd+" > "+tf;
   std::system(fullcmd.c_str());
   std::ifstream t(tf);
@@ -163,7 +215,7 @@ std::string exec_cmd(std::string cmd) {
   buffer << t.rdbuf();
   std::string res=buffer.str();
   t.close();
-  return res;
+  return clean_utf8(res.c_str());
 }
 
 void replace_all(std::string &s, std::string srch, std::string repl) {

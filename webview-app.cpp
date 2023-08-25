@@ -71,8 +71,19 @@ std::vector<run_opt> r_opts = {
 };
 
 
+std::string get_index() {
+  std::string idx=std::filesystem::absolute("index.html").generic_string();
+  if (std::filesystem::is_regular_file(idx)) return idx;
+  idx=std::filesystem::absolute("index.js").generic_string();
+  if (std::filesystem::is_regular_file(idx)) return idx;
+
+  return "";
+}
+
 #ifdef _WIN32
 
+// Live html test :
+// ./webview-app.exe "html://<input type='button' value='Exit web app' onclick='exit_webapp()'>"
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow) {
   LPSTR *argv;
   int argc;
@@ -83,24 +94,29 @@ int main(int argc, char **argv, char **) {
   getopt_init(argc, argv, r_opts, "WebView app.", "", "(c) Denis LALANNE. Provided as is. NO WARRANTY of any kind.");
 
   if (url.empty()) {
-    if (optind < argc) url=argv[optind];
-    else {
-      // ToDo : search for index.html or index.js in current directory
-      std::string cpath=std::filesystem::current_path().generic_string();
-      std::cout << "cpath " << cpath << std::endl;
-      if (false) {
-      } else {
+    if (optind < argc) {
+      url=argv[optind];
+
+      if (url.starts_with("file://"))
+        url=std::filesystem::absolute(url.substr(7)).generic_string();
+      else if (!url.starts_with("html://") && !url.starts_with("http://") && !url.starts_with("https://"))
+        url=std::filesystem::absolute(url).generic_string();
+    } else {
+      // Search for index.html or index.js in current directory
+      url=get_index();
+
+      if (url.empty()) {
         if (title.empty()) title="Missing parameter";
         url="html://";
         std::string hm=usage();
         replace_all(hm, "\r", "<br>");
         replace_all(hm, "\n", "<br>");
         if (!hm.empty()) url+="<pre>"+hm+"</pre>";
-
       }
     }
   }
 
+  std::cout << url << std::endl;
   run_webview(devmode, wnd, width, height, hints, url, title, init_js);
 
   return 0;

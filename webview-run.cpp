@@ -24,7 +24,7 @@ void create_bind(webview::webview &w) {
         std::string res_cmd=exec_cmd(cmd);
         rep_crlf(res_cmd);
         auto result="{\"value\": \""+res_cmd+"\"}";
-        std::cout << "SEQ " << seq << ", REQ " << cmd << std::endl << result << std::endl;
+        //std::cout << "SEQ " << seq << ", REQ " << cmd << std::endl << result << std::endl;
         w.resolve(seq, 0, result);
       }).detach();
     },
@@ -34,8 +34,9 @@ void create_bind(webview::webview &w) {
   w.bind(
     "exit_webapp",
     [&](const std::string & /*req*/) -> std::string {
-      std::cout << "Exitting web app" << std::endl;
-      exit(0);
+      std::cout << "Exiting web app" << std::endl;
+      w.terminate();
+      return "";
     });
 
   w.bind(

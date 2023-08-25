@@ -7,14 +7,17 @@
 <input type="button" id="quit" name="quit" value="Exit web app" onclick="exit_webapp()">
 <script>
   const [incrementElement, countElement, computeElement, computeResultElement] =
-  document.querySelectorAll("#increment, #count, #compute, #compute-result");
   document.addEventListener("DOMContentLoaded", () => {
     run_cmd.addEventListener("click", () => {
-      //run_cmd.disabled = true;
+      run_cmd.disabled = true;
       window.exec_cmd(cmd.value).then(result => {
         output.textContent += result.value;
         run_cmd.disabled = false;
       });
+    });
+
+    document.addEventListener("keyup", (event) => {
+      if (event.keyCode === 27) exit_webapp();
     });
   });
 </script>
