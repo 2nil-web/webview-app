@@ -215,6 +215,7 @@ std::string exec_cmd(std::string cmd) {
   buffer << t.rdbuf();
   std::string res=buffer.str();
   t.close();
+  //return res.c_str();
   return clean_utf8(res.c_str());
 }
 
