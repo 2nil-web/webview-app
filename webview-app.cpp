@@ -9,7 +9,6 @@
 #include <thread>
 #include <filesystem>
 
-
 #include "util.h"
 #include "runopt.h"
 
@@ -58,7 +57,7 @@ std::vector<run_opt> r_opts = {
   { "html",   'm', opt_only,  required_argument, "Provide the an html string.", set_html },
   { "", '\0', 0, 0, "-u and -m are mutually exclusive.", NULL },
   { "title",  't', opt_only,  required_argument, "Set the title of the webview windows, default is to display the url as title if it is provided or nothing if just an html string is provided.", set_title },
-  { "js",     'j', opt_only,  required_argument, "Inject a javascript command before loading html page.", [] (char , std::string , std::string val) -> void { init_js=val; } },
+//  { "js",     'j', opt_only,  required_argument, "Inject a javascript command before loading html page.", [] (char , std::string , std::string val) -> void { init_js=val; } },
   { "debug",  'd', opt_only,  no_argument,       "Activate the developper mode in the webview.",  [] (char , std::string , std::string val) -> void { devmode=true; }},
   { "width",  'w', opt_only,  required_argument, "Set webview windows witdh.",  [] (char , std::string , std::string val) -> void { width=std::stoi(val); }},
   { "height", 'h', opt_only,  required_argument, "Set webview windows height.", [] (char , std::string , std::string val) -> void { height=std::stoi(val); }},

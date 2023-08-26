@@ -44,16 +44,23 @@ TARGET=${PREFIX}${EXEXT}
 
 .PHONY: FORCE
 
+#DO_MSBUILD=0
 ifeq ($(DO_MSBUILD),1)
+ARCH=x64
+CONF=Release
 all : version_check.txt version.h ${PREFIX}.ico ${TARGET}
-	${MSBUILD} webview-app.sln -p:Configuration=Release
-	cp x64/Release/*.exe .
 #	pandoc -o Summary.docx -f markdown -t docx Summary.md
+
+${TARGET} : ${ARCH}/${CONF}/${TARGET}
+
+${ARCH}/${CONF}/${TARGET} :
+	${MSBUILD} webview-app.sln -p:Configuration=${CONF}
+	cp ${ARCH}/${CONF}/*.exe .
 else
 all : version_check.txt version.h ${TARGET}
-endif
 
 ${TARGET} : ${OBJS}
+endif
 
 ${PREFIX}_res.o : ${PREFIX}.ico
 
@@ -65,11 +72,10 @@ upx : strip
 	$(UPX) $(TARGET) | true
 
 clean :
-	rm -f *~ ${PREFIX}.ico *.o $(OBJS)
-
-rclean :
-	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET) WebView2Loader.dll
-	rm -rf x64
+	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET)
+ifeq ($(DO_MSBUILD),1)
+	rm -rf ${ARCH}
+endif
 
 # Génération du version.h intégré dans l'appli
 version.h : version_check.txt
@@ -94,8 +100,15 @@ cfg :
 	@echo "END PATH"
 	which inkscape.exe
 
-# Ces régles implicites ne sont pas utiles quand on fait 'make rclean' (voir même make clean ...)
-ifneq ($(MAKECMDGOALS),rclean)
+# Ces régles implicites ne sont pas utiles quand on fait 'make clean'
+ifneq ($(MAKECMDGOALS),clean)
+%.ico : %.png
+	${MAGICK} convert -background none $< $@
+
+%.ico : %.svg
+	${MAGICK} convert -background none $< $@
+
+ifneq ($(DO_MSBUILD),1)
 %.exe: %.o
 	$(LINK.cpp) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
@@ -104,12 +117,6 @@ ifneq ($(MAKECMDGOALS),rclean)
 
 %.exe: %.cpp
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
-
-%.ico : %.png
-	${MAGICK} convert -background none $< $@
-
-%.ico : %.svg
-	${MAGICK} convert -background none $< $@
 
 # Régles pour construire les fichier objet d'après les .rc
 %.o : %.rc
@@ -127,6 +134,7 @@ ifneq ($(MAKECMDGOALS),rclean)
 # Inclusion des fichiers de dépendance .d
 ifdef OBJS
 -include $(OBJS:.o=.d)
+endif
 endif
 endif
 
