@@ -27,7 +27,7 @@ CXXFLAGS += -Wall -pedantic # -Wextra
 LDFLAGS += -static -mwindows
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
-MSBUILD='C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
+MSBUILD='C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 DO_MSBUILD=$(shell test -f "${MSBUILD}" && echo 1 || echo 0)
 
 ifeq ($(DO_MSBUILD),0)
@@ -44,11 +44,13 @@ TARGET=${PREFIX}${EXEXT}
 
 .PHONY: FORCE
 
-all : version_check.txt version.h ${TARGET}
 ifeq ($(DO_MSBUILD),1)
+all : version_check.txt version.h ${PREFIX}.ico ${TARGET}
 	${MSBUILD} webview-app.sln -p:Configuration=Release
 	cp x64/Release/*.exe .
 #	pandoc -o Summary.docx -f markdown -t docx Summary.md
+else
+all : version_check.txt version.h ${TARGET}
 endif
 
 ${TARGET} : ${OBJS}
