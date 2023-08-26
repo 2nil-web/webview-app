@@ -101,7 +101,7 @@ PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc) {
     BOOLEAN  in_TEXT;
     BOOLEAN  in_SPACE;
 
-    len = strlen(CmdLine);
+    len = (ULONG)strlen(CmdLine);
     i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
     argv = (PCHAR*)GlobalAlloc(GMEM_FIXED, i + (len+2)*sizeof(CHAR));
     _argv = (PCHAR)(((PUCHAR)argv)+i);

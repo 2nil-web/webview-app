@@ -27,6 +27,13 @@ CXXFLAGS += -Wall -pedantic # -Wextra
 LDFLAGS += -static -mwindows
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
+MSBUILD='C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
+DO_MSBUILD=$(shell test -f "${MSBUILD}" && echo 1 || echo 0)
+
+ifeq ($(DO_MSBUILD),0)
+	DO_MSBUILD=$(shell test -f $(cygpath "${MSBUILD}") && echo 1 || echo 0)
+endif
+
 EXEXT=.exe
 PREFIX=webview-app
 SRCS=$(wildcard *.cpp)
@@ -38,6 +45,11 @@ TARGET=${PREFIX}${EXEXT}
 .PHONY: FORCE
 
 all : version_check.txt version.h ${TARGET}
+ifeq ($(DO_MSBUILD),1)
+	${MSBUILD} webview-app.sln -p:Configuration=Release
+	cp x64/Release/*.exe .
+#	pandoc -o Summary.docx -f markdown -t docx Summary.md
+endif
 
 ${TARGET} : ${OBJS}
 
@@ -55,6 +67,7 @@ clean :
 
 rclean :
 	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET) WebView2Loader.dll
+	rm -rf x64
 
 # Génération du version.h intégré dans l'appli
 version.h : version_check.txt
