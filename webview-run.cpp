@@ -1,5 +1,9 @@
 
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
@@ -14,10 +18,37 @@
 #include "util.h"
 
 
-void create_bind(webview::webview &w) {
-  // A binding that return the result of a command exec at a later time.
+std::string myBoundCallback(std::string args) {
+  return "true";
+}
+void create_binds(webview::webview &w) {
+  // Change window title
   w.bind(
-    "exec_cmd",
+    "webapp_title",
+    [&](const std::string & req) -> std::string {
+      auto title=webview::detail::json_parse(req, "", 0);
+      w.set_title(title);
+      return "";
+    });
+
+  // Change window dimension and sizing behaviour
+  w.bind(
+    "webapp_size",
+    [&](const std::string & req) -> std::string {
+      auto params=webview::detail::json_parse(req, "", 0);
+      auto l_width = std::stoi(webview::detail::json_parse(req, "", 0));
+      auto l_height = std::stoi(webview::detail::json_parse(req, "", 1));
+      auto l_hints = std::stoi(webview::detail::json_parse(req, "", 2));
+      w.set_size(l_width, l_height, l_hints);
+      return "";
+    });
+
+  // Exit from the web application
+  w.bind("webapp_exit", [&](const std::string &) -> std::string { w.terminate(); return ""; });
+
+  // Run a local command and return an eventual result at a later time.
+  w.bind(
+    "webapp_exec",
     [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
         auto cmd=webview::detail::json_parse(req, "", 0);
@@ -30,51 +61,18 @@ void create_bind(webview::webview &w) {
     },
     nullptr
   );
-
-  w.bind(
-    "exit_webapp",
-    [&](const std::string & /*req*/) -> std::string {
-      std::cout << "Exiting web app" << std::endl;
-      w.terminate();
-      return "";
-    });
-
-  w.bind(
-    "increment",
-    [&](const std::string & /*req*/) -> std::string {
-      static unsigned int count = 0;
-      auto count_string = std::to_string(++count);
-      return "{\"count\": " + count_string + "}";
-    });
-
-  // A binding that creates a new thread and returns the result at a later time.
-  w.bind(
-    "compute",
-    [&](const std::string &seq, const std::string &req, void * /*arg*/) {
-      // Create a thread and forget about it for the sake of simplicity.
-      std::thread([&, seq, req] {
-        std::cout << "SEQ " << seq << ", REQ " << req << std::endl;
-        // Simulate load.
-        //std::this_thread::sleep_for(std::chrono::seconds(1));
-/*        auto left = std::stoll(webview::detail::json_parse(req, "", 0));
-        auto right = std::stoll(webview::detail::json_parse(req, "", 1));
-        auto result = std::to_string(left + right);*/
-        auto left = webview::detail::json_parse(req, "", 0);
-        auto right = webview::detail::json_parse(req, "", 1);
-        auto result = "{\"value\": \"res\"}";
-        w.resolve(seq, 0, result);
-      }).detach();
-    },
-    nullptr
-  );
 }
 
 void run_webview(bool devmode, void *wnd, int width, int height, int hints, std::string url, std::string title, std::string init_js) {
   webview::webview w(devmode, wnd);
 
-  if (width > -1 && height > -1) w.set_size(width, height, hints);
+  if (width < 0) width=640;
+  if (height < 0) height=480;
+  w.set_size(width, height, hints);
 
-  create_bind(w);
+  create_binds(w);
+
+  if (!init_js.empty()) w.init(init_js);
 
   if (url.starts_with("html://")) {
     if (title == "") title="HTML string";
@@ -87,7 +85,6 @@ void run_webview(bool devmode, void *wnd, int width, int height, int hints, std:
     w.navigate(url);
   }
 
-  if (!init_js.empty()) w.init(init_js);
 
   w.run();
 }

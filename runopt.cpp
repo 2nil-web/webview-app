@@ -367,7 +367,7 @@ void getopt_init(int argc, char **argv, std::vector<run_opt> pOptions, const std
 //  insert_arg_if_missing("batch", 'b', opt_only, no_argument, "work in batch mode default is to work in interactive mode if -h or -V are not provided.", [] (char , std::string , std::string) -> void { interp_on=false; });
 //  insert_arg_if_missing("inter", 'i', opt_only, no_argument, "work in interactive mode, this is the default mode if -h or -V are not provided.", [] (char , std::string , std::string) -> void { arg_sel=false; interp_on=true; });
   insert_arg_if_missing("version", 'V', opt_itr, no_argument, "display version information and exit.", getVersion);
-  insert_arg_if_missing("help", 'h', opt_itr, no_argument, "print this message and exit.", getUsage);
+  insert_arg_if_missing("help", 'H', opt_itr, no_argument, "print this message and exit.", getUsage);
 //  for (auto vo:my_ropts) std::cout << "val " << vo.val << ", name " << vo.name << ", help [[" << vo.help << "]]" << std::endl;
 
   set_options();

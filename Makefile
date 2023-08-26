@@ -53,7 +53,7 @@ all : version_check.txt version.h ${PREFIX}.ico ${TARGET}
 
 ${TARGET} : ${ARCH}/${CONF}/${TARGET}
 
-${ARCH}/${CONF}/${TARGET} :
+${ARCH}/${CONF}/${TARGET} : ${SRCS} ${PREFIX}_res.rc
 	${MSBUILD} webview-app.sln -p:Configuration=${CONF}
 	cp ${ARCH}/${CONF}/*.exe .
 else
