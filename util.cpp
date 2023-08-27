@@ -19,6 +19,7 @@
 #include <filesystem>
 #endif
 
+
 #include "util.h"
 
 #ifdef _WIN32
@@ -43,7 +44,6 @@ static const uint8_t utf8d[] = {
 
 static uint32_t decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
 	uint32_t type = utf8d[byte];
-
 	*codep = (*state != UTF8_ACCEPT) ?  (byte & 0x3fu) | (*codep << 6) : (0xff >> type) & (byte);
 	*state = utf8d[256 + *state*16 + type];
 	return *state;
@@ -166,6 +166,20 @@ PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc) {
 #endif
 #endif
 
+void replace_all(std::string &s, std::string srch, std::string repl) {
+  size_t pos=0;
+  while (pos += repl.length()) {
+    pos=s.find(srch, pos);
+    if (pos == std::string::npos) break;
+    s.replace(pos, srch.length(), repl);
+  }
+}
+
+void rep_crlf(std::string &s) {
+  replace_all(s, "\r", "\\r");
+  replace_all(s, "\n", "\\n");
+}
+
 std::string temppath() {
   std::string tpath="";
 #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
@@ -181,24 +195,24 @@ std::string temppath() {
   return tpath;
 }
 
+
 std::string tempfile(std::string tpath, std::string pfx) {
   std::string tfn="";
 
   if (tpath.empty()) tpath=temppath();
-  if (pfx.empty()) pfx="temp.XXXXXX";
+  if (pfx.empty()) pfx="tmp.XXXXXX";
 #ifdef _WIN32
+  replace_all(tpath, "/", "\\");
   char tfnw[MAX_PATH];
   if (GetTempFileName(tpath.c_str(), pfx.c_str(), 0, tfnw) != 0) tfn=tfnw;
 #else
-  char *tfnl=strdup((tpath+'/'+pfx).c_str());
-  int id=mkstemp(tfnl);
+  tfn=std::string((tpath+pfx).c_str());
+  int id=mkstemp(tfn.c_str());
 
   if (id != -1) {
     close(id);
-    unlink(tfnl);
+    unlink(tfnl.c_str());
     tfn=tfnl;
-  } else {
-    free(tfnl);
   }
 #endif
 
@@ -207,7 +221,7 @@ std::string tempfile(std::string tpath, std::string pfx) {
 
 std::string exec_cmd(std::string cmd) {
   std::string tf=tempfile();
-  //std::cout << tf << std::endl;
+  std::cout << tf << std::endl;
   std::string fullcmd=cmd+" > "+tf;
   std::system(fullcmd.c_str());
   std::ifstream t(tf);
@@ -215,21 +229,7 @@ std::string exec_cmd(std::string cmd) {
   buffer << t.rdbuf();
   std::string res=buffer.str();
   t.close();
-  //return res.c_str();
+  std::remove(tf.c_str());
   return clean_utf8(res.c_str());
-}
-
-void replace_all(std::string &s, std::string srch, std::string repl) {
-  size_t pos=0;
-  while (pos += repl.length()) {
-    pos=s.find(srch, pos);
-    if (pos == std::string::npos) break;
-    s.replace(pos, srch.length(), repl);
-  }
-}
-
-void rep_crlf(std::string &s) {
-  replace_all(s, "\r", "\\r");
-  replace_all(s, "\n", "\\n");
 }
 
