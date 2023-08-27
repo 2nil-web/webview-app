@@ -19,7 +19,7 @@ VERSION=$(shell git describe --abbrev=0 --tags 2>/dev/null || echo 'Unknown_vers
 COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo 'Unknown_commit')
 DECORATION=Nawak-Bidon
 
-WVDIR=webview-gcc
+WVDIR=webview
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include --include=webview_mingw_support.h
 CXXFLAGS += -std=c++20

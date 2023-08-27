@@ -73,7 +73,7 @@
       <PreprocessorDefinitions>STATIC_GETOPT</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>getopt_vc;webview-vs\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview-vs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>getopt_vs;webview\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,7 +89,7 @@
       <PreprocessorDefinitions>STATIC_GETOPT</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>getopt_vc;webview-vs\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview-vs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>getopt_vs;webview\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>STATIC_GETOPT</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>getopt_vc;webview-vs\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview-vs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>getopt_vs;webview\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -121,7 +121,7 @@
       <PreprocessorDefinitions>STATIC_GETOPT</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>getopt_vc;webview-vs\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview-vs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>getopt_vs;webview\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,7 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="getopt_vc\getopt.cpp" />
+    <ClCompile Include="getopt_vs\getopt.cpp" />
     <ClCompile Include="runopt.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="webview-app.cpp" />
@@ -141,12 +141,12 @@
     <Image Include="webview-app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="getopt_vc\getopt.h" />
+    <ClInclude Include="getopt_vs\getopt.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="runopt.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />
-    <ClInclude Include="webview-vs\webview.h" />
+    <ClInclude Include="webview\webview.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="webview-app_res.rc" />

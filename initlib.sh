@@ -9,18 +9,7 @@ then
   exit
 fi
 
-WVDIR=webview-gcc
-
-if [[ "${OSTYPE}" == "msys" || "${OSTYPE}" == "cygwin" ]]
-then
-  if ! which make g++ >/dev/null 2>&1
-  then
-    echo "Considering the use of webview with Visual Studio."
-    WVDIR=webview-vs
-    echo "Considering the use of webview with the gcc/g++ compiler."
-    WVDIR=webview-gcc
-  fi
-fi
+WVDIR=webview
 
 echo -n "Considering the use of webview with "
 

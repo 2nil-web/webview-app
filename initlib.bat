@@ -9,14 +9,14 @@ where cmake >nul || ( echo You need cmake to build the webview library.; exit /b
 
 echo Considering the use of webview with Visual Studio.
 
-if exist webview-vs\ (
-  echo No need to clone the webview-vs directory as it already exists.
+if exist webview\ (
+  echo No need to clone the webview directory as it already exists.
 ) else (
-  echo Cloning webview-vs ...
-  git clone https://github.com/webview/webview.git webview-vs
+  echo Cloning webview ...
+  git clone https://github.com/webview/webview.git webview
 )
 
-cmd /C webview-vs\script\build.bat
+cmd /C webview\script\build.bat
 
 echo You can now compile this example by running Visual Studio.
 
