@@ -10,6 +10,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <locale>
+#include <codecvt>
 #include <string>
 #include <vector>
 #include <chrono>
@@ -71,7 +73,6 @@ std::string clean_utf8(const char *cs) {
   return cs;
 }
 #endif
-
 
 bool any_of_ctype(const std::string s, std::function<int(int)> istype) {
   return std::any_of(s.begin(), s.end(), [istype](char c) { return istype(c); } );
@@ -219,17 +220,73 @@ std::string tempfile(std::string tpath, std::string pfx) {
   return std::string(tfn);
 }
 
+#ifdef _WIN32
+std::wstring wfile2wstr(std::string filename) {
+    std::wifstream wif(filename);
+    wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+    std::wstringstream wss;
+    wss << wif.rdbuf();
+    return wss.str();
+}
+
+std::string file2str(std::string filename) {
+    std::ifstream ifs(filename);
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    return ss.str();
+}
+
+std::string ws2s(std::wstring ws) {
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  return converter.to_bytes(ws);
+}
+
+std::wstring s2ws(std::string s) {
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  return converter.from_bytes(s);
+}
+
+const wchar_t *getcmd() {
+  static wchar_t cmd_path[MAX_PATH];
+  if (SearchPathW(nullptr, L"cmd", L".exe", MAX_PATH, cmd_path, nullptr)) return cmd_path;
+  else return L"C:\\Windows\\System32\\cmd.exe";
+}
+
+std::wstring SystemToString(const std::string cmd) {
+  std::wstring wcmd=s2ws("/C "+cmd);
+  std::string tmpFile=tempfile();
+  std::wstring wtmpFile=s2ws(tmpFile);
+
+  AllocConsole();
+  ShowWindow(GetConsoleWindow(), SW_HIDE);
+  SetConsoleOutputCP(65001);
+
+  STARTUPINFOW si={};
+  si.cb=sizeof(STARTUPINFOW);
+  PROCESS_INFORMATION pi={};
+  SECURITY_ATTRIBUTES se={};
+  se.nLength=sizeof(SECURITY_ATTRIBUTES);
+
+  HANDLE hFile=CreateFileW(wtmpFile.c_str(), FILE_WRITE_DATA, FILE_SHARE_DELETE | FILE_SHARE_READ, &se, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_TEMPORARY , 0);
+  SetStdHandle(STD_OUTPUT_HANDLE, hFile);
+  CreateProcessW(getcmd(), const_cast<wchar_t*>(wcmd.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
+  WaitForSingleObject(pi.hProcess,INFINITE);
+
+  std::wstring s=wfile2wstr(tmpFile);
+  CloseHandle(hFile);
+  DeleteFileW(wtmpFile.c_str());
+  return s;
+}
+#endif
+
 std::string exec_cmd(std::string cmd) {
+#ifdef _WIN32
+  return ws2s(SystemToString(cmd));
+#else
   std::string tf=tempfile();
-  std::cout << tf << std::endl;
   std::string fullcmd=cmd+" > "+tf;
   std::system(fullcmd.c_str());
-  std::ifstream t(tf);
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  std::string res=buffer.str();
-  t.close();
-  std::remove(tf.c_str());
-  return clean_utf8(res.c_str());
+  return file2str(tf);
+#endif
 }
 

@@ -18,7 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
   run_cmd.addEventListener("click", (event) => {
     run_cmd.disabled = true;
     window.webapp_exec(cmd.value).then(result => {
-      output.textContent += result.value;
+      console.log(result.value);
+      output.value += result.value;
       run_cmd.disabled = false;
     });
   });

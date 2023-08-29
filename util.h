@@ -20,6 +20,7 @@ bool all_of_ctype(const std::string, std::function<int(int)>);
 std::string temppath();
 std::string tempfile(std::string tpath="", std::string pfx="");
 std::string exec_cmd(std::string cmd);
+std::wstring exec_cmdw(std::string cmd);
 void replace_all(std::string &s, std::string srch, std::string repl);
 void rep_crlf(std::string &s);
 

@@ -25,13 +25,13 @@ CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/inc
 CXXFLAGS += -std=c++20
 CXXFLAGS += -Wall -pedantic # -Wextra
 LDFLAGS += -static -mwindows
-LDLIBS += --ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
+LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
 MSBUILD='C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 DO_MSBUILD=$(shell test -f "${MSBUILD}" && echo 1 || echo 0)
 
 ifeq ($(DO_MSBUILD),0)
-	DO_MSBUILD=$(shell test -f $(cygpath "${MSBUILD}") && echo 1 || echo 0)
+	DO_MSBUILD=$(shell test -f "$(cygpath ${MSBUILD}')" && echo 1 || echo 0)
 endif
 
 EXEXT=.exe

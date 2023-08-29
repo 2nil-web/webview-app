@@ -18,9 +18,6 @@
 #include "util.h"
 
 
-std::string myBoundCallback(std::string args) {
-  return "true";
-}
 void create_binds(webview::webview &w) {
   // Change window title
   w.bind(
@@ -53,9 +50,11 @@ void create_binds(webview::webview &w) {
       std::thread([&, seq, req] {
         auto cmd=webview::detail::json_parse(req, "", 0);
         std::string res_cmd=exec_cmd(cmd);
+        //std::cout << res_cmd << std::endl;
+        replace_all(res_cmd, "\\", "<BACKSLASH_CODE>");
         rep_crlf(res_cmd);
+        replace_all(res_cmd, "<BACKSLASH_CODE>", "\\\\");
         auto result="{\"value\": \""+res_cmd+"\"}";
-        //std::cout << "SEQ " << seq << ", REQ " << cmd << std::endl << result << std::endl;
         w.resolve(seq, 0, result);
       }).detach();
     },
