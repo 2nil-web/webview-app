@@ -27,12 +27,10 @@ CXXFLAGS += -Wall -pedantic # -Wextra
 LDFLAGS += -static -mwindows
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
-MSBUILD='C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
-DO_MSBUILD=$(shell test -f "${MSBUILD}" && echo 1 || echo 0)
-
-ifeq ($(DO_MSBUILD),0)
-	DO_MSBUILD=$(shell test -f "$(cygpath ${MSBUILD}')" && echo 1 || echo 0)
-endif
+MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
+MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
+#DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
+DO_MSBUILD=1
 
 EXEXT=.exe
 PREFIX=webview-app
@@ -44,7 +42,7 @@ TARGET=${PREFIX}${EXEXT}
 
 .PHONY: FORCE
 
-#DO_MSBUILD=0
+DO_MSBUILD=0
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64
 CONF=Release
@@ -98,7 +96,8 @@ cfg :
 	@echo "PATH"
 	@echo "${PATH}" | sed 's/:/\n/g'
 	@echo "END PATH"
-	which inkscape.exe
+	@which inkscape.exe
+	@echo "DO_MSBUILD [${DO_MSBUILD}]"
 
 # Ces régles implicites ne sont pas utiles quand on fait 'make clean'
 ifneq ($(MAKECMDGOALS),clean)

@@ -221,6 +221,37 @@ std::string tempfile(std::string tpath, std::string pfx) {
 }
 
 #ifdef _WIN32
+#ifdef _MSC_FULL_VER
+std::string ws2s(std::wstring ws) {
+  char *sTo=new char[ws.size()+1];
+  sTo[ws.size()]='\0';
+  WideCharToMultiByte(CP_ACP, 0, ws.c_str(), -1, sTo, (int)ws.length(), NULL, NULL);
+  std::string s=sTo;
+  delete sTo;
+  return s;
+}
+
+std::wstring s2ws(std::string s) {
+  wchar_t *wsTo=new wchar_t[s.size()+1];
+  wsTo[s.size()]='\0';
+  MultiByteToWideChar(CP_ACP, 0, s.c_str(), -1, wsTo, (int)s.length());
+  std::wstring ws=wsTo;
+  delete wsTo;
+  return ws;
+}
+#else
+
+std::string ws2s(std::wstring ws) {
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  return converter.to_bytes(ws);
+}
+
+std::wstring s2ws(std::string s) {
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  return converter.from_bytes(s);
+}
+#endif
+
 std::wstring wfile2wstr(std::string filename) {
     std::wifstream wif(filename);
     wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
@@ -234,16 +265,6 @@ std::string file2str(std::string filename) {
     std::stringstream ss;
     ss << ifs.rdbuf();
     return ss.str();
-}
-
-std::string ws2s(std::wstring ws) {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  return converter.to_bytes(ws);
-}
-
-std::wstring s2ws(std::string s) {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  return converter.from_bytes(s);
 }
 
 const wchar_t *getcmd() {
