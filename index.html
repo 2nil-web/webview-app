@@ -1,35 +1,85 @@
 <html>
-<head>
-</head>
-<label> Command to run: <textarea style="vertical-align: top;" rows="1" cols="44" id="cmd" value="" placeholder='Enter your command and click the "Run" button.'></textarea></label>
+  <head></head>
+    <label>Command to run:
+      <textarea style="vertical-align: top;" rows="2" cols="40" id="cmd" placeholder='Enter command and click "Run".'></textarea>
+    </label>
+    <input type="button" id="run_cmd" value="Run"/>
+    <label>
+      <input type="checkbox" id="consmode" value="value"/>
+      Console mode
+    </label>
+    <br> <input type="button" id="output_clear" value="Clean output"/>
+    <br><br>
+    <textarea style="width:95%; height:80%" id="output"></textarea>
+    <br><br>
+    <!--input type="button" id="quit" value="Exit web app" onclick="webapp_exit()"--!>
+  <script>
+    function getCursorLine(objName) {
+      ta=document.getElementById(objName);
+      ssta=ta.selectionStart;
+      sfin=ta.selectionEnd;
+      if (ssta !== sfin) {
+        ret=ta.value.substring(ssta, sfin);
+        //console.log("ssta !== sfin (" + ssta + "," + sfin + ") ==>[" + ret + "]");
+        return ret.trim();
+      }
+      // Get current line
+      var is, ie;
+      for (is=ssta; is; is--) {
+        if (is !== ssta && (ta.value.charCodeAt(is) == 10 || ta.value.charCodeAt(is) == 13)) break;
+      }
+      for (ie=sfin; ie < ta.value.length; ie++) {
+        if (ie !== sfin && (ta.value.charCodeAt(ie) == 10 || ta.value.charCodeAt(ie) == 13)) break;
+      }
+      currLine=ta.value.substring(is, ie).trim();
 
-<input type="button" id="run_cmd" name="run_cmd" value="Run">
-<label><input type="checkbox" name="consmode" id="consmode" value="value">Console mode</label>
-<br><br>
-<textarea style="width:95%; height:85%" id="output" name="output"></textarea>
-<br><br>
-<!--input type="button" id="quit" name="quit" value="Exit web app" onclick="webapp_exit()"--!>
-<script>
-  
-if (typeof webapp_title === "function") {
-  webapp_title("Hello");
-  webapp_size(1000, 800, 0);
-}
+      // Get previous line
+      for (iss=is - 1; iss > 0; iss--) {
+        if (ta.value.charCodeAt(iss) == 10 || ta.value.charCodeAt(iss) == 13) break;
+      }
+      prevLine=ta.value.substring(iss, is).trim();
 
-document.addEventListener("DOMContentLoaded", () => {
-  run_cmd.addEventListener("click", (event) => {
-    run_cmd.disabled = true;
-    window.webapp_exec(cmd.value, true).then(result => {
-      console.log(result.value);
-      output.value += result.value;
-      run_cmd.disabled = false;
+      //console.log("ssta === sfin (" + sfin + ")");
+      //ta.value=ta.value.trimRight()+'\n';
+      if (prevLine === "") return currLine;
+      else return prevLine;
+    }
+
+    function scroll_to_bottom(objName) {
+      var logTa=document.getElementById(objName)
+      logTa.scrollTop=logTa.scrollHeight;
+    }
+    
+    if (typeof webapp_title === "function") {
+      //webapp_title("Hello");
+      webapp_size(640, 384, 0);
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      cmd.addEventListener("keyup", (event) => {
+        if (event.keyCode === 13) {
+          document.getElementById("run_cmd").click();
+        }
+      });
+    
+      run_cmd.addEventListener("click", (event) => {
+      run_cmd.disabled = true;
+      var txt=getCursorLine("cmd");
+      if (txt !== "") {
+        txt=txt.trim();
+        //console.log('[' + txt + ']');
+        window.webapp_exec(txt, true).then(result => {
+          output.value += result.value;
+          //log.value += ("Send: " + txt + "\n");
+          //txt.value="";
+          scroll_to_bottom("output");
+          run_cmd.disabled = false;
+        });
+      }
     });
-  });
-
-  document.addEventListener("keyup", (event) => {
-    if (event.keyCode === 27) webapp_exit();
-  });
-});
-</script>
+    
+      document.addEventListener("keyup", (event) => {
+        if (event.keyCode === 27) webapp_exit();
+      });
+    });
+  </script>
 <html>
-
