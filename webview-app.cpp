@@ -11,6 +11,8 @@
 
 #include "util.h"
 #include "runopt.h"
+#define WEBVIEW_HEADER
+#include <webview.h>
 
 extern void run_webview(bool devmode, void *wnd, int width, int height, int hints, std::string url, std::string title="", std::string init_js="");
 

@@ -20,18 +20,14 @@
 
 void create_binds(webview::webview &w) {
   // Change window title
-  w.bind(
-    "webapp_title",
-    [&](const std::string & req) -> std::string {
+  w.bind("webapp_title", [&](const std::string & req)  -> std::string {
       auto title=webview::detail::json_parse(req, "", 0);
       w.set_title(title);
       return "";
     });
 
   // Change window dimension and sizing behaviour
-  w.bind(
-    "webapp_size",
-    [&](const std::string & req) -> std::string {
+  w.bind("webapp_size", [&](const std::string & req) -> std::string {
       auto params=webview::detail::json_parse(req, "", 0);
       auto l_width = std::stoi(webview::detail::json_parse(req, "", 0));
       auto l_height = std::stoi(webview::detail::json_parse(req, "", 1));
@@ -43,10 +39,15 @@ void create_binds(webview::webview &w) {
   // Exit from the web application
   w.bind("webapp_exit", [&](const std::string &) -> std::string { w.terminate(); return ""; });
 
+  // Exit from the web application on certain key
+  w.bind("webapp_exit_on", [&](const std::string &req) -> std::string {
+      auto k = std::stoi(webview::detail::json_parse(req, "", 27));
+      w.terminate();
+      return "";
+    });
+
   // Run a local command and return an eventual result at a later time.
-  w.bind(
-    "webapp_exec",
-    [&](const std::string &seq, const std::string &req, void *) {
+  w.bind("webapp_exec", [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
         auto cmd=webview::detail::json_parse(req, "", 0);
         std::string res_cmd=exec_cmd(cmd);
@@ -60,6 +61,30 @@ void create_binds(webview::webview &w) {
     },
     nullptr
   );
+}
+
+webview::webview *W=nullptr;
+WNDPROC currentProc=nullptr;
+LRESULT CALLBACK KeyProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+  switch(msg) {
+    case WM_KEYDOWN:
+      std::cout << "kproc:" << wParam << std::endl;
+
+      if (wParam == VK_ESCAPE)
+        if (W != nullptr) W->terminate();
+      break;
+
+    case WM_NOTIFY:
+      std::cout << "kproc:" << wParam << std::endl;
+      if (HIBYTE(GetKeyState(VK_ESCAPE)) != 0 && GetFocus() != hwnd)
+        if (W != nullptr) W->terminate();
+      break;
+      default:
+        if (currentProc != nullptr)
+          return CallWindowProc((WNDPROC)currentProc, hwnd, msg, wParam, lParam);
+  }
+
+    return 0;
 }
 
 void run_webview(bool devmode, void *wnd, int width, int height, int hints, std::string url, std::string title, std::string init_js) {
@@ -83,8 +108,13 @@ void run_webview(bool devmode, void *wnd, int width, int height, int hints, std:
     w.set_title(title);
     w.navigate(url);
   }
-
-
+#ifdef _WIN32
+  W=&w;
+  HWND hw=(HWND)w.window();
+  //currentProc=(WNDPROC)SetWindowLongPtr(hw, GWLP_WNDPROC, (long)KeyProc);
+  currentProc=reinterpret_cast<WNDPROC>(SetWindowLongPtr(hw, GWLP_WNDPROC, (LONG_PTR)KeyProc));
+  
+#endif
   w.run();
 }
 

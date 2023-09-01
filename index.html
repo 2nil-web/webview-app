@@ -8,12 +8,14 @@
       <input type="checkbox" id="consmode" value="value"/>
       Console mode
     </label>
-    <br> <input type="button" id="output_clear" value="Clean output"/>
+    <br> <input type="button" id="output_clear" value="Clean output" onclick="output.value=''"/>
     <br><br>
     <textarea style="width:95%; height:80%" id="output"></textarea>
     <br><br>
     <!--input type="button" id="quit" value="Exit web app" onclick="webapp_exit()"--!>
   <script>
+//typeof webapp_title === "function"
+
     function getCursorLine(objName) {
       ta=document.getElementById(objName);
       ssta=ta.selectionStart;
@@ -51,7 +53,7 @@
     }
     
     if (typeof webapp_title === "function") {
-      //webapp_title("Hello");
+      webapp_title("Hello");
       webapp_size(640, 384, 0);
     }
     document.addEventListener("DOMContentLoaded", () => {
@@ -77,9 +79,7 @@
       }
     });
     
-      document.addEventListener("keyup", (event) => {
-        if (event.keyCode === 27) webapp_exit();
-      });
+//      document.addEventListener("keyup", (event) => { if (event.keyCode === 27) webapp_exit(); });
     });
   </script>
 <html>
