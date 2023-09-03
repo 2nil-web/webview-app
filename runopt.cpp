@@ -76,7 +76,7 @@ std::string parse_vt(std::string& s) {
 // name, has_arg, val, help
 // has_arg : no_argument (ou 0), si l'option ne prend pas d'argument, required_argument (ou 1) si l'option prend un argument, ou optional_argument (ou 2) si l'option prend un argument optionnel.
 size_t n_opt=0, longest_opname=0;
-static struct option *long_options=NULL;
+static struct option *long_options=nullptr;
 static std::vector<run_opt> my_ropts;
 std::string optstr="";
 bool arg_sel=true, interp_on=false, quiet=false, no_quit=false;
@@ -246,11 +246,11 @@ void set_options () {
     if (my_ropts[i].name.size() > longest_opname) longest_opname=my_ropts[i].name.size();
 
     if (my_ropts[i].name.size() > 0) long_options[i].name=my_ropts[i].name.c_str();
-    else long_options[i].name=NULL;
+    else long_options[i].name=nullptr;
 
     long_options[i].has_arg=my_ropts[i].has_arg;
     long_options[i].val=my_ropts[i].val;
-    long_options[i].flag=NULL;
+    long_options[i].flag=0;
 
     //std::cout << "[[[ lopt val " << (char)long_options[i].val << ", name " << long_options[i].name << ", has_arg " << long_options[i].has_arg << "]]]" << std::endl;
 
@@ -335,7 +335,7 @@ bool interp () {
         if (myopt.oi_mode != opt_only && (myopt.name == cmd || (cmd.size() == 1 && myopt.val == cmd[0]))) {
           //std::cout << "n [" << myopt.name << "], cmd [" << cmd << ']' << std::endl;
           found_cmd=true;
-          if (myopt.func != NULL) myopt.func(myopt.val, myopt.name, param);
+          if (myopt.func != nullptr) myopt.func(myopt.val, myopt.name, param);
         }
       }
 
@@ -404,7 +404,7 @@ void getopt_init(int argc, char **argv, std::vector<run_opt> pOptions, const std
             }
             break;
           case optional_argument:
-            if (!optarg && argv[optind] != NULL && argv[optind][0] != '-') {
+            if (!optarg && argv[optind] != nullptr && argv[optind][0] != '-') {
               oarg=argv[optind++];
             }
             break;

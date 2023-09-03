@@ -1,4 +1,4 @@
-# webview-app
+# WebView Application template
 
 Application using the : [webview library](https://github.com/webview/webview.git).
 

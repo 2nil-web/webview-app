@@ -1,35 +1,75 @@
 <html>
-  <head></head>
+  <head>
+<style>
+body {
+  overflow: hidden; /* Hide scrollbars */
+}
+.statement {
+  color: red;
+  font-weight: bold;
+  font-style: italic;
+}
+</style>
+    <meta http-equiv="Content-Type" content="text/plain; charset=utf-16">
+  </head>
     <label>Command to run:
       <textarea style="vertical-align: top;" rows="2" cols="40" id="cmd" placeholder='Enter command and click "Run".'></textarea>
     </label>
     <input type="button" id="run_cmd" value="Run"/>
-    <label>
-      <input type="checkbox" id="consmode" value="value"/>
-      Console mode
-    </label>
-    <br> <input type="button" id="output_clear" value="Clean output" onclick="output.value=''"/>
+    <input type="number" id="tout" value="3000" min="0" style="width:50" step="100"/>
+    <br> <input type="button" id="output_clear" value="Clean output" onclick="output.innerText=''"/>
     <br><br>
-    <textarea style="width:95%; height:80%" id="output"></textarea>
+    <div style="width:95%; height:80%; border:1px solid black; overflow-y: scroll;" id="output"></div>
     <br><br>
     <!--input type="button" id="quit" value="Exit web app" onclick="webapp_exit()"--!>
   <script>
 //typeof webapp_title === "function"
+    if (typeof webapp_title === "function") {
+        window.webapp_get_title().then(result => { console.log(result.value); });
+      webapp_size(640, 384, 0);
+    }
+    cmd.focus();
 
-    function getCursorLine(objName) {
+    function exec_cmd_no_return(scmd, duration) {
+      if (run_cmd.disabled === true) {
+        output.innerHTML+='<span class="statement">Command ['+scmd+'] did not return anything after '+duration/1000+' seconds<br/>.</span>';
+        run_cmd.disabled=false;
+      }
+      document.getElementById("cmd").focus();
+    }
+
+    function exec_cmd(scmd) {
+      if (scmd !== "") {
+        run_cmd.disabled = true;
+        scmd=scmd.trim();
+        //console.log('[' + scmd + ']');
+        setTimeout(exec_cmd_no_return, tout.value, scmd, tout.value);
+        window.webapp_exec(scmd, true).then(result => {
+          output.innerHTML += result.value.replace(/(?:\r\n|\r|\n)/g, '<br>');
+          scroll_to_bottom("output");
+          run_cmd.disabled = false;
+          cmd.focus();
+        });
+      }
+    }
+
+    function getCurrentLine(objName, curr=true) {
       ta=document.getElementById(objName);
       ssta=ta.selectionStart;
       sfin=ta.selectionEnd;
+
       if (ssta !== sfin) {
         ret=ta.value.substring(ssta, sfin);
         //console.log("ssta !== sfin (" + ssta + "," + sfin + ") ==>[" + ret + "]");
         return ret.trim();
       }
+
       // Get current line
       var is, ie;
       for (is=ssta; is; is--) {
         if (is !== ssta && (ta.value.charCodeAt(is) == 10 || ta.value.charCodeAt(is) == 13)) break;
       }
+
       for (ie=sfin; ie < ta.value.length; ie++) {
         if (ie !== sfin && (ta.value.charCodeAt(ie) == 10 || ta.value.charCodeAt(ie) == 13)) break;
       }
@@ -43,8 +83,12 @@
 
       //console.log("ssta === sfin (" + sfin + ")");
       //ta.value=ta.value.trimRight()+'\n';
-      if (prevLine === "") return currLine;
+      if (prevLine === "" || curr) return currLine;
       else return prevLine;
+    }
+
+    function getPreviousLine(objName) {
+      return getCurrentLine(objName, false);
     }
 
     function scroll_to_bottom(objName) {
@@ -52,34 +96,19 @@
       logTa.scrollTop=logTa.scrollHeight;
     }
     
-    if (typeof webapp_title === "function") {
-      webapp_title("Hello");
-      webapp_size(640, 384, 0);
-    }
     document.addEventListener("DOMContentLoaded", () => {
-      cmd.addEventListener("keyup", (event) => {
-        if (event.keyCode === 13) {
-          document.getElementById("run_cmd").click();
-        }
+      cmd.addEventListener("keyup", (event) => { // Sur CR on execute la ligne précédente
+        if (event.keyCode === 13) exec_cmd(getPreviousLine("cmd"));
       });
     
-      run_cmd.addEventListener("click", (event) => {
-      run_cmd.disabled = true;
-      var txt=getCursorLine("cmd");
-      if (txt !== "") {
-        txt=txt.trim();
-        //console.log('[' + txt + ']');
-        window.webapp_exec(txt, true).then(result => {
-          output.value += result.value;
-          //log.value += ("Send: " + txt + "\n");
-          //txt.value="";
-          scroll_to_bottom("output");
-          run_cmd.disabled = false;
-        });
+      run_cmd.addEventListener( "click", (event) => { // Sur click "Run" on execute la ligne courante
+        exec_cmd(getCurrentLine("cmd"));
+      });
+    
+    document.addEventListener("keyup", (event) => { if (event.keyCode === 27) {
+        webapp_exit();
       }
     });
-    
-//      document.addEventListener("keyup", (event) => { if (event.keyCode === 27) webapp_exit(); });
     });
   </script>
 <html>

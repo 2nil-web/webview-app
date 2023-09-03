@@ -21,58 +21,7 @@
 #include <filesystem>
 #endif
 
-
 #include "util.h"
-
-#ifdef _WIN32
-// From Bjoern Hoehrmann <bjoern@hoehrmann.de>
-#define UTF8_ACCEPT 0
-static const uint8_t utf8d[] = {
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 00..1f
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 20..3f
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 40..5f
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 60..7f
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, // 80..9f
-	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7, // a0..bf
-	8,8,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, // c0..df
-	0xa,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x3,0x4,0x3,0x3, // e0..ef
-	0xb,0x6,0x6,0x6,0x5,0x8,0x8,0x8,0x8,0x8,0x8,0x8,0x8,0x8,0x8,0x8, // f0..ff
-	0x0,0x1,0x2,0x3,0x5,0x8,0x7,0x1,0x1,0x1,0x4,0x6,0x1,0x1,0x1,0x1, // s0..s0
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1, // s1..s2
-	1,2,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1, // s3..s4
-	1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,3,1,1,1,1,1,1, // s5..s6
-	1,3,1,1,1,1,1,3,1,3,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // s7..s8
-};
-
-static uint32_t decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
-	uint32_t type = utf8d[byte];
-	*codep = (*state != UTF8_ACCEPT) ?  (byte & 0x3fu) | (*codep << 6) : (0xff >> type) & (byte);
-	*state = utf8d[256 + *state*16 + type];
-	return *state;
-}
-
-std::string clean_utf8(const char *cs) {
-  uint8_t *s=(uint8_t *)cs;
-	uint32_t codepoint, state = 0;
-  std::string ss;
-
-	while (*s) {
-		decode(&state, &codepoint, *s);
-    if (state == UTF8_ACCEPT) ss+=*s;
-    else {
-      ss+=' ';
-      state=UTF8_ACCEPT;
-    }
-    s++;
-  }
-
-	return ss;
-}
-#else
-std::string clean_utf8(const char *cs) {
-  return cs;
-}
-#endif
 
 bool any_of_ctype(const std::string s, std::function<int(int)> istype) {
   return std::any_of(s.begin(), s.end(), [istype](char c) { return istype(c); } );
@@ -159,7 +108,7 @@ PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc) {
         i++;
     }
     _argv[j] = '\0';
-    argv[argc] = NULL;
+    argv[argc] = nullptr;
 
     (*_argc) = argc;
     return argv;
@@ -221,26 +170,33 @@ std::string tempfile(std::string tpath, std::string pfx) {
 }
 
 #ifdef _WIN32
-#ifdef _MSC_FULL_VER
+#ifndef _MSC_FULL_VER
+UINT CodePage=CP_UTF8;
+DWORD dwFlags=WC_ERR_INVALID_CHARS;
 std::string ws2s(std::wstring ws) {
-  char *sTo=new char[ws.size()+1];
-  sTo[ws.size()]='\0';
-  WideCharToMultiByte(CP_ACP, 0, ws.c_str(), -1, sTo, (int)ws.length(), NULL, NULL);
-  std::string s=sTo;
-  delete sTo;
-  return s;
+  int l=WideCharToMultiByte(CodePage, dwFlags, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
+
+  if (l > 0) {
+    char *sTo=new char[l+1];
+    WideCharToMultiByte(CodePage, dwFlags, ws.c_str(), -1, sTo, l, nullptr, nullptr);
+    sTo[l]='\0';
+    std::string s=sTo;
+    delete sTo;
+    return s;
+  }
+
+  return "";
 }
 
 std::wstring s2ws(std::string s) {
   wchar_t *wsTo=new wchar_t[s.size()+1];
   wsTo[s.size()]='\0';
-  MultiByteToWideChar(CP_ACP, 0, s.c_str(), -1, wsTo, (int)s.length());
+  MultiByteToWideChar(CodePage, dwFlags, s.c_str(), -1, wsTo, (int)s.length());
   std::wstring ws=wsTo;
   delete wsTo;
   return ws;
 }
 #else
-
 std::string ws2s(std::wstring ws) {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   return converter.to_bytes(ws);
@@ -267,10 +223,16 @@ std::string file2str(std::string filename) {
     return ss.str();
 }
 
-const wchar_t *getcmd() {
+const wchar_t *getcmdw() {
   static wchar_t cmd_path[MAX_PATH];
   if (SearchPathW(nullptr, L"cmd", L".exe", MAX_PATH, cmd_path, nullptr)) return cmd_path;
   else return L"C:\\Windows\\System32\\cmd.exe";
+}
+
+const char *getcmda() {
+  static char cmd_path[MAX_PATH];
+  if (SearchPathA(nullptr, "cmd", ".exe", MAX_PATH, cmd_path, nullptr)) return cmd_path;
+  else return "C:\\Windows\\System32\\cmd.exe";
 }
 
 std::wstring SystemToString(const std::string cmd) {
@@ -290,7 +252,7 @@ std::wstring SystemToString(const std::string cmd) {
 
   HANDLE hFile=CreateFileW(wtmpFile.c_str(), FILE_WRITE_DATA, FILE_SHARE_DELETE | FILE_SHARE_READ, &se, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_TEMPORARY , 0);
   SetStdHandle(STD_OUTPUT_HANDLE, hFile);
-  CreateProcessW(getcmd(), const_cast<wchar_t*>(wcmd.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
+  CreateProcessW(getcmdw(), const_cast<wchar_t*>(wcmd.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
   WaitForSingleObject(pi.hProcess,INFINITE);
 
   std::wstring s=wfile2wstr(tmpFile);
@@ -301,13 +263,9 @@ std::wstring SystemToString(const std::string cmd) {
 #endif
 
 std::string exec_cmd(std::string cmd) {
-#ifdef _WIN32
-  return ws2s(SystemToString(cmd));
-#else
   std::string tf=tempfile();
   std::string fullcmd=cmd+" > "+tf;
   std::system(fullcmd.c_str());
   return file2str(tf);
-#endif
 }
 

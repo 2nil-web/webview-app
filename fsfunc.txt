@@ -1,0 +1,112 @@
+Non-member functions
+Defined in header <filesystem>
+Defined in namespace std::filesystem
+
+absolute
+composes an absolute path
+
+canonical
+weakly_canonical
+composes a canonical path
+
+relative
+proximate
+composes a relative path
+
+copy
+copies files or directories
+
+copy_file
+copies file contents
+
+copy_symlink
+copies a symbolic link
+
+create_directory
+create_directories
+creates new directory
+
+create_hard_link
+creates a hard link
+
+create_symlink
+create_directory_symlink
+creates a symbolic link
+
+current_path
+returns or sets the current working directory
+
+exists
+checks whether path refers to existing file system object
+
+equivalent
+checks whether two paths refer to the same file system object
+
+file_size
+returns the size of a file
+
+hard_link_count
+returns the number of hard links referring to the specific file
+
+last_write_time
+gets or sets the time of the last data modification
+
+permissions
+modifies file access permissions
+
+read_symlink
+obtains the target of a symbolic link
+
+remove
+remove_all
+removes a file or empty directory
+removes a file or directory and all its contents, recursively
+
+rename
+moves or renames a file or directory
+
+resize_file
+changes the size of a regular file by truncation or zero-fill
+
+space
+determines available free space on the file system
+
+status
+symlink_status
+determines file attributes
+determines file attributes, checking the symlink target
+
+temp_directory_path
+returns a directory suitable for temporary files
+
+File types
+is_block_file
+checks whether the given path refers to block device
+
+is_character_file
+checks whether the given path refers to a character device
+
+is_directory
+checks whether the given path refers to a directory
+
+is_empty
+checks whether the given path refers to an empty file or directory
+
+is_fifo
+checks whether the given path refers to a named pipe
+
+is_other
+checks whether the argument refers to an other file
+
+is_regular_file
+checks whether the argument refers to a regular file
+
+is_socket
+checks whether the argument refers to a named IPC socket
+
+is_symlink
+checks whether the argument refers to a symbolic link
+
+status_known
+checks whether file status is known
+

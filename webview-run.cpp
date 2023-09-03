@@ -15,16 +15,43 @@
 #include <filesystem>
 
 #include <webview.h>
-#include "util.h"
 
+#include "util.h"
+#include "winapi.h"
+
+webview::webview *w=nullptr;
 
 void create_binds(webview::webview &w) {
   // Change window title
-  w.bind("webapp_title", [&](const std::string & req)  -> std::string {
-      auto title=webview::detail::json_parse(req, "", 0);
-      w.set_title(title);
-      return "";
-    });
+  w.bind("webapp_get_title", [&](const std::string &seq, const std::string &req, void *) {
+     std::thread([&, seq, req] {
+        std::string prev_title="";
+#ifdef _WIN32
+        prev_title=GetWindowText((HWND)w.window());
+#endif
+        auto result="{\"value\": \""+prev_title+"\"}";
+        //auto result=res_cmd;
+        w.resolve(seq, 0, result);
+      }).detach();
+    },
+    nullptr
+  );
+
+  w.bind("webapp_title", [&](const std::string &seq, const std::string &req, void *) {
+      std::thread([&, seq, req] {
+        std::string prev_title="";
+#ifdef _WIN32
+        prev_title=GetWindowText((HWND)w.window());
+#endif
+        auto title=webview::detail::json_parse(req, "", 0);
+        w.set_title(title);
+        auto result="{\"value\": \""+prev_title+"\"}";
+        //auto result=res_cmd;
+        w.resolve(seq, 0, result);
+      }).detach();
+    },
+    nullptr
+  );
 
   // Change window dimension and sizing behaviour
   w.bind("webapp_size", [&](const std::string & req) -> std::string {
@@ -39,12 +66,6 @@ void create_binds(webview::webview &w) {
   // Exit from the web application
   w.bind("webapp_exit", [&](const std::string &) -> std::string { w.terminate(); return ""; });
 
-  // Exit from the web application on certain key
-  w.bind("webapp_exit_on", [&](const std::string &req) -> std::string {
-      auto k = std::stoi(webview::detail::json_parse(req, "", 27));
-      w.terminate();
-      return "";
-    });
 
   // Run a local command and return an eventual result at a later time.
   w.bind("webapp_exec", [&](const std::string &seq, const std::string &req, void *) {
@@ -56,6 +77,7 @@ void create_binds(webview::webview &w) {
         rep_crlf(res_cmd);
         replace_all(res_cmd, "<BACKSLASH_CODE>", "\\\\");
         auto result="{\"value\": \""+res_cmd+"\"}";
+        //auto result=res_cmd;
         w.resolve(seq, 0, result);
       }).detach();
     },
@@ -63,59 +85,29 @@ void create_binds(webview::webview &w) {
   );
 }
 
-webview::webview *W=nullptr;
-WNDPROC currentProc=nullptr;
-LRESULT CALLBACK KeyProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
-  switch(msg) {
-    case WM_KEYDOWN:
-      std::cout << "kproc:" << wParam << std::endl;
+void *webview_set(bool devmode, int width, int height, int hints) {
+  void *wnd=nullptr;
 
-      if (wParam == VK_ESCAPE)
-        if (W != nullptr) W->terminate();
-      break;
-
-    case WM_NOTIFY:
-      std::cout << "kproc:" << wParam << std::endl;
-      if (HIBYTE(GetKeyState(VK_ESCAPE)) != 0 && GetFocus() != hwnd)
-        if (W != nullptr) W->terminate();
-      break;
-      default:
-        if (currentProc != nullptr)
-          return CallWindowProc((WNDPROC)currentProc, hwnd, msg, wParam, lParam);
+  if (w == nullptr) {
+    w=new webview::webview(devmode, wnd);
+    w->set_size(width, height, hints);
+    create_binds(*w);
   }
 
-    return 0;
+  return wnd;
 }
 
-void run_webview(bool devmode, void *wnd, int width, int height, int hints, std::string url, std::string title, std::string init_js) {
-  webview::webview w(devmode, wnd);
-
-  if (width < 0) width=640;
-  if (height < 0) height=480;
-  w.set_size(width, height, hints);
-
-  create_binds(w);
-
-  if (!init_js.empty()) w.init(init_js);
+void webview_run(std::string url, std::string title, std::string init_js) {
+  w->set_title(title);
+  if (!init_js.empty()) w->init(init_js);
 
   if (url.starts_with("html://")) {
-    if (title == "") title="HTML string";
-    url.erase(0, 7);
-    w.set_title(title);
-    w.set_html(url);
+    w->set_html(url);
   } else {
-    if (title == "") title=url;
-    w.set_title(title);
-    w.navigate(url);
+    w->navigate(url);
   }
-#ifdef _WIN32
-  W=&w;
-  HWND hw=(HWND)w.window();
-  //currentProc=(WNDPROC)SetWindowLongPtr(hw, GWLP_WNDPROC, (long)KeyProc);
-  currentProc=reinterpret_cast<WNDPROC>(SetWindowLongPtr(hw, GWLP_WNDPROC, (LONG_PTR)KeyProc));
-  
-#endif
-  w.run();
+
+  w->run();
 }
 
 
