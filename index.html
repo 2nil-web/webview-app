@@ -10,13 +10,22 @@ body {
   font-style: italic;
 }
 
-#output {
-  white-space: pre-line;
-  //width:95%;
+#output_par {
+  //white-space: pre-line;
+  width:95%;
   height:75%;
   border:1px solid black;
-  overflow-y: scroll;
 }
+
+#output_text {
+  //white-space: pre-line;
+  width:100%;
+  height:100%;
+  resize: none;
+  overflow-y: scroll;
+  border:0px solid white;
+}
+
 </style>
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-16">
   </head>
@@ -25,9 +34,9 @@ body {
     </label>
     <input type="button" id="run_cmd" value="Run"/>
     <input type="number" id="tout" value="3000" min="0" style="width:50" step="100"/>
-    <br> <input type="button" id="output_clear" value="Clean output" onclick="output.innerText=''"/>
+    <br> <input type="button" id="output_clear" value="Clean output" onclick="output_text.innerText=''"/>
     <br><br>
-    <pre id="output"></pre>
+    <div id="output_par"><textarea readonly id="output_text"></textarea></div>
     <br><br>
     <!--input type="button" id="quit" value="Exit web app" onclick="webapp_exit()"--!>
   <script>
@@ -40,7 +49,7 @@ body {
 
     function exec_cmd_no_return(scmd, duration) {
       if (run_cmd.disabled === true) {
-        output.innerHTML+='<span class="statement">Command ['+scmd+'] did not return anything after '+duration/1000+' seconds.<br/></span>';
+        output_par.innerHTML+='<span class="statement">Command ['+scmd+'] did not return anything after '+duration/1000+' seconds.<br/></span>';
         run_cmd.disabled=false;
       }
       document.getElementById("cmd").focus();
@@ -53,8 +62,8 @@ body {
         //console.log('[' + scmd + ']');
         setTimeout(exec_cmd_no_return, tout.value, scmd, tout.value);
         window.webapp_exec(scmd, true).then(result => {
-          output.innerText += result.value;//.replace(/(\r|\n)/g, '<p>');
-          scroll_to_bottom("output");
+          output_text.value += result.value;//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+          scroll_to_bottom("output_text");
           run_cmd.disabled = false;
           cmd.focus();
         });
