@@ -9,6 +9,14 @@ body {
   font-weight: bold;
   font-style: italic;
 }
+
+#output {
+  white-space: pre-line;
+  //width:95%;
+  height:75%;
+  border:1px solid black;
+  overflow-y: scroll;
+}
 </style>
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-16">
   </head>
@@ -19,7 +27,7 @@ body {
     <input type="number" id="tout" value="3000" min="0" style="width:50" step="100"/>
     <br> <input type="button" id="output_clear" value="Clean output" onclick="output.innerText=''"/>
     <br><br>
-    <div style="width:95%; height:80%; border:1px solid black; overflow-y: scroll;" id="output"></div>
+    <pre id="output"></pre>
     <br><br>
     <!--input type="button" id="quit" value="Exit web app" onclick="webapp_exit()"--!>
   <script>
@@ -32,7 +40,7 @@ body {
 
     function exec_cmd_no_return(scmd, duration) {
       if (run_cmd.disabled === true) {
-        output.innerHTML+='<span class="statement">Command ['+scmd+'] did not return anything after '+duration/1000+' seconds<br/>.</span>';
+        output.innerHTML+='<span class="statement">Command ['+scmd+'] did not return anything after '+duration/1000+' seconds.<br/></span>';
         run_cmd.disabled=false;
       }
       document.getElementById("cmd").focus();
@@ -45,7 +53,7 @@ body {
         //console.log('[' + scmd + ']');
         setTimeout(exec_cmd_no_return, tout.value, scmd, tout.value);
         window.webapp_exec(scmd, true).then(result => {
-          output.innerHTML += result.value.replace(/(?:\r\n|\r|\n)/g, '<br>');
+          output.innerText += result.value;//.replace(/(\r|\n)/g, '<p>');
           scroll_to_bottom("output");
           run_cmd.disabled = false;
           cmd.focus();

@@ -170,9 +170,9 @@ std::string tempfile(std::string tpath, std::string pfx) {
 }
 
 #ifdef _WIN32
-#ifndef _MSC_FULL_VER
-UINT CodePage=CP_UTF8;
-DWORD dwFlags=WC_ERR_INVALID_CHARS;
+#ifdef _MSC_FULL_VER
+UINT CodePage=CP_ACP;
+DWORD dwFlags=0;
 std::string ws2s(std::wstring ws) {
   int l=WideCharToMultiByte(CodePage, dwFlags, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
 
@@ -197,6 +197,7 @@ std::wstring s2ws(std::string s) {
   return ws;
 }
 #else
+
 std::string ws2s(std::wstring ws) {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   return converter.to_bytes(ws);
@@ -252,6 +253,7 @@ std::wstring SystemToString(const std::string cmd) {
 
   HANDLE hFile=CreateFileW(wtmpFile.c_str(), FILE_WRITE_DATA, FILE_SHARE_DELETE | FILE_SHARE_READ, &se, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_TEMPORARY , 0);
   SetStdHandle(STD_OUTPUT_HANDLE, hFile);
+  SetStdHandle(STD_ERROR_HANDLE, hFile);
   CreateProcessW(getcmdw(), const_cast<wchar_t*>(wcmd.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
   WaitForSingleObject(pi.hProcess,INFINITE);
 
@@ -263,9 +265,13 @@ std::wstring SystemToString(const std::string cmd) {
 #endif
 
 std::string exec_cmd(std::string cmd) {
+#ifdef _WIN32
+  return ws2s(SystemToString(cmd));
+#else
   std::string tf=tempfile();
   std::string fullcmd=cmd+" > "+tf;
   std::system(fullcmd.c_str());
   return file2str(tf);
+#endif
 }
 
