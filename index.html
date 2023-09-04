@@ -11,14 +11,14 @@ body {
 }
 
 #output_div {
-  width:95%;
-  height:75%;
+//  width:95%;
+//  height:75%;
   border:none;
 }
 
 #output_text {
   width:100%;
-  height:100%;
+  height:60%;
   resize: none;
   overflow-y: scroll;
 }
@@ -27,26 +27,35 @@ body {
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-16">
   </head>
     <label>Command to run:
-      <textarea style="vertical-align: top;" rows="2" cols="40" id="cmd" placeholder='Enter command and click "Run".'></textarea>
+      <textarea style="vertical-align: top;" rows="2" cols="50" id="cmd" placeholder='Enter command and click "Run".'></textarea>
     </label>
     <input type="button" id="run_cmd" value="Run"/>
-    <input type="number" id="tout" value="3000" min="0" style="width:50" step="100"/>
-    <br> <input type="button" id="output_clear" value="Clean output" onclick="output_text.value=''"/>
+    <br><br>
+    <label>Wait to abort command after:
+      <input type="number" id="tout" value="3000" min="0" style="width:48" step="100"/>
+      milliseconds
+    </label>
+    <br><br>
+    <input type="button" id="output_clear" value="Clean output" onclick="output_text.value=''"/>
     <br><br>
     <div id="output_div"><textarea readonly id="output_text"></textarea></div>
     <br><br>
     <!--input type="button" id="quit" value="Exit web app" onclick="webapp_exit()"--!>
   <script>
 //typeof webapp_title === "function"
-    if (typeof webapp_title === "function") {
-        window.webapp_get_title().then(result => { console.log(result.value); });
+
+//    if (typeof webapp_title === "function") {
       webapp_size(640, 384, 0);
-    }
+      //window.webapp_get_title().then(result => { console.log(result.value); });
+      //window.ls("..").then(result => { console.log(result.value); });
+      window.lsi().then(result => { console.log(result.value); });
+//    }
+
     cmd.focus();
 
     function exec_cmd_no_return(scmd, duration) {
       if (run_cmd.disabled === true) {
-        output_div.innerHTML+='<span class="statement">Command ['+scmd+'] did not return anything after '+duration/1000+' seconds.<br/></span>';
+        output_div.innerHTML='<span class="statement">Command ['+scmd+'] did not return anything after '+duration/1000+' seconds.<br/></span>'+output_div.innerHTML;
         run_cmd.disabled=false;
       }
       document.getElementById("cmd").focus();

@@ -73,16 +73,39 @@ void create_binds(webview::webview &w) {
         auto cmd=webview::detail::json_parse(req, "", 0);
         std::string res_cmd=exec_cmd(cmd);
         //std::cout << res_cmd << std::endl;
-        replace_all(res_cmd, "\\", "<BACKSLASH_CODE>");
+        std::string bs;
+        bs=(char)92;
+        replace_all(res_cmd, bs, "##BACKSLASH_CODE##");
         rep_crlf(res_cmd);
-        replace_all(res_cmd, "<BACKSLASH_CODE>", "\\\\");
+        replace_all(res_cmd, "##BACKSLASH_CODE##", bs+bs);
         auto result="{\"value\": \""+res_cmd+"\"}";
-        //auto result=res_cmd;
         w.resolve(seq, 0, result);
       }).detach();
     },
     nullptr
   );
+
+  // Local file system function
+  w.bind("ls", [&](const std::string &seq, const std::string &req, void *) {
+     std::thread([&, seq, req] {
+        auto dir=webview::detail::json_parse(req, "", 0);
+        auto res=listdir(dir);
+        std::cout << res << std::endl;
+        rep_bs(res);
+        auto result="{\"value\": \""+res+"\"}";
+        w.resolve(seq, 0, result);
+      }).detach();
+    },
+    nullptr
+  );
+
+  w.bind("lsi", [&](const std::string &req) -> std::string {
+    auto res=listdir("");
+    rep_bs(res);
+    return "{\"value\": \""+res+"\"}";
+  });
+
+
 }
 
 void *webview_set(bool devmode, int width, int height, int hints) {

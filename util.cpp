@@ -257,6 +257,10 @@ std::wstring SystemToString(const std::string cmd) {
   CreateProcessW(getcmdw(), const_cast<wchar_t*>(wcmd.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
   WaitForSingleObject(pi.hProcess,INFINITE);
 
+  //FlushFileBuffers(GetStdHandle(STD_OUTPUT_HANDLE));
+  //FlushFileBuffers(GetStdHandle(STD_ERROR_HANDLE));
+  //FlushFileBuffers(hFile);
+  
   std::wstring s=wfile2wstr(tmpFile);
   CloseHandle(hFile);
   DeleteFileW(wtmpFile.c_str());
@@ -271,7 +275,41 @@ std::string exec_cmd(std::string cmd) {
   std::string tf=tempfile();
   std::string fullcmd=cmd+" > "+tf;
   std::system(fullcmd.c_str());
-  return file2str(tf);
+  std::string s=file2str(tf);
+  std::filesystem::remove(tf);
+  return s;
 #endif
+}
+
+std::string rep_bs(std::string &s) {
+  std::string bs;
+  bs=(char)92;
+  replace_all(s, bs, "##BACKSLASH_CODE##");
+  rep_crlf(s);
+  replace_all(s, "##BACKSLASH_CODE##", bs+bs);
+  return s;
+}
+
+// Filesystem api exposed to javascript
+std::string pwd() {
+  return std::filesystem::current_path().string();
+}
+
+std::string cwd(std::string new_dir) {
+  std::filesystem::current_path(new_dir);
+  return pwd();
+}
+
+std::string listdir(std::string path) {
+  std::string res="";
+  if (path.empty()) {
+    path=std::filesystem::current_path().string();
+  }
+
+  for (const auto & entry : std::filesystem::directory_iterator(path)) {
+    res+=entry.path().string()+"\n";
+  }
+
+  return res;
 }
 
