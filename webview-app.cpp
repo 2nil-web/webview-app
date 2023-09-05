@@ -14,6 +14,7 @@
 #include "webview-run.h"
 
 bool devmode=false;
+bool runjs_and_exit=false;
 bool html_string=false;
 int width=-1, height=-1, hints=0; /*
 0 Width and height are default size
@@ -58,6 +59,11 @@ std::vector<run_opt> r_opts = {
   { "", '\0', 0, 0, "-f and -c are mutually exclusive.", nullptr },
   { "title",  't', opt_only,  required_argument, "Set the title of the webview windows, default is to display the url as title if it is provided or nothing if just an html string is provided.", set_title },
   { "js",     'j', opt_only,  required_argument, "Inject a javascript command before loading html page.", [] (char , std::string , std::string val) -> void { init_js=val; } },
+  { "runjs",  'r', opt_only,  required_argument, "Run the provided javascript command and exit.", [] (char , std::string , std::string val) -> void {
+      init_js=val;
+      runjs_and_exit=true;
+    }
+  },
   { "debug",  'd', opt_only,  no_argument,       "Activate the developper mode in the webview.",  [] (char , std::string , std::string ) -> void { devmode=true; }},
   { "width",  'w', opt_only,  required_argument, "Set webview windows initial witdh (Default is 640).",  [] (char , std::string , std::string val) -> void { width=std::stoi(val); }},
   { "height", 'h', opt_only,  required_argument, "Set webview windows initial height (Default is 480).", [] (char , std::string , std::string val) -> void { height=std::stoi(val); }},
@@ -121,7 +127,7 @@ int main(int argc, char **argv, char **) {
 
   if (width < 0) width=640;
   if (height < 0) height=480;
-  webview_set(devmode, width, height, hints);
+  webview_set(devmode, width, height, hints, runjs_and_exit);
 
   if (url.starts_with("html://")) {
     if (title == "") title="HTML string";

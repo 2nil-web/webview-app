@@ -19,6 +19,7 @@
 #include "util.h"
 #include "winapi.h"
 
+
 webview::webview *w=nullptr;
 
 void create_binds(webview::webview &w) {
@@ -105,32 +106,58 @@ void create_binds(webview::webview &w) {
     return "{\"value\": \""+res+"\"}";
   });
 
+  w.bind("out", [&](const std::string &req) -> std::string {
+    auto s=webview::detail::json_parse(req, "", 0);
+    std::cout << s << std::endl;
+    return "";
+  });
 
+  w.bind("err", [&](const std::string &req) -> std::string {
+    auto s=webview::detail::json_parse(req, "", 0);
+    std::cerr << s << std::endl;
+    return "";
+  });
 }
 
-void *webview_set(bool devmode, int width, int height, int hints) {
-  void *wnd=nullptr;
-
+bool run_and_exit=false;
+void webview_set(bool devmode, int width, int height, int hints, bool _run_and_exit) {
   if (w == nullptr) {
-    w=new webview::webview(devmode, wnd);
+    void *wnd=nullptr;
+    run_and_exit=_run_and_exit;
+
+    if (run_and_exit) {
+#ifdef _WIN32
+      HWND hwnd;
+      extern HWND CreateWin();
+      hwnd=CreateWin();
+      wnd=&hwnd;
+#else
+#endif
+    }
+
+    w=new webview::webview(devmode, (void *)wnd);
     w->set_size(width, height, hints);
     create_binds(*w);
   }
-
-  return wnd;
 }
 
 void webview_run(std::string url, std::string title, std::string init_js) {
   w->set_title(title);
-  if (!init_js.empty()) w->init(init_js);
 
-  if (url.starts_with("html://")) {
-    w->set_html(url);
+  if (!init_js.empty()) w->init(init_js);
+  if (run_and_exit) {
+    w->init("webapp_exit();");
+    w->set_html("");
   } else {
-    w->navigate(url);
+    if (url.starts_with("html://")) {
+      w->set_html(url);
+    } else {
+      w->navigate(url);
+    }
   }
 
   w->run();
+  delete w;
 }
 
 

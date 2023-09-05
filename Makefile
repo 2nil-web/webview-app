@@ -22,7 +22,7 @@ DECORATION=Nawak-Bidon
 WVDIR=webview
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include --include=webview_mingw_support.h
-CXXFLAGS += -std=c++20
+CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
 LDFLAGS += -static -mwindows -g
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
