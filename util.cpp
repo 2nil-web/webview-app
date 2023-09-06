@@ -38,6 +38,22 @@ std::string trim(std::string& s) {
 }
 
 #ifdef _WIN32
+void WinError(const char *fmt, ...) {
+  CHAR *lpMsgBuf;
+  char title[1024];
+  DWORD len;
+  va_list ap;
+
+  va_start(ap, fmt);
+  vsnprintf(title, 1024, fmt, ap);
+  va_end(ap);
+
+  len=FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
+  lpMsgBuf[len-2]='\0';
+  MessageBox(NULL, lpMsgBuf, title, MB_OK|MB_ICONERROR);
+  LocalFree(lpMsgBuf);
+}
+
 #ifndef UNICODE
 PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc) {
     PCHAR* argv;

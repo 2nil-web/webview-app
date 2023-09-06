@@ -14,37 +14,26 @@ void outwm (UINT msg) {
 }  
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-  switch (msg) {
+  switch (msg) {/*
   case WM_NCCREATE :
     SetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_HIDEWINDOW);
     ShowWindow(hwnd, SW_HIDE);
-    return TRUE;
+    return TRUE;*/
   case WM_DESTROY:
     PostQuitMessage(0);
     return 0;
-  case WM_CREATE:
-//  case WM_ACTIVATE:
-  case WM_SHOWWINDOW:
-  case WM_SETFOCUS:
+  //case WM_CREATE:
+  //case WM_SHOWWINDOW:
+  //case WM_SETFOCUS:
+  //case WM_ENABLE:
   case WM_SIZE:
-  case WM_ENABLE:
-    outwm(msg);
+    //outwm(msg);
     SetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_HIDEWINDOW);
   //  ShowWindow(hwnd, SW_HIDE);
     return 0;
   default :
     //return CallWindowProc((WNDPROC)wpOrigEditProc, hwnd, msg, wParam, lParam);
     return DefWindowProc(hwnd, msg, wParam, lParam);
-/*
-  case WM_PAINT: {
-    PAINTSTRUCT ps;
-    HDC hdc = BeginPaint(hwnd, &ps);
-     All painting occurs here, between BeginPaint and EndPaint.
-    FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
-    EndPaint(hwnd, &ps);
-    }
-    return 0;
-*/
   }
   return DefWindowProc(hwnd, msg, wParam, lParam);
 }

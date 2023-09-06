@@ -108,7 +108,21 @@ void create_binds(webview::webview &w) {
 
   w.bind("out", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
+#ifdef _WIN32
+    char title[256];
+    std::string tit="";
+    if (GetConsoleTitle(title, 256) > 0) tit=title;
+
+    if (tit.find("invisible cygwin console") != std::string::npos) {
+      std::cout << s << std::endl;
+    } else {
+      DWORD nbwritten;
+      WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), s.size(), &nbwritten, nullptr);
+      WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), "\n\r", 2, &nbwritten, nullptr);
+    }
+#else
     std::cout << s << std::endl;
+#endif
     return "";
   });
 
@@ -131,6 +145,7 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
       extern HWND CreateWin();
       hwnd=CreateWin();
       wnd=&hwnd;
+      if (AttachConsole(ATTACH_PARENT_PROCESS) == 0) WinError("AttachConsole");
 #else
 #endif
     }

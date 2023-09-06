@@ -93,6 +93,7 @@ std::string get_index() {
 // ./webview-app.exe index.html
 // ./webview-app.exe
 // ./webview-app.exe -j "window.confirm('Hello')"
+// ./webview-app.exe -r "for(i=0; i < 10; i++) out(i);"
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/) {
   LPSTR *argv;
   int argc;
