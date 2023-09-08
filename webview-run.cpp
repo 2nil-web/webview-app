@@ -42,7 +42,21 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
   if (w != nullptr) w->eval("console.log('"+s+"');");
 }
 
+void lsdir(const std::string seq, const std::string req, void *arg) {
+  auto dir=webview::detail::json_parse(req, "", 0);
+  auto res=listdir(dir);
+  std::cout << res << std::endl;
+  rep_bs(res);
+  auto result="{\"value\": \""+res+"\"}";
+  w->resolve(seq, 0, result);
+}
+
 void create_binds(webview::webview &w) {
+  w.bind("toto", [&](const std::string & ) -> std::string { return "{\"value\":\"tutu\"}"; });
+
+  // Local file system function
+  w.bind("ls", [&](const std::string &seq, const std::string &req, void *) { lsdir(seq, req, nullptr); }, nullptr);
+
   // Change window title
   w.bind("webapp_get_title", [&](const std::string &seq, const std::string &req, void *) {
      std::thread([&, seq, req] {
@@ -106,25 +120,6 @@ void create_binds(webview::webview &w) {
     nullptr
   );
 
-  // Local file system function
-  w.bind("ls", [&](const std::string &seq, const std::string &req, void *) {
-     std::thread([&, seq, req] {
-        auto dir=webview::detail::json_parse(req, "", 0);
-        auto res=listdir(dir);
-        std::cout << res << std::endl;
-        rep_bs(res);
-        auto result="{\"value\": \""+res+"\"}";
-        w.resolve(seq, 0, result);
-      }).detach();
-    },
-    nullptr
-  );
-
-  w.bind("lsi", [&](const std::string &req) -> std::string {
-    auto res=listdir("");
-    rep_bs(res);
-    return "{\"value\": \""+res+"\"}";
-  });
 
   w.bind("write", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
@@ -149,12 +144,6 @@ void create_binds(webview::webview &w) {
     auto s=webview::detail::json_parse(req, "", 0);
     write_cons(s, std::cerr);
     write_cons("\n", std::cerr);
-    return "";
-  });
-
-  w.bind("err", [&](const std::string &req) -> std::string {
-    auto s=webview::detail::json_parse(req, "", 0);
-    std::cerr << s << std::endl;
     return "";
   });
 }
