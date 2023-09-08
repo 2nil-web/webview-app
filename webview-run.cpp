@@ -19,8 +19,28 @@
 #include "util.h"
 #include "winapi.h"
 
-
 webview::webview *w=nullptr;
+
+void write_cons(std::string s, std::ostream& out=std::cout) {
+#ifdef _WIN32
+  char title[256];
+  std::string tit="";
+  if (GetConsoleTitle(title, 256) > 0) tit=title;
+
+  if (tit.find("invisible cygwin console") != std::string::npos) {
+    out << s; out.flush();
+  } else {
+    HANDLE ho;
+    if (&out == &std::cerr) ho=GetStdHandle(STD_ERROR_HANDLE);
+    else ho=GetStdHandle(STD_OUTPUT_HANDLE);
+    WriteConsole(ho, s.c_str(), s.size(), nullptr, nullptr);
+#else
+    out << s; out.flush();
+#endif
+  }
+
+  if (w != nullptr) w->eval("console.log('"+s+"');");
+}
 
 void create_binds(webview::webview &w) {
   // Change window title
@@ -106,23 +126,29 @@ void create_binds(webview::webview &w) {
     return "{\"value\": \""+res+"\"}";
   });
 
-  w.bind("out", [&](const std::string &req) -> std::string {
+  w.bind("write", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
-#ifdef _WIN32
-    char title[256];
-    std::string tit="";
-    if (GetConsoleTitle(title, 256) > 0) tit=title;
+    write_cons(s);
+    return "";
+  });
 
-    if (tit.find("invisible cygwin console") != std::string::npos) {
-      std::cout << s << std::endl;
-    } else {
-      DWORD nbwritten;
-      WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), s.c_str(), s.size(), &nbwritten, nullptr);
-      WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), "\n\r", 2, &nbwritten, nullptr);
-    }
-#else
-    std::cout << s << std::endl;
-#endif
+  w.bind("writeln", [&](const std::string &req) -> std::string {
+    auto s=webview::detail::json_parse(req, "", 0);
+    write_cons(s);
+    write_cons("\n");
+    return "";
+  });
+
+  w.bind("ewrite", [&](const std::string &req) -> std::string {
+    auto s=webview::detail::json_parse(req, "", 0);
+    write_cons(s, std::cerr);
+    return "";
+  });
+
+  w.bind("ewriteln", [&](const std::string &req) -> std::string {
+    auto s=webview::detail::json_parse(req, "", 0);
+    write_cons(s, std::cerr);
+    write_cons("\n", std::cerr);
     return "";
   });
 
@@ -141,12 +167,15 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
 
     if (run_and_exit) {
 #ifdef _WIN32
-      HWND hwnd;
-      extern HWND CreateWin();
-      hwnd=CreateWin();
-      wnd=&hwnd;
-      if (AttachConsole(ATTACH_PARENT_PROCESS) == 0) WinError("AttachConsole");
-#else
+      if (AttachConsole(ATTACH_PARENT_PROCESS) == 0) {
+        run_and_exit=false;
+        devmode=true;
+      } else {
+        HWND hwnd;
+        extern HWND CreateWin();
+        hwnd=CreateWin();
+        wnd=&hwnd;
+      }
 #endif
     }
 
