@@ -33,7 +33,7 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
     HANDLE ho;
     if (&out == &std::cerr) ho=GetStdHandle(STD_ERROR_HANDLE);
     else ho=GetStdHandle(STD_OUTPUT_HANDLE);
-    WriteConsole(ho, s.c_str(), s.size(), nullptr, nullptr);
+    WriteConsole(ho, s.c_str(), (DWORD)s.size(), nullptr, nullptr);
 #else
     out << s; out.flush();
 #endif
