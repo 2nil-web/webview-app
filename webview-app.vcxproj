@@ -112,7 +112,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions);_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;STATIC_GETOPT</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions);STATIC_GETOPT</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>getopt_vs;webview\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview</AdditionalIncludeDirectories>
@@ -131,7 +131,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions);_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;STATIC_GETOPT</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions);STATIC_GETOPT</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>getopt_vs;webview\build\external\libs\Microsoft.Web.WebView2.1.0.1150.38\build\native\include;webview</AdditionalIncludeDirectories>

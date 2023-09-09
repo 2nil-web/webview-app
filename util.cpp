@@ -13,6 +13,7 @@
 #include <locale>
 #include <codecvt>
 #include <string>
+#include <stdexcept>
 #include <vector>
 #include <chrono>
 #include <algorithm>
@@ -186,7 +187,8 @@ std::string tempfile(std::string tpath, std::string pfx) {
 }
 
 #ifdef _WIN32
-#ifdef _MSC_FULL_VER
+#ifdef _MSC_VER
+#ifdef RESV
 UINT CodePage=CP_ACP;
 DWORD dwFlags=0;
 std::string ws2s(std::wstring ws) {
@@ -213,6 +215,38 @@ std::wstring s2ws(std::string s) {
   return ws;
 }
 #else
+std::string ws2s(const std::wstring& wide_string) {
+    if (wide_string.empty()) {
+        return "";
+    }
+
+    const auto size_needed = WideCharToMultiByte(CP_UTF8, 0, &wide_string.at(0), (int)wide_string.size(), nullptr, 0, nullptr, nullptr);
+    if (size_needed <= 0) {
+        throw std::runtime_error("WideCharToMultiByte() failed: " + std::to_string(size_needed));
+    }
+
+    std::string result(size_needed, 0);
+    WideCharToMultiByte(CP_UTF8, 0, &wide_string.at(0), (int)wide_string.size(), &result.at(0), size_needed, nullptr, nullptr);
+    return result;
+}
+
+std::wstring s2ws(const std::string& string) {
+    if (string.empty()) {
+        return L"";
+    }
+
+    const auto size_needed = MultiByteToWideChar(CP_UTF8, 0, &string.at(0), (int)string.size(), nullptr, 0);
+    if (size_needed <= 0) {
+        throw std::runtime_error("MultiByteToWideChar() failed: " + std::to_string(size_needed));
+    }
+
+    std::wstring result(size_needed, 0);
+    MultiByteToWideChar(CP_UTF8, 0, &string.at(0), (int)string.size(), &result.at(0), size_needed);
+    return result;
+}
+
+#endif
+#else
 
 std::string ws2s(std::wstring ws) {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -225,9 +259,57 @@ std::wstring s2ws(std::string s) {
 }
 #endif
 
+std::string Utf8FromUtf16(const std::wstring& utf16_string) {
+    if (utf16_string.empty()) {
+        return std::string();
+    }
+    int target_length = ::WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string.data(),
+        static_cast<int>(utf16_string.length()), nullptr, 0, nullptr, nullptr);
+    if (target_length == 0) {
+        return std::string();
+    }
+    std::string utf8_string;
+    utf8_string.resize(target_length);
+    int converted_length = ::WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string.data(),
+        static_cast<int>(utf16_string.length()), utf8_string.data(),
+        target_length, nullptr, nullptr);
+    if (converted_length == 0) {
+        return std::string();
+    }
+    return utf8_string;
+    }
+
+std::wstring Utf16FromUtf8(const std::string& utf8_string) {
+    if (utf8_string.empty()) {
+        return std::wstring();
+    }
+    int target_length =
+        ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8_string.data(),
+            static_cast<int>(utf8_string.length()), nullptr, 0);
+    if (target_length == 0) {
+        return std::wstring();
+    }
+    std::wstring utf16_string;
+    utf16_string.resize(target_length);
+    int converted_length =
+        ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8_string.data(),
+            static_cast<int>(utf8_string.length()),
+            utf16_string.data(), target_length);
+    if (converted_length == 0) {
+        return std::wstring();
+    }
+    return utf16_string;
+}
+
 std::wstring wfile2wstr(std::string filename) {
     std::wifstream wif(filename);
+#ifndef _MSC_VER
     wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+/*#else
+    wif.imbue(std::locale(std::locale(), new std::codecvt_utf8_utf16<wchar_t, 0x10FFFF, std::consume_header>));*/
+#endif
     std::wstringstream wss;
     wss << wif.rdbuf();
     return wss.str();
