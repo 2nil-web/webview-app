@@ -85,7 +85,6 @@ std::string get_index() {
   return "";
 }
 
-#ifdef _WIN32
 
 // Live html test :
 // ./webview-app.exe -c "<input type='button' value='Exit web app' onclick='exit_webapp()'>"
@@ -93,8 +92,9 @@ std::string get_index() {
 // ./webview-app.exe index.html
 // ./webview-app.exe
 // ./webview-app.exe -j "window.confirm('Hello')"
-// ./webview-app.exe -r "for(i=0; i < 10; i++) out(i);" # under a cygwin/mingw mintty console
-// start /wait webview-app.exe -r "for(i=0; i < 10; i++) out(i);" # under a windows cmd
+// ./webview-app.exe -r "for(i=0; i < 10; i++) writeln(i);" # under a cygwin/mingw mintty console
+// start /wait webview-app.exe -r "for(i=0; i < 10; i++) writeln(i);" # under a windows cmd
+#ifdef _WIN32
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/) {
   LPSTR *argv;
   int argc;

@@ -29,7 +29,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   case WM_SIZE:
     //outwm(msg);
     SetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_HIDEWINDOW);
-  //  ShowWindow(hwnd, SW_HIDE);
+    ShowWindow(hwnd, SW_HIDE);
     return 0;
   default :
     //return CallWindowProc((WNDPROC)wpOrigEditProc, hwnd, msg, wParam, lParam);
@@ -90,12 +90,12 @@ LRESULT CALLBACK HideWindowProc(HWND hw, UINT msg, WPARAM wParam, LPARAM lParam)
     std::cout << std::endl;
     return 0;
   default :
-    //return CallWindowProc((WNDPROC)wpOrigEditProc, hw, msg, wParam, lParam);
-    return DefWindowProc(hw, msg, wParam, lParam);
+    return CallWindowProc((WNDPROC)wpOrigEditProc, hw, msg, wParam, lParam);
+//    return DefWindowProc(hw, msg, wParam, lParam);
   }
 
-//  return CallWindowProc((WNDPROC)wpOrigEditProc, hw, msg, wParam, lParam);
-    return DefWindowProc(hw, msg, wParam, lParam);
+  return CallWindowProc((WNDPROC)wpOrigEditProc, hw, msg, wParam, lParam);
+//    return DefWindowProc(hw, msg, wParam, lParam);
 }
 HWND wnd;
 #endif
