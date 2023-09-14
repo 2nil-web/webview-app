@@ -51,54 +51,35 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
   else MessageBox(NULL, "", "No Win", MB_OK);
 }
 
-// ls().then(result => { output_text.value += (result.value); });
-// ls().then(result => { writeln(result.value); });
-// ls().then(result => { console.log(result.value); });
-// ls().then(result => { result.forEach((d) => console.log(d)); });
-// ls().then(result => { result.forEach((d) => { console.log(d) })};
-// Return a javascript array of strings
-std::string lsdir(const std::string dir) {
+// Return a javascript array of strings corresponding to a directory list
+std::string lsdir(std::string path) {
   std::string res="[";
-  auto vd=listdir(dir);
-  for (auto& d:vd) {
-    res+='"'+d+'"';
-    if (&d != &vd.back()) res+=',';
+  if (path.empty()) path=".";
+  for (const auto& e:std::filesystem::directory_iterator(path)) {
+    res+='"'+e.path().string()+"\",";
   }
-
-  res+="]";
+  res[res.size()-1]=']';
+  replace_all(res, "\\", "/");
   //std::cout << res << std::endl;
   return res;
 }
 
 
 void create_binds(webview::webview &w) {
-  // Local file system function
-  // imm_ls().then(r=>{console.log(r)});
-  // imm_ls().then(r=>{ console.log(JSON.stringify(r[0])); });
-  w.bind("imm_ls", [&](const std::string &req) -> std::string {
-    auto dir=webview::detail::json_parse(req, "", 0);
-    auto res=lsdir(dir);
-    replace_all(res, "\\", "/");
-    std::cout << res << std::endl;
-    return res;
-  });
-
-  // ls().then(res=>{document.getElementById("output_text").value+=res[0]+", "+res[4]+"\n"});
-  // ls().then(r=>{console.log(r)});
+  // ls().then(r=>{r.forEach((d)=>console.log(d))});
+  // ls().then(r=>{r.forEach((d)=>document.getElementById("output_text").value+=d+"\n")});
+  // ls().then(r=>{r.forEach((d)=>writeln(d+"\n"))});
   w.bind(
       "ls",
       [&](const std::string &seq, const std::string &req, void *) {
         // Create a thread and forget about it for the sake of simplicity.
         std::thread([&, seq, req] {
-          auto dir=webview::detail::json_parse(req, "", 0);
-          auto res=lsdir(dir);
-          replace_all(res, "\\", "/");
-          //rep_bs(res);
-          std::cout << res << std::endl;
-          w.resolve(seq, 0, res);
+          w.resolve(seq, 0, lsdir(webview::detail::json_parse(req, "", 0)));
         }).detach();
       },
       nullptr);
+
+  w.bind("simple_ls", [&](const std::string &req) -> std::string { return lsdir(webview::detail::json_parse(req, "", 0)); });
 
   // Change window title
   w.bind("webapp_get_title", [&](const std::string &seq, const std::string &req, void *) {

@@ -28,7 +28,6 @@ std::string rep_bs(std::string &s);
 // Filesystem api exposed to javascript
 std::string pwd();
 std::string cwd(std::string new_dir="");
-std::vector<std::string> listdir(std::string path=".");
 
 #endif /* UTIL_H */
 

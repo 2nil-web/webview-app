@@ -399,15 +399,3 @@ std::string cwd(std::string new_dir) {
   return pwd();
 }
 
-std::vector<std::string> listdir(std::string path) {
-//  if (path.empty()) { path=std::filesystem::current_path().string(); }
-  if (path.empty()) path=".";
-
-  std::vector<std::string> vecd;
-  for (const auto& entry : std::filesystem::directory_iterator(path)) {
-      vecd.push_back(entry.path().string());
-  }
-
-  return vecd;
-}
-
