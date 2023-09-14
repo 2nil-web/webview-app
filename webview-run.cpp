@@ -21,11 +21,7 @@
 
 webview::webview *w=nullptr;
 
-void write_consRES(std::string s, std::ostream& out=std::cout) {
-  out << s; out.flush();
-  w->eval("console.log('"+s+"');");
-  if (w != nullptr) w->eval("console.log('"+s+"');");
-}
+
 void write_cons(std::string s, std::ostream& out=std::cout) {
   if (s.empty()) return;
 #ifdef _WIN32
@@ -35,7 +31,7 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
   //out << gctres << std::endl;
   if (gctres > 0) {
     tit=title;
-    MessageBox(NULL, "", title, MB_OK);
+    //MessageBox(NULL, "", title, MB_OK);
     //out << gctres << ", [[" << title << "]]" << std::endl; //out.flush();
 
     if (tit.find("invisible cygwin console") != std::string::npos) {
@@ -51,57 +47,55 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
     out << s; out.flush();
 #endif
 
-  if (w != nullptr) w->eval("console.log('"+s+"');");
+  if (w != nullptr) w->eval("console.log('[["+s+"]]');");
+  else MessageBox(NULL, "", "No Win", MB_OK);
 }
 
 // ls().then(result => { output_text.value += (result.value); });
 // ls().then(result => { writeln(result.value); });
 // ls().then(result => { console.log(result.value); });
-void lsdir(const std::string seq, const std::string req, void *arg) {
-  std::thread([&, seq, req] {
-    auto dir=webview::detail::json_parse(req, "", 0);
-    auto res=listdir(dir);
-    //std::cout << res << std::endl;
-    rep_bs(res);
-    auto result="{\"value\": \""+res+"\"}";
-    w->resolve(seq, 0, result);
-    //return result;
-  }).detach();
+// ls().then(result => { result.forEach((d) => console.log(d)); });
+// ls().then(result => { result.forEach((d) => { console.log(d) })};
+// Return a javascript array of strings
+std::string lsdir(const std::string dir) {
+  std::string res="[";
+  auto vd=listdir(dir);
+  for (auto& d:vd) {
+    res+='"'+d+'"';
+    if (&d != &vd.back()) res+=',';
+  }
+
+  res+="]";
+  //std::cout << res << std::endl;
+  return res;
 }
 
+
 void create_binds(webview::webview &w) {
-  w.bind("toto", [&](const std::string & ) -> std::string { return "{\"value\": \"tutu\"}"; });
-
-    w.bind(
-      "compute",
-      [&](const std::string &seq, const std::string &req, void * /*arg*/) {
-        // Create a thread and forget about it for the sake of simplicity.
-        std::thread([&, seq, req] {
-          // Simulate load.
-          std::this_thread::sleep_for(std::chrono::seconds(1));
-          // json_parse() is an implementation detail and is only used here
-          // to provide a working example.
-          auto left = std::stoll(webview::detail::json_parse(req, "", 0));
-          auto right = std::stoll(webview::detail::json_parse(req, "", 1));
-          auto result = std::to_string(left * right);
-          w.resolve(seq, 0, result);
-        }).detach();
-      },
-      nullptr);
-
   // Local file system function
-  //w.bind("ls", [&](const std::string &seq, const std::string &req, void *) { lsdir(seq, req, nullptr); }, nullptr);
+  // imm_ls().then(r=>{console.log(r)});
+  // imm_ls().then(r=>{ console.log(JSON.stringify(r[0])); });
+  w.bind("imm_ls", [&](const std::string &req) -> std::string {
+    auto dir=webview::detail::json_parse(req, "", 0);
+    auto res=lsdir(dir);
+    replace_all(res, "\\", "/");
+    std::cout << res << std::endl;
+    return res;
+  });
+
+  // ls().then(res=>{document.getElementById("output_text").value+=res[0]+", "+res[4]+"\n"});
+  // ls().then(r=>{console.log(r)});
   w.bind(
       "ls",
-      [&](const std::string &seq, const std::string &req, void * /*arg*/) {
+      [&](const std::string &seq, const std::string &req, void *) {
         // Create a thread and forget about it for the sake of simplicity.
         std::thread([&, seq, req] {
           auto dir=webview::detail::json_parse(req, "", 0);
-          auto res=listdir(dir);
-          //std::cout << res << std::endl;
-          rep_bs(res);
-          auto result="{\"value\": \""+res+"\"}";
-          w.resolve(seq, 0, result);
+          auto res=lsdir(dir);
+          replace_all(res, "\\", "/");
+          //rep_bs(res);
+          std::cout << res << std::endl;
+          w.resolve(seq, 0, res);
         }).detach();
       },
       nullptr);
@@ -207,10 +201,7 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
     if (run_and_exit) {
       if (AttachConsole(ATTACH_PARENT_PROCESS)) {
         // Console mode, webview window will not be rendered.
-        HWND hwnd;
-        extern HWND CreateWin();
-        hwnd=CreateWin();
-        wnd=&hwnd;
+        //HWND hwnd; extern HWND CreateWin(); hwnd=CreateWin(); wnd=&hwnd;
       } else {
         // GUI mode is not compatible with run_and_exit option
         run_and_exit=false;
@@ -228,11 +219,15 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
 void webview_run(std::string url, std::string title, std::string init_js) {
   w->set_title(title);
 
-  //std::cout << init_js << std::endl;
   if (run_and_exit) {
-    w->init("webapp_exit();");
-    w->set_html("");
+    if (init_js.back() != ';') init_js+=';';
+    init_js+=" webapp_exit();";
+    w->init(init_js);
+
+    w->set_html("html://<div></div>");
   } else {
+    if (!init_js.empty()) { w->init(init_js); }
+
     if (url.starts_with("html://")) {
       w->set_html(url);
     } else {
@@ -240,9 +235,8 @@ void webview_run(std::string url, std::string title, std::string init_js) {
     }
   }
 
-  if (!init_js.empty()) {
-    w->init(init_js);
-  }
+  std::cout << init_js << std::endl;
+
   w->run();
   delete w;
 }

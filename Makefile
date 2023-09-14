@@ -29,8 +29,8 @@ LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
 MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
-#DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
-DO_MSBUILD=1
+DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
+#DO_MSBUILD=1
 
 EXEXT=.exe
 PREFIX=webview-app

@@ -12,6 +12,7 @@
 #include <fstream>
 #include <locale>
 #include <codecvt>
+#include <vector>
 #include <string>
 #include <stdexcept>
 #include <vector>
@@ -398,16 +399,15 @@ std::string cwd(std::string new_dir) {
   return pwd();
 }
 
-std::string listdir(std::string path) {
-  std::string res="";
-  if (path.empty()) {
-    path=std::filesystem::current_path().string();
+std::vector<std::string> listdir(std::string path) {
+//  if (path.empty()) { path=std::filesystem::current_path().string(); }
+  if (path.empty()) path=".";
+
+  std::vector<std::string> vecd;
+  for (const auto& entry : std::filesystem::directory_iterator(path)) {
+      vecd.push_back(entry.path().string());
   }
 
-  for (const auto & entry : std::filesystem::directory_iterator(path)) {
-    res+=entry.path().string()+"\n";
-  }
-
-  return res;
+  return vecd;
 }
 

@@ -29,7 +29,7 @@ body {
   <meta http-equiv="Content-Type" content="text/plain; charset=utf-16">
 </head>
 <body>
-    <label>Command to run: <textarea style="vertical-align: middle;" rows="2" cols="50" id="cmd" placeholder='Enter command and click "Run".'></textarea></label>
+    <label>Command to run: <textarea style="vertical-align: middle; width:80%; height:10%" id="cmd" placeholder='Enter command and click "Run".'></textarea></label>
     <br>
     <input type="checkbox" id="curr_line" checked /> <label for="curr_line">Run current line only</label>
     <input type="button" id="run_cmd" value="Run as shell"/>
@@ -37,7 +37,7 @@ body {
     <br>
     <label>Wait to abort command after: <input type="number" id="tout" value="3000" min="0" style="width:48px" step="100"/> milliseconds</label>
     <div id="output_div"><textarea readonly id="output_text"></textarea></div>
-    <input type="button" id="output_clear" value="Clean output" onclick="output_text.value=''"/>
+    <input type="button" id="output_clear" value="Clean output" onclick="document.getElementById('output_text').value=''"/>
     <br>
     <!--input type="button" id="quit" value="Exit web app" onclick="webapp_exit()"--!>
 </body>
@@ -82,7 +82,7 @@ body {
         run_cmd.disabled = true;
         run_js.disabled = true;
         scmd=scmd.trim();
-        output_text.value += eval(scmd);
+        eval(scmd);
         scroll_to_bottom("output_text");
         run_cmd.disabled = false;
         run_js.disabled = false;
