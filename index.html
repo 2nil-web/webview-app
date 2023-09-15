@@ -31,127 +31,106 @@ body {
 <body>
     <label>Command to run: <textarea style="vertical-align: middle; width:80%; height:10%" id="cmd" placeholder='Enter command and click "Run".'></textarea></label>
     <br>
-    <input type="checkbox" id="curr_line" checked /> <label for="curr_line">Run current line only</label>
-    <input type="button" id="run_cmd" value="Run as shell"/>
-    <input type="button" id="run_js" value="Run as js"/>
+    <input type="button" id="run_cmd" value="Run"/>
+    <label><input type="radio" id="as_js" name="run_as" value="JS" checked/>As javascript</label>
+    <label><input type="radio" id="as_sh" name="run_as" value="shell" />As shell</label>
+    <label style="float:right;">Shell running timeout: <input type="number" id="tout" value="3000" min="0" style="width:48px" step="100"/> milliseconds</label>
+    <div id="output_div">
+      <textarea readonly id="output_text"></textarea>
+      <span id="tout_warn" class="statement">&nbsp;</span>
+    </div>
+    <input type="button" id="output_clear" value="Clean output" onclick="output_text.value=''; tout_warn.innerHTML='&nbsp;'"/>
     <br>
-    <label>Wait to abort command after: <input type="number" id="tout" value="3000" min="0" style="width:48px" step="100"/> milliseconds</label>
-    <div id="output_div"><textarea readonly id="output_text"></textarea></div>
-    <input type="button" id="output_clear" value="Clean output" onclick="document.getElementById('output_text').value=''"/>
-    <br>
-    <!--input type="button" id="quit" value="Exit web app" onclick="webapp_exit()"--!>
 </body>
 <script>
-//typeof webapp_title === "function"
-
-//    if (typeof webapp_title === "function") {
-      webapp_size(640, 384, 0);
-      //window.webapp_get_title().then(result => { console.log(result.value); });
-      //window.ls("..").then(result => { console.log(result.value); });
+if (typeof webapp_title === "function") {
+  webapp_size(640, 384, 0);
+  //window.webapp_get_title().then(result => { console.log(result.value); });
+  //window.ls("..").then(result => { console.log(result.value); });
 //      ls().then(result => { console.log(result.value); });
-//    }
+}
 
-    cmd.focus();
+cmd.focus();
 
-    function exec_cmd_no_return(scmd, duration) {
-      if (run_cmd.disabled === true) {
-        output_div.innerHTML='<span class="statement">Command ['+scmd+'] did not return anything after '+duration/1000+' seconds.<br/></span>'+output_div.innerHTML;
-        run_cmd.disabled=false;
-      }
-      document.getElementById("cmd").focus();
-    }
+function end_cmd() {
+  output_text.scrollTop=output_text.scrollHeight;
+  run_cmd.disabled=false;
+  cmd.focus();
+}
 
-    function exec_cmd(scmd) {
-      if (scmd !== "") {
-        run_cmd.disabled = true;
-        run_js.disabled = true;
-        scmd=scmd.trim();
-        setTimeout(exec_cmd_no_return, tout.value, scmd, tout.value);
-        window.webapp_exec(scmd, true).then(result => {
-          output_text.value += result.value;//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
-          scroll_to_bottom("output_text");
-          run_cmd.disabled = false;
-          run_js.disabled = false;
-          cmd.focus();
-        });
-      }
-    }
+function dir(rec=false) {
+  if (rec) l=lsr();
+  else l=ls();
+  var nfiles=0, ndir=0, nothers=0;
 
-    function exec_js(scmd) {
-      if (scmd !== "") {
-        run_cmd.disabled = true;
-        run_js.disabled = true;
-        scmd=scmd.trim();
-        eval(scmd);
-        scroll_to_bottom("output_text");
-        run_cmd.disabled = false;
-        run_js.disabled = false;
-        cmd.focus();
-      }
-    }
+  l.then(r=>{
+    r.forEach((d)=> {
+      file_type(d).then(fs=> {
+        switch(fs) {
+          case 'regular file':
+            nfile++;
+            break;
+          case 'directory':
+            ndir++;
+            break;
+          default:
+            nothers++;
+            break;
+        }
 
-    function getLine(objName, curr=true) {
-      ta=document.getElementById(objName);
-      ssta=ta.selectionStart;
-      sfin=ta.selectionEnd;
-
-      if (ssta !== sfin) {
-        ret=ta.value.substring(ssta, sfin);
-        return ret.trim();
-      }
-
-      // Get current line
-      var is, ie;
-      for (is=ssta; is; is--) {
-        if (is !== ssta && (ta.value.charCodeAt(is) == 10 || ta.value.charCodeAt(is) == 13)) break;
-      }
-
-      for (ie=sfin; ie < ta.value.length; ie++) {
-        if (ie !== sfin && (ta.value.charCodeAt(ie) == 10 || ta.value.charCodeAt(ie) == 13)) break;
-      }
-      currLine=ta.value.substring(is, ie).trim();
-
-      // Get previous line
-      for (iss=is - 1; iss > 0; iss--) {
-        if (ta.value.charCodeAt(iss) == 10 || ta.value.charCodeAt(iss) == 13) break;
-      }
-      prevLine=ta.value.substring(iss, is).trim();
-
-      if (prevLine === "" || curr) return currLine;
-      else return prevLine;
-    }
-
-    function getPreviousLine(objName) {
-      return getLine(objName, false);
-    }
-
-    function scroll_to_bottom(objName) {
-      var logTa=document.getElementById(objName)
-      logTa.scrollTop=logTa.scrollHeight;
-    }
-    
-    document.addEventListener("DOMContentLoaded", () => {
-      cmd.addEventListener("keyup", (event) => { // Sur CR on execute la ligne précédente
-          if (event.keyCode === 13) {
-            if (curr_line.checked) exec_cmd(getPreviousLine("cmd"));
-            else exec_cmd(cmd.value);
-          }
+        console.log(fs+","+d);
+        output_text.value+=fs+","+d.replace("/^\.\//", "")+"\n";
       });
-    
-      run_cmd.addEventListener( "click", (event) => { // Sur click "Run as shell" on execute la ligne courante
-        if (curr_line.checked) exec_cmd(getPreviousLine("cmd"));
-        else exec_cmd(cmd.value);
-      });
-    
-      run_js.addEventListener( "click", (event) => { // Sur click "Run as shell" on execute la ligne courante
-        if (curr_line.checked) exec_js(getPreviousLine("cmd"));
-        else exec_js(cmd.value);
-      });
-    
-    document.addEventListener("keyup", (event) => { if (event.keyCode === 27) {
-        webapp_exit();
-      }
+        console.log("FILE:"+d);
     });
+
+    //output_text.value+=r.length+" file";
+    //if (r.length > 1) output_text.value+='s';
+    //output_text.value+="\n";
+    end_cmd();
+  });
+}
+
+function exec_cmd_no_return(cmd_value, duration) {
+  if (run_cmd.disabled === true) {
+    tout_warn.innerHTML='Command ['+cmd_value+'] did not return after '+duration/1000+' seconds.';
+    run_cmd.disabled=false;
+  } else tout_warn.innerHTML='&nbsp;';
+
+  cmd.focus();
+}
+
+function end_cmd() {
+  output_text.scrollTop=output_text.scrollHeight;
+  run_cmd.disabled=false;
+  cmd.focus();
+}
+
+function exec_cmd(cmd_value) {
+    run_cmd.disabled = true;
+    cmd_value=cmd_value.trim();
+    tout_warn.innerHTML='&nbsp;';
+    setTimeout(exec_cmd_no_return, tout.value, cmd_value, tout.value);
+    window.webapp_exec(cmd_value, true).then(result => {
+      output_text.value += result.value;//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+      end_cmd();
     });
+}
+
+run_cmd.addEventListener( "click", (event) => { // Sur click "Run" on execute la commande comme shell ou javascript
+  if (cmd.value !== "") {
+    run_cmd.disabled = true;
+    cmd.value=cmd.value.trim();
+
+    if (as_js.checked) {
+      eval(cmd.value);
+      end_cmd();
+    } else exec_cmd(cmd.value);
+  }
+
+  cmd.focus();
+});
+
+  document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 </script>
 <html>

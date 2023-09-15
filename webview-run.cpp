@@ -51,24 +51,89 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
   else MessageBox(NULL, "", "No Win", MB_OK);
 }
 
-// Return a javascript array of strings corresponding to a directory list
-std::string lsdir(std::string path) {
+// Return a javascript array of strings corresponding to a directory list, recursively or not
+std::string lsdir(std::string path, bool recursive=false) {
   std::string res="[";
   if (path.empty()) path=".";
-  for (const auto& e:std::filesystem::directory_iterator(path)) {
-    res+='"'+e.path().string()+"\",";
-  }
+
+  if (recursive) 
+    for (const auto& e:std::filesystem::recursive_directory_iterator(path))
+      res+='"'+e.path().string()+"\",";
+  else
+    for (const auto& e:std::filesystem::directory_iterator(path))
+      res+='"'+e.path().string()+"\",";
+
   res[res.size()-1]=']';
   replace_all(res, "\\", "/");
   //std::cout << res << std::endl;
   return res;
 }
 
+std::string file_type(std::string fn) {
+  auto fs=std::filesystem::status(fn);
+  std::string status;
+
+  switch (fs.type()) {
+    case std::filesystem::file_type::none:
+      status="`not-evaluated-yet`";
+      break;
+    case std::filesystem::file_type::not_found:
+      status="not found";
+      break;
+    case std::filesystem::file_type::regular:
+      status="regular file";
+      break;
+    case std::filesystem::file_type::directory:
+      status="directory";
+      break;
+    case std::filesystem::file_type::symlink:
+      status="symlink";
+      break;
+    case std::filesystem::file_type::block:
+      status="block device";
+      break;
+    case std::filesystem::file_type::character:
+      status="character device";
+      break;
+    case std::filesystem::file_type::fifo:
+      status="named IPC pipe";
+      break;
+    case std::filesystem::file_type::socket:
+      status="named IPC socket";
+      break;
+    case std::filesystem::file_type::unknown:
+      status="`unknown`";
+      break;
+    default:
+      status="`implementation-defined`";
+      break;
+  }
+
+  std::cout << fn << ':' << status << std::endl;
+  return status;
+}
 
 void create_binds(webview::webview &w) {
+  // ls().then(r=>{r.forEach((d)=>writeln(d))});
+  w.bind(
+      "file_type",
+      [&](const std::string &seq, const std::string &req, void *) {
+        // Create a thread and forget about it for the sake of simplicity.
+        std::thread([&, seq, req] {
+          w.resolve(seq, 0, file_type(webview::detail::json_parse(req, "", 0)));
+        }).detach();
+      },
+      nullptr);
+
   // ls().then(r=>{r.forEach((d)=>console.log(d))});
-  // ls().then(r=>{r.forEach((d)=>document.getElementById("output_text").value+=d+"\n")});
-  // ls().then(r=>{r.forEach((d)=>writeln(d+"\n"))});
+  // ls().then(r=>{r.forEach((d)=>output_text.value+=d+"\n")});
+  /*
+ls().then(r=>{
+  r.forEach((d)=>output_text.value+=d.replace(/^\.\//, "")+"\n");
+  output_text.value+=r.length+" files(s)\n";
+});
+  */
+  // ls().then(r=>{r.forEach((d)=>writeln(d))});
   w.bind(
       "ls",
       [&](const std::string &seq, const std::string &req, void *) {
@@ -79,7 +144,17 @@ void create_binds(webview::webview &w) {
       },
       nullptr);
 
-  w.bind("simple_ls", [&](const std::string &req) -> std::string { return lsdir(webview::detail::json_parse(req, "", 0)); });
+  w.bind(
+      "lsr",
+      [&](const std::string &seq, const std::string &req, void *) {
+        // Create a thread and forget about it for the sake of simplicity.
+        std::thread([&, seq, req] {
+          w.resolve(seq, 0, lsdir(webview::detail::json_parse(req, "", 0), true));
+        }).detach();
+      },
+      nullptr);
+
+//  w.bind("simple_ls", [&](const std::string &req) -> std::string { return lsdir(webview::detail::json_parse(req, "", 0)); });
 
   // Change window title
   w.bind("webapp_get_title", [&](const std::string &seq, const std::string &req, void *) {
