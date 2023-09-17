@@ -69,58 +69,30 @@ std::string lsdir(std::string path, bool recursive=false) {
   return res;
 }
 
-std::string file_type(std::string fn) {
-  auto fs=std::filesystem::status(fn);
-  std::string status;
+// Return a string that represents the number in hexadecimal form
+std::string to_js_hex(unsigned int number) {
+   std::ostringstream str;
+   str << std::hex << number;
+   return "0X"+str.str();
+}
 
-  switch (fs.type()) {
-    case std::filesystem::file_type::none:
-      status="`not-evaluated-yet`";
-      break;
-    case std::filesystem::file_type::not_found:
-      status="not found";
-      break;
-    case std::filesystem::file_type::regular:
-      status="regular file";
-      break;
-    case std::filesystem::file_type::directory:
-      status="directory";
-      break;
-    case std::filesystem::file_type::symlink:
-      status="symlink";
-      break;
-    case std::filesystem::file_type::block:
-      status="block device";
-      break;
-    case std::filesystem::file_type::character:
-      status="character device";
-      break;
-    case std::filesystem::file_type::fifo:
-      status="named IPC pipe";
-      break;
-    case std::filesystem::file_type::socket:
-      status="named IPC socket";
-      break;
-    case std::filesystem::file_type::unknown:
-      status="`unknown`";
-      break;
-    default:
-      status="`implementation-defined`";
-      break;
-  }
-
-  std::cout << fn << ':' << status << std::endl;
-  return status;
+// Return a string that represents the number in octal form
+std::string to_js_oct(unsigned int number) {
+   std::ostringstream str;
+   str << std::oct << number;
+   return "0"+str.str();
 }
 
 void create_binds(webview::webview &w) {
-  // ls().then(r=>{r.forEach((d)=>writeln(d))});
-  w.bind(
-      "file_type",
+   w.bind(
+      "fstat",
       [&](const std::string &seq, const std::string &req, void *) {
-        // Create a thread and forget about it for the sake of simplicity.
         std::thread([&, seq, req] {
-          w.resolve(seq, 0, file_type(webview::detail::json_parse(req, "", 0)));
+          auto fs=std::filesystem::status(webview::detail::json_parse(req, "", 0));
+          auto res="{\"type\":" + std::to_string((int)fs.type())+",\"perms\":"+to_js_oct((unsigned)fs.permissions())+"}";
+          //unsigned int p=(unsigned int)fs.permissions();
+          //std::cout << p << " <=> " << to_js_oct(p) <<  " <=> " << to_js_hex(p) << std::endl;
+          w.resolve(seq, 0, res);
         }).detach();
       },
       nullptr);
@@ -137,7 +109,6 @@ ls().then(r=>{
   w.bind(
       "ls",
       [&](const std::string &seq, const std::string &req, void *) {
-        // Create a thread and forget about it for the sake of simplicity.
         std::thread([&, seq, req] {
           w.resolve(seq, 0, lsdir(webview::detail::json_parse(req, "", 0)));
         }).detach();
@@ -147,7 +118,6 @@ ls().then(r=>{
   w.bind(
       "lsr",
       [&](const std::string &seq, const std::string &req, void *) {
-        // Create a thread and forget about it for the sake of simplicity.
         std::thread([&, seq, req] {
           w.resolve(seq, 0, lsdir(webview::detail::json_parse(req, "", 0), true));
         }).detach();
