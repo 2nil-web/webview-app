@@ -1,6 +1,6 @@
 
-//window.ls("..").then(result => { console.log(result.value); });
 /*
+window.ls("..").then(result => { console.log(result.value); });
 file_status("x64");
 file_status("webview-app.exe");
 file_status("win.cpp");
@@ -9,7 +9,6 @@ file_status("NotFound");
 file_status("runopt.o");
 */
 dir(output_text);
-
 cmd.focus();
 
 function end_cmd() {
@@ -52,5 +51,4 @@ run_cmd.addEventListener( "click", (event) => { // Sur click "Run" on execute la
   cmd.focus();
 });
 
-document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 

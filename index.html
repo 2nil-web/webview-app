@@ -17,11 +17,12 @@
       <input type="radio" id="as_sh" name="run_as" value="shell" />As shell
     </label>
     <label style="float:right;">Shell running timeout:
-      <input type="number" id="tout" value="3000" min="0" style="width:48px" step="100" />
+      <input type="number" id="tout" value="3000" min="0" style="width:54px" step="100" />
       milliseconds
     </label>
     <div id="output_div">
-      <textarea readonly id="output_text"></textarea>
+      <textarea readonly id="output_text">
+      </textarea>
       <span id="tout_warn" class="statement">&nbsp;</span>
     </div>
     <input type="button" id="output_clear" value="Clean output" onclick="output_text.value=''; tout_warn.innerHTML='&nbsp;'" />

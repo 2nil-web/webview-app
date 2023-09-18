@@ -88,8 +88,18 @@ void create_binds(webview::webview &w) {
       "fstat",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
-          auto fs=std::filesystem::status(webview::detail::json_parse(req, "", 0));
-          auto res="{\"type\":" + std::to_string((int)fs.type())+",\"perms\":"+to_js_oct((unsigned)fs.permissions())+"}";
+          std::filesystem::path p=webview::detail::json_parse(req, "", 0);
+          auto fs=std::filesystem::status(p);
+
+          auto ft=fs.type();
+          std::uintmax_t sz;
+          if (ft != std::filesystem::file_type::directory &&
+              ft != std::filesystem::file_type::not_found &&
+              ft != std::filesystem::file_type::unknown   &&
+              ft != std::filesystem::file_type::none)
+            sz=std::filesystem::file_size(p);
+          else sz=static_cast<std::uintmax_t>(-1);
+          auto res="{\"type\":" + std::to_string((int)ft)+",\"perms\":"+to_js_oct((unsigned)fs.permissions())+",\"size\":"+std::to_string(sz)+"}";
           //unsigned int p=(unsigned int)fs.permissions();
           //std::cout << p << " <=> " << to_js_oct(p) <<  " <=> " << to_js_hex(p) << std::endl;
           w.resolve(seq, 0, res);
@@ -266,5 +276,4 @@ void webview_run(std::string url, std::string title, std::string init_js) {
   w->run();
   delete w;
 }
-
 

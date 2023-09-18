@@ -1,4 +1,6 @@
 
+document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
+
 if (typeof webapp_title === "function") {
   webapp_size(640, 384, 0);
 //window.webapp_get_title().then(result => { console.log(result.value); });
@@ -9,6 +11,7 @@ const file_type = {
       block:  4, character: 5,    fifo: 6,    socket: 7, unknown: 8
 };
 
+// Return file type in a string form
 function ftype2s(t) {
   switch (t) {
     case file_type.none:
@@ -46,6 +49,7 @@ const perms = {
      unknown: 0xFFFF
 };
 
+// Return file permissions in a string form
 function perm2s(p) {
   sp="";
   if (p === perms.unknown)			sp+="unknown,";
@@ -89,58 +93,82 @@ function perm2s(p) {
   return sp;
 }
 
+// Return file permissions in the form 'drwxrwxrwx'
 function show_status(fsta) {
   function prm(op, p) { return fsta.perms & p ? op : '-'; }
-  function typ(op, p) { return fsta.perms & p ? op : '-'; }
-
-  ret="";
-  if (fsta.type === file_type.not_found) ret="          ";
-  else {
-    ret+=fsta.type === file_type.directory ? 'd':'-';
-    ret+=prm('r', perms.owner_read);
-    ret+=prm('w', perms.owner_write);
-    ret+=prm('x', perms.owner_exec);
-    ret+=prm('r', perms.group_read);
-    ret+=prm('w', perms.group_write);
-    ret+=prm('x', perms.group_exec);
-    ret+=prm('r', perms.others_read);
-    ret+=prm('w', perms.others_write);
-    ret+=prm('x', perms.others_exec);
-  }
-
+  ret=fsta.type === file_type.directory ? 'd':'-';
+  ret+=prm('r', perms.owner_read);
+  ret+=prm('w', perms.owner_write);
+  ret+=prm('x', perms.owner_exec);
+  ret+=prm('r', perms.group_read);
+  ret+=prm('w', perms.group_write);
+  ret+=prm('x', perms.group_exec);
+  ret+=prm('r', perms.others_read);
+  ret+=prm('w', perms.others_write);
+  ret+=prm('x', perms.others_exec);
   return ret;
 }
 
-function file_status(f, obj) {
-  fstat(f).then(r => {
-    f=f.replace(/^\.\//, "");
-    res=show_status(r)+' '+f;
-    obj.value+=res+"\n";
-    r1=27-f.length;
-    if (r1 < 1) r1=1;
-    r2=7-+r.perms.toString(8).length;
-    if (r2 < 1) r2=1;
-    console.log(res);
-  });
+function grant_in_number (val, sing, plur) {
+//  if (val > 0) {
+    ret=val+' ';
+    if (val > 1) ret+=plur;
+    else ret+=sing;
+    return ret+"\n";
+//  }
+
+  return "";
 }
 
 // dir()
-function dir(fld=".", ta, rec=false) {
+function dir(txta, fld=".", rec=false) {
   if (rec) l=lsr(fld);
   else l=ls(fld);
-  var nfiles=0, ndir=0, nothers=0;
+  var nfiles=0, ndirs=0, nothers=0;
+  spc=10;
 
-  l.then(r=>{
-     r.forEach(f=> {
-      file_status(f, ta);
+  l.then(r => {
+    r.forEach((f) =>  {
+      sta=fstat(f);
+      sta.then(r => {
+        re=/^\.\//;
+        f=f.replace(re, "");
+        res=log=show_status(r);
+        res+=' ';
+
+        if (r.type == file_type.regular) {
+          nfiles++;
+          if (r.size.toString().length < spc) {
+            rp=spc-r.size.toString().length;
+            res+=' '.repeat(rp)+r.size;
+          } else res+=' '.repeat(spc);
+        } else {
+          res+=' '.repeat(spc);
+          if (r.type == file_type.directory) ndirs++;
+          else nothers++;
+        }
+
+        res+=' '+f;
+        txta.value+=res+"\n";
+
+        log+=','+f+','+ftype2s(r.type)+','+r.size;
+        //console.log(0.toString());
+      });
     });
 
-    ta.value+=r.length+" file";
-    if (r.length > 1) ta.value+='s';
-    ta.value+="\n";
-    end_cmd();
+    sta.finally(() => {
+      //if (idx === r.length-1) {
+      // Nombre d'entrées dans la liste
+      txta.value+=' '.repeat(spc)+grant_in_number(r.length, 'entry', 'entries');
+      // Nombre de fichiers
+      txta.value+=' '.repeat(spc)+grant_in_number(nfiles, 'regular file', 'regular files');
+      // Nombre de répertoires
+      txta.value+=' '.repeat(spc)+grant_in_number(ndirs, 'folder', 'folders');
+      // Nombre d'autre type ...
+      txta.value+=' '.repeat(spc)+grant_in_number(nothers, 'other type', 'others type');
+      end_cmd();
+      //}
+    });
   });
 }
-
-
 
