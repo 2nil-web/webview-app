@@ -5,9 +5,9 @@
     <script type="text/javascript" src="head.js"></script>
   </head>
   <body>
-    <label>Command to run:
-      <textarea style="vertical-align: middle; width:80%; height:10%" id="cmd" placeholder='Enter command and click "Run".'></textarea>
-    </label>
+    <label>Command to run:</label>
+    <br>
+      <textarea style="" id="cmd" placeholder='Enter command and click "Run".'></textarea>
     <br>
     <input type="button" id="run_cmd" value="Run" />
     <label>
@@ -21,9 +21,8 @@
       milliseconds
     </label>
     <div id="output_div">
-      <textarea readonly id="output_text">
-      </textarea>
-      <span id="tout_warn" class="statement">&nbsp;</span>
+      <textarea readonly id="output_text"></textarea>
+      <span id="tout_warn">&nbsp;</span>
     </div>
     <input type="button" id="output_clear" value="Clean output" onclick="output_text.value=''; tout_warn.innerHTML='&nbsp;'" />
     <br>

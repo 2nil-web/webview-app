@@ -2,7 +2,7 @@
 document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 
 if (typeof webapp_title === "function") {
-  webapp_size(640, 384, 0);
+//  webapp_size(640, 384, 0);
 //window.webapp_get_title().then(result => { console.log(result.value); });
 }
   
@@ -110,14 +110,12 @@ function show_status(fsta) {
 }
 
 function grant_in_number (val, sing, plur) {
-//  if (val > 0) {
     ret=val+' ';
-    if (val > 1) ret+=plur;
-    else ret+=sing;
-    return ret+"\n";
-//  }
-
-  return "";
+    if (val > 1) {
+      if (plur === "") ret+=sing+'s';
+      else ret+=plur;
+    } else ret+=sing;
+    return ret;
 }
 
 // dir()
@@ -158,14 +156,8 @@ function dir(txta, fld=".", rec=false) {
 
     sta.finally(() => {
       //if (idx === r.length-1) {
-      // Nombre d'entrées dans la liste
-      txta.value+=' '.repeat(spc)+grant_in_number(r.length, 'entry', 'entries');
-      // Nombre de fichiers
-      txta.value+=' '.repeat(spc)+grant_in_number(nfiles, 'regular file', 'regular files');
-      // Nombre de répertoires
-      txta.value+=' '.repeat(spc)+grant_in_number(ndirs, 'folder', 'folders');
-      // Nombre d'autre type ...
-      txta.value+=' '.repeat(spc)+grant_in_number(nothers, 'other type', 'others type');
+      // Nombre d'entrées dans la liste, fichiers, répertoire et autres ...
+      txta.value+="  "+grant_in_number(r.length, 'entry', 'entries') +', '+grant_in_number(nfiles, 'file', 'files') +', '+grant_in_number(ndirs, 'folder', 'folders') +' and '+grant_in_number(nothers, 'of other type', 'other type');
       end_cmd();
       //}
     });
