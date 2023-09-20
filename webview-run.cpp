@@ -117,6 +117,30 @@ ls().then(r=>{
   */
   // ls().then(r=>{r.forEach((d)=>writeln(d))});
   w.bind(
+      "absolute",
+      [&](const std::string &seq, const std::string &req, void *) {
+        std::thread([&, seq, req] {
+          auto pth=webview::detail::json_parse(req, "", 0);
+          auto res=std::filesystem::absolute(pth).string();
+          std::cout << "absolute, canonical        " << std::filesystem::canonical(pth).string() << std::endl;
+          std::cout << "absolute, weakly_canonical " << std::filesystem::weakly_canonical(pth).string() << std::endl;
+          std::cout << std::filesystem::canonical(pth).string() << std::endl;
+          replace_all(res, "\\", "/");
+          std::cout << res << std::endl;
+          w.resolve(seq, 0, '"'+res+'"');
+        }).detach();
+      },
+      nullptr);
+
+  w.bind("chdir", [&](const std::string &req) -> std::string {
+    auto pth=webview::detail::json_parse(req, "", 0);
+    std::filesystem::current_path(pth);
+    std::cout << "chdir, canonical        " << std::filesystem::canonical(pth).string() << std::endl;
+    std::cout << "chdir, weakly_canonical " << std::filesystem::weakly_canonical(pth).string() << std::endl;
+    return "";
+  });
+
+  w.bind(
       "ls",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {

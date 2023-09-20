@@ -8,7 +8,10 @@ file_status("NUL");
 file_status("NotFound");
 file_status("runopt.o");
 */
-dir(output_text);
+if (cmd.value === "") {
+  cmd.value='dir()';
+}
+
 cmd.focus();
 
 function end_cmd() {

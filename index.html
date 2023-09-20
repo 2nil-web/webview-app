@@ -5,10 +5,12 @@
     <script type="text/javascript" src="head.js"></script>
   </head>
   <body>
-    <label>Command to run:</label>
-    <br>
+    <div id="dv1">
+      <label>Command to run:</label>
       <textarea style="" id="cmd" placeholder='Enter command and click "Run".'></textarea>
-    <br>
+    </div>
+
+    <div id="dv2">
     <input type="button" id="run_cmd" value="Run" />
     <label>
       <input type="radio" id="as_js" name="run_as" value="JS" checked />As javascript
@@ -20,7 +22,9 @@
       <input type="number" id="tout" value="3000" min="0" style="width:54px" step="100" />
       milliseconds
     </label>
-    <div id="output_div">
+    </div>
+
+    <div id="dv3">
       <textarea readonly id="output_text"></textarea>
       <span id="tout_warn">&nbsp;</span>
     </div>

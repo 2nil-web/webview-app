@@ -1,16 +1,35 @@
 
-* {
-  margin-top: 0.3em;
+body {
+  overflow: hidden;
 }
 
-body {
-  overflow: hidden; /* Hide scrollbars */
+div {
+  width: 100%;
 }
+
+textarea {
+  width: 100%;
+  resize: none;
+}
+
+#dv1 {
+  height: 10%;
+}
+
+#dv2 {
+  margin-top: 0.8em;
+  height: 7%;
+}
+
+#dv3 {
+  height: 75%;
+}
+
 
 #cmd {
   vertical-align: middle;
   width:100%;
-  height:10%;
+  height:90%;
   resize: vertical;
 }
 
@@ -21,24 +40,12 @@ body {
 }
 
 #output_text {
-  position: relative;
-  width:100%;
-  height:72%;
-  top: 80%;
-  resize: vertical;
-  overflow-y: scroll;
-
-  /*
-  object position: left top;
-  left: 10px;
-  top: 100px;
-  bottom: 60px;
-  right: 10px;*/
+  height:99%;
 }
 
 #output_clear {
   position: fixed;
-  bottom: 6px;
   right: 10px;
+  /*bottom: 6px;*/
 }
 

@@ -3,27 +3,63 @@
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-16">
   </head>
   <style>
-#ta1 {
-  width: 100%;
-  height: 25%;
+
+body {
+  overflow: hidden; /* Hide scrollbars */
+}
+
+div {
+  margin-top: 0.3em;
+}
+
+textarea {
+  resize: vertical;
 }
 
 #dv1 {
   width: 100%;
-  height: 5%;
+  height: 25%;
+  border: 2px solid green;
 }
+#dv2 {
+  width: 100%;
+  height: 5%;
+  border: 2px solid blue;
+}
+#dv3 {
+  width: 100%;
+  height: 60%;
+  border: 2px solid yellow;
+}
+
+#ta1 {
+  width: 100%;
+  height: 90%;
+}
+
 #ta2 {
   width: 100%;
-  height: 70%;
+  height: 100%;
+}
+
+#bt3 {
+  position: fixed;
+  bottom: 6px;
+  right: 10px;*
 }
   </style>
   <body>
-      <textarea style="" id="ta1" placeholder='TextArea 1.'></textarea>
-    <br>
     <div id="dv1">
-      <button>Bouton</button>
+      <label>Command to run:</label>
+      <textarea style="" id="ta1" placeholder='TextArea 1.'></textarea>
     </div>
+    <div id="dv2">
+      <button>Bouton2</button>
+    </div>
+    <div id="dv3">
       <textarea readonly id="ta2" placeholder='TextArea 2.'></textarea>
+      <button id="bt3">Bouton3</button>
+    </div>
   </body>
     <script>
     </script>

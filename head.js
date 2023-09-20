@@ -2,7 +2,9 @@
 document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 
 if (typeof webapp_title === "function") {
-//  webapp_size(640, 384, 0);
+  // Default and minimal size
+  //webapp_size(640, 400, 0);
+  webapp_size(640, 400, 1);
 //window.webapp_get_title().then(result => { console.log(result.value); });
 }
   
@@ -118,19 +120,43 @@ function grant_in_number (val, sing, plur) {
     return ret;
 }
 
+function abs_dir(d=".") {
+  pwd(d).then((dos) => {
+    console.log("DOS "+dos);
+  });
+
+}
+
 // dir()
-function dir(txta, fld=".", rec=false) {
-  if (rec) l=lsr(fld);
-  else l=ls(fld);
+function dir(fld=".", stxta="output_text", rec=false) {
+  var dirlist="[]\n", dos, finalRes="";
+
+  fpwd=absolute(fld);
+
+  fpwd.then((cwd) => {
+    dos=cwd;
+//    console.log("DOS "+dos);
+    //chdir(cwd);
+    dirlist=cwd+"\n";
+
+  fpwd.finally(() => {
+    console.log("DOS "+dos);
+    dirlist=dos+"\n";
+  });
+
+  if (rec) l=lsr(dos);
+  else l=ls(dos);
   var nfiles=0, ndirs=0, nothers=0;
   spc=10;
+  txta=document.getElementById(stxta);
 
   l.then(r => {
+    console.log(dos);
     r.forEach((f) =>  {
       sta=fstat(f);
       sta.then(r => {
-        re=/^\.\//;
-        f=f.replace(re, "");
+        re=/^(\.*\/)*/;
+        f=f.replace(dos, "").replace(/^\//, "");
         res=log=show_status(r);
         res+=' ';
 
@@ -147,7 +173,7 @@ function dir(txta, fld=".", rec=false) {
         }
 
         res+=' '+f;
-        txta.value+=res+"\n";
+        finalRes+=res+"\n";
 
         log+=','+f+','+ftype2s(r.type)+','+r.size;
         //console.log(0.toString());
@@ -157,10 +183,11 @@ function dir(txta, fld=".", rec=false) {
     sta.finally(() => {
       //if (idx === r.length-1) {
       // Nombre d'entrées dans la liste, fichiers, répertoire et autres ...
-      txta.value+="  "+grant_in_number(r.length, 'entry', 'entries') +', '+grant_in_number(nfiles, 'file', 'files') +', '+grant_in_number(ndirs, 'folder', 'folders') +' and '+grant_in_number(nothers, 'of other type', 'other type');
+      txta.value+="\n"+dirlist+finalRes+"  "+grant_in_number(r.length, 'entry', 'entries') +', '+grant_in_number(nfiles, 'file', 'files') +', '+grant_in_number(ndirs, 'folder', 'folders') +' and '+grant_in_number(nothers, 'of other type', 'other type');
       end_cmd();
       //}
     });
+  });
   });
 }
 
