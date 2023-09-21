@@ -83,6 +83,42 @@ std::string to_js_oct(unsigned int number) {
    return "0"+str.str();
 }
 
+void print_file_types() {
+  static int un=true;
+  if (un) {
+    un=false;
+    std::cout << "none      :" << (unsigned int)std::filesystem::file_type::none << std::endl;
+    std::cout << "not_found :" << (unsigned int)std::filesystem::file_type::not_found << std::endl;
+    std::cout << "regular   :" << (unsigned int)std::filesystem::file_type::regular << std::endl;
+    std::cout << "directory :" << (unsigned int)std::filesystem::file_type::directory << std::endl;
+    std::cout << "symlink   :" << (unsigned int)std::filesystem::file_type::symlink << std::endl;
+    std::cout << "block     :" << (unsigned int)std::filesystem::file_type::block << std::endl;
+    std::cout << "character :" << (unsigned int)std::filesystem::file_type::character << std::endl;
+    std::cout << "fifo      :" << (unsigned int)std::filesystem::file_type::fifo << std::endl;
+    std::cout << "socket    :" << (unsigned int)std::filesystem::file_type::socket << std::endl;
+    std::cout << "unknown   :" << (unsigned int)std::filesystem::file_type::unknown << std::endl;
+  }
+}
+// As file_type have unspecified values in the C++ standard
+// and as I notice a difference between G++ and MSVC
+// let force there value to my own choice for javascript
+int forced_file_type(std::filesystem::file_type ft) {
+  switch (ft) {
+    case std::filesystem::file_type::not_found : return 0;
+    case std::filesystem::file_type::none      : return 1;
+    case std::filesystem::file_type::regular   : return 2;
+    case std::filesystem::file_type::directory : return 3;
+    case std::filesystem::file_type::symlink   : return 4;
+    case std::filesystem::file_type::block     : return 5;
+    case std::filesystem::file_type::character : return 6;
+    case std::filesystem::file_type::fifo      : return 7;
+    case std::filesystem::file_type::socket    : return 8;
+    case std::filesystem::file_type::unknown   :
+    default : 
+                                                 return 9;
+  }
+}
+
 void create_binds(webview::webview &w) {
    w.bind(
       "fstat",
@@ -99,7 +135,8 @@ void create_binds(webview::webview &w) {
               ft != std::filesystem::file_type::none)
             sz=std::filesystem::file_size(p);
           else sz=static_cast<std::uintmax_t>(-1);
-          auto res="{\"type\":" + std::to_string((int)ft)+",\"perms\":"+to_js_oct((unsigned)fs.permissions())+",\"size\":"+std::to_string(sz)+"}";
+
+          auto res="{\"type\":" + std::to_string(forced_file_type(ft))+",\"perms\":"+to_js_oct((unsigned)fs.permissions())+",\"size\":"+std::to_string(sz)+"}";
           //unsigned int p=(unsigned int)fs.permissions();
           //std::cout << p << " <=> " << to_js_oct(p) <<  " <=> " << to_js_hex(p) << std::endl;
           w.resolve(seq, 0, res);
@@ -122,11 +159,11 @@ ls().then(r=>{
         std::thread([&, seq, req] {
           auto pth=webview::detail::json_parse(req, "", 0);
           auto res=std::filesystem::absolute(pth).string();
-          std::cout << "absolute, canonical        " << std::filesystem::canonical(pth).string() << std::endl;
-          std::cout << "absolute, weakly_canonical " << std::filesystem::weakly_canonical(pth).string() << std::endl;
-          std::cout << std::filesystem::canonical(pth).string() << std::endl;
+//          std::cout << "absolute, canonical        " << std::filesystem::canonical(pth).string() << std::endl;
+//          std::cout << "absolute, weakly_canonical " << std::filesystem::weakly_canonical(pth).string() << std::endl;
+          //std::cout << std::filesystem::canonical(pth).string() << std::endl;
           replace_all(res, "\\", "/");
-          std::cout << res << std::endl;
+//          std::cout << res << std::endl;
           w.resolve(seq, 0, '"'+res+'"');
         }).detach();
       },
@@ -135,8 +172,8 @@ ls().then(r=>{
   w.bind("chdir", [&](const std::string &req) -> std::string {
     auto pth=webview::detail::json_parse(req, "", 0);
     std::filesystem::current_path(pth);
-    std::cout << "chdir, canonical        " << std::filesystem::canonical(pth).string() << std::endl;
-    std::cout << "chdir, weakly_canonical " << std::filesystem::weakly_canonical(pth).string() << std::endl;
+//    std::cout << "chdir, canonical        " << std::filesystem::canonical(pth).string() << std::endl;
+//    std::cout << "chdir, weakly_canonical " << std::filesystem::weakly_canonical(pth).string() << std::endl;
     return "";
   });
 
@@ -295,7 +332,7 @@ void webview_run(std::string url, std::string title, std::string init_js) {
     }
   }
 
-  std::cout << init_js << std::endl;
+  //std::cout << init_js << std::endl;
 
   w->run();
   delete w;

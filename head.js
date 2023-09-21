@@ -9,8 +9,8 @@ if (typeof webapp_title === "function") {
 }
   
 const file_type = {
-  not_found: -1,      none: 0, regular: 1, directory: 2, symlink: 3,
-      block:  4, character: 5,    fifo: 6,    socket: 7, unknown: 8
+  not_found: 0,      none: 1, regular: 2, directory: 3, symlink: 4,
+      block: 5, character: 6,    fifo: 7,    socket: 8, unknown: 9
 };
 
 // Return file type in a string form
@@ -98,7 +98,8 @@ function perm2s(p) {
 // Return file permissions in the form 'drwxrwxrwx'
 function show_status(fsta) {
   function prm(op, p) { return fsta.perms & p ? op : '-'; }
-  ret=fsta.type === file_type.directory ? 'd':'-';
+  var ret="";
+  ret+=(fsta.type === file_type.directory) ? 'd':'-';
   ret+=prm('r', perms.owner_read);
   ret+=prm('w', perms.owner_write);
   ret+=prm('x', perms.owner_exec);
@@ -118,13 +119,6 @@ function grant_in_number (val, sing, plur) {
       else ret+=plur;
     } else ret+=sing;
     return ret;
-}
-
-function abs_dir(d=".") {
-  pwd(d).then((dos) => {
-    console.log("DOS "+dos);
-  });
-
 }
 
 // dir()
@@ -150,8 +144,9 @@ function dir(fld=".", stxta="output_text", rec=false) {
   spc=10;
   txta=document.getElementById(stxta);
 
+  var res="", log_res="";
   l.then(r => {
-    console.log(dos);
+    //console.log(dos);
     r.forEach((f) =>  {
       sta=fstat(f);
       sta.then(r => {
@@ -175,8 +170,10 @@ function dir(fld=".", stxta="output_text", rec=false) {
         res+=' '+f;
         finalRes+=res+"\n";
 
-        log+=','+f+','+ftype2s(r.type)+','+r.size;
-        //console.log(0.toString());
+        log+=','+f+','+ftype2s(r.type);
+        if (r.type !== file_type.directory) log+=','+r.size;
+
+        console.log(log);
       });
     });
 
