@@ -138,14 +138,14 @@ function dir(fld=".", stxta="output_text", rec=false) {
     dirlist=dos+"\n";
   });
 
-  if (rec) l=lsr(dos);
-  else l=ls(dos);
+  if (rec) lstdir=lsr(dos);
+  else lstdir=ls(dos);
   var nfiles=0, ndirs=0, nothers=0;
   spc=10;
   txta=document.getElementById(stxta);
 
   var res="", log_res="";
-  l.then(r => {
+  lstdir.then(r => {
     //console.log(dos);
     r.forEach((f) =>  {
       sta=fstat(f);
@@ -184,7 +184,57 @@ function dir(fld=".", stxta="output_text", rec=false) {
       end_cmd();
       //}
     });
+    });
   });
+
+  lstdir.finally(() => { });
+}
+
+function dirRES(_pth=".", stxta="output_text", rec=false) {
+  var nfiles=0, ndirs=0, nothers=0;
+  var spc=10;
+  var txta=document.getElementById(stxta);
+  var renoas=/^\//;
+  var absdir=absolute(_pth);
+  absdir.then(cwd => {
+    //console.log("cwd "+cwd);
+    if (rec) lstdir=lsr(cwd);
+    else lstdir=ls(cwd);
+
+    var lines=[];
+    lstdir.then(ld => {
+      ld.forEach((elt, ie) =>  {
+        _fstat=fstat(elt);
+        _fstat.then(stat => {
+          var line="";
+
+          if (stat.type == file_type.regular) {
+            nfiles++;
+            if (stat.size.toString().length < spc) {
+              rp=spc-stat.size.toString().length;
+              line+=' '.repeat(rp)+stat.size;
+            } else line+=' '.repeat(spc);
+          } else {
+            line+=' '.repeat(spc);
+            if (stat.type == file_type.directory) ndirs++;
+            else nothers++;
+          }
+
+          line+=' '+elt.replace(cwd, "").replace(renoas, "")+' '+show_status(stat);
+          lines.push(line);
+          //console.log("LINE"+ie+':'+line);
+        });
+        return Promise.all(lines);
+      });
+    });
+
+    lstdir.finally(() => {
+      lines.forEach((e, i) => { console.log(e); });
+      txta.value+=cwd+"\n";
+      txta.value+=lines.join("\n");
+      txta.value+="  "+grant_in_number(lines.length, 'entry', 'entries') +', '+grant_in_number(nfiles, 'file', 'files') +', '+grant_in_number(ndirs, 'folder', 'folders') +' and '+grant_in_number(nothers, 'of other type', 'other type');
+      end_cmd();
+    });
   });
 }
 
