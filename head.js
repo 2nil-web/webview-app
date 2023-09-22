@@ -187,7 +187,8 @@ function dir(fld=".", stxta="output_text", rec=false) {
     });
   });
 
-  lstdir.finally(() => { });
+  lstdir.finally(() => {
+  });
 }
 
 function dirRES(_pth=".", stxta="output_text", rec=false) {
