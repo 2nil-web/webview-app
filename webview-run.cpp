@@ -119,7 +119,30 @@ int forced_file_type(std::filesystem::file_type ft) {
   }
 }
 
+std::string sec_wait(std::string ssec) {
+  auto msg=ssec+" second wait";
+  int sec = std::stoi(ssec);
+//  std::cout << "Starting " << msg << std::endl;
+  std::this_thread::sleep_for(std::chrono::seconds(sec));
+//  std::cout << "Ending   " << msg << std::endl;
+  return '"'+msg+" is over.\"";
+}
+
 void create_binds(webview::webview &w) {
+  w.bind("wait_nothread", [&](const std::string & req) -> std::string {
+    return sec_wait(webview::detail::json_parse(req, "", 0));
+  });
+
+  w.bind(
+    "wait_thread",
+    [&](const std::string &seq, const std::string &req, void * /*arg*/) {
+    std::thread([&, seq, req] {
+      auto result = sec_wait(webview::detail::json_parse(req, "", 0));
+      w.resolve(seq, 0, result);
+    }).detach();
+  },
+  nullptr);
+
    w.bind(
       "fstat",
       [&](const std::string &seq, const std::string &req, void *) {

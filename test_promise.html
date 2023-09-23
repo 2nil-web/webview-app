@@ -2,50 +2,98 @@
   <head>
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-16">
     <script>
-function start_timer() {
-  setInterval(() => { time.textContent=new Date().toUTCString(); } , 400);
+performance = performance || {};
+performance.now = (function() {
+  return performance.now       ||
+         performance.mozNow    ||
+         performance.msNow     ||
+         performance.oNow      ||
+         performance.webkitNow ||
+         function() { return new Date().getTime(); };
+})();
+
+navStart=performance.now();
+
+function gettime(subSec=10) {
+  dt=new Date();
+  res=dt.toLocaleTimeString();
+  if (subSec) {
+//    navStartMod=navStart%60000;
+    perfNow=performance.now();
+    perf=(perfNow-navStart);
+    perfI=Math.trunc(perfNow-navStart);
+    perf-=perfI;
+    dtMi=dt.getMilliseconds();
+    dtMa=dtMi+perfNow;
+
+    console.log("navStart "+navStart.toFixed(subSec)+", perfNow "+perfNow.toFixed(subSec)+", perf "+perf.toFixed(subSec)+", dtMi "+dtMi.toFixed(subSec)+", dtMa "+dtMa.toFixed(subSec));
+    res+=':'+dtMa.toFixed(subSec);
+  }
+  return res;
 }
+
+timeNavStart=gettime();
+function navDurationSec() {
+  return (performance.now()-navStart)/1000;
+}
+var timer_init=0;      
+function timer() {
+  if (timer_init === 0) {
+    timer_init=navDurationSec();
+    return -1;          
+  }
+  var tdur=navDurationSec()-timer_init;
+  timer_init=0;
+  return tdur;
+}
+
+function gettimeMilli(milli=true) {
+  dt=new Date();
+  res=dt.toLocaleTimeString();
+  if (milli) res+='.'+dt.getMilliseconds();
+  return res;
+}
+
     </script>
   </head>
-  <body onload="start_timer()">
+  <body>
+    <!--button onclick='navDur.textContent="navStart "+navStart+", perf.now "+performance.now()+", navDuration in second with 5 microsecond precision "+navDurationSec();'>Get nav duration</button>
+    <label id="navDur"></label--!>
     <div id="time"></div>
     <div id="dv"></div>
   </body>
     <script>
-var tochg="Unchanged";
 
-function promise_run () {
-  tochg="Before resolve";
-  setTimeout(() => promise_resolv("done"), 4000);
-  tochg="After resolve";
+
+function start_clock() {
+  time.textContent=gettime(false);
+  setInterval(() => { time.textContent=gettime(false); } , 400);
 }
 
-// affiche "done!" après 1 seconde
-function promise_resolv (result) {
-  dv.insertAdjacentHTML("beforeend", "Promesse résolue "+result+"="+tochg+"<br>");
-}
-
- // ne se lance pas
-function promise_reject (error) {
-  dv.insertAdjacentHTML("beforeend", "ERREUR "+error+"="+tochg+"<br>");
-}
-
-function promise_test () {
-  dv.insertAdjacentHTML("beforeend", "Avant lancement promesse "+tochg+"<br>");
-
-  let promise = new Promise(function(resolve, reject) {
-    dv.insertAdjacentHTML("beforeend", "Début lancement promesse "+tochg+"<br>");
-    promise_run();
-    dv.insertAdjacentHTML("beforeend", "Fin lancement promesse "+tochg+"<br>");
+function promise_run (func, param) {
+  dv.insertAdjacentHTML("beforeend", "Lancement de la promesse "+func.name+" à "+gettime()+"<br>");
+  let promise;
+  if (typeof param !== 'undefined') promise=func(param);
+  else promise=func();
+  promise.then(result => {
+    dv.insertAdjacentHTML("beforeend", "Promesse "+func.name+" résolue à "+gettime()+" avec le message '"+result+"'<br>");
   });
-
-  dv.insertAdjacentHTML("beforeend", "Aprés lancement promesse "+tochg+"<br>");
-
-  // resolve lance la première fonction dans .then
-  promise.then( result => promise_resolv(result), error => promise_reject(error));
+  promise.finally(() => {
+    dv.insertAdjacentHTML("beforeend", "Promesse terminée "+func.name+" à "+gettime()+"<br>");
+  });
+  dv.insertAdjacentHTML("beforeend", "Promesse lancée "+func.name+" à "+gettime()+"<br>");
 }
 
-promise_test();
+document.addEventListener("DOMContentLoaded", () => {
+  start_clock();
+  stim="Date.getTime "+new Date().getTime()+", gettime "+gettime()+", timeNavStart "+timeNavStart+", navStart "+navStart+", performance "+performance.now();
+  //console.log(stim);
+  dv.insertAdjacentHTML("beforeend", stim+"<br>");
+
+        
+  promise_run(wait_thread,   7); // Ne fige pas l'ihm
+//promise_run(wait_nothread, 5); // Fige l'ihm
+});
   </script>
 
 <html>
