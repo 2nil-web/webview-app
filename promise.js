@@ -1,27 +1,35 @@
 
-function def_pthen (func, result) {
-  var pmsg= "Promesse ";
-  if (typeof func !== 'undefined') pmsg+=func.name+' ';
-  pmsg+=" résolue à "+gettime();
-  if (typeof result !== 'undefined') pmsg+=" avec le message '"+result;
-  pmsg+=".";
+function def_promise_end (func, result) {
+  var pmsg= "promesse";
+  if (typeof func.name !== 'undefined') this.func_name=func.name;
+  else this.func_name=""
 
+  pmsg+=arguments.callee.name;
+  pmsg+=' ';
+
+  if (typeof result !== 'undefined') {
+    this.result=result;
+    pmsg+="résolue";
+    if (this.result !== "") pmsg+=" avec le résultat '"+this.result+"'";
+  } else {
+    pmsg+="terminée";
+    this.result="";
+  }
+
+  pmsg=gettime()+": "+pmsg+'.';
   console.log(pmsg);
 }
 
-function def_pfinal (func) {
-  var pmsg= "Promesse ";
-  if (typeof func !== 'undefined') pmsg+=func.name+' ';
-
-  pmsg+="terminée à "+gettime()+".";
-  console.log(pmsg);
-}
-
-function promise_run (func, param="", pthen=def_pthen, pfinal=def_pfinal) {
+function promise_run (func, param, promise_end=def_promise_end) {
+  console.log(func.name);
   let promise;
   if (typeof param !== 'undefined') promise=func(param);
   else promise=func();
-  if (typeof pthen !== 'undefined') promise.then(result => pthen(func, result));
-  if (typeof pfinal !== 'undefined') promise.finally(() => pfinal(func));
+
+
+  if (typeof promise_end !== 'undefined') {
+    promise.then(result => promise_end(func, result));
+    promise.finally(() => promise_end(func));
+  }
 }
 

@@ -29,12 +29,9 @@ function fstat_pfinal (func) {
 }
 
 function lsl (lst) {
-//  promise_run(lsl, ls_res, lsl_pthen, lsl_pfinal);
-//  dv.innerHTML="";
-//  dv.insertAdjacentHTML("beforeend", ls_res.join("<br>"));
   lst.forEach((elt, idx, arr) => {
     console.log(idx+':'+elt);
-
+    //promise_run(fstat, elt, fstat_pthen, fstat_pfinal);
   });
 }
 
@@ -48,6 +45,14 @@ function ls_pfinal (func) {
   ls_res="";
 }
 
+function abs_promise (func, param) {
+  if (typeof param !== 'undefined') {
+    this.abs_res=param;
+  } else {
+    promise_run(ls, this.abs_res, ls_pthen, ls_pfinal);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 //  start_clock();
 //  stim="Date.getTime "+new Date().getTime()+", gettime "+gettime()+", timeNavStart "+timeNavStart+", navStart "+navStart+", performance "+performance.now();
@@ -59,7 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   lsb.addEventListener( "click", (event) => {
     //console.log(lsp.value);
-    promise_run(ls, lsp.value, ls_pthen, ls_pfinal);
+    promise_run(absolute, lsp.value);
+    //promise_run(absolute, lsp.value, abs_promise);
   });
 
 
