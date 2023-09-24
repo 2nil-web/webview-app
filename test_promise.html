@@ -1,62 +1,15 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-16">
+    <script type="text/javascript" src="time.js"></script>
+    <script type="text/javascript" src="promise.js"></script>
+    <script type="text/javascript" src="filesystem.js"></script>
     <script>
-performance = performance || {};
-performance.now = (function() {
-  return performance.now       ||
-         performance.mozNow    ||
-         performance.msNow     ||
-         performance.oNow      ||
-         performance.webkitNow ||
-         function() { return new Date().getTime(); };
-})();
-
-navStart=performance.now();
-
-function gettime(subSec=10) {
-  dt=new Date();
-  res=dt.toLocaleTimeString();
-  if (subSec) {
-//    navStartMod=navStart%60000;
-    perfNow=performance.now();
-    perf=(perfNow-navStart);
-    perfI=Math.trunc(perfNow-navStart);
-    perf-=perfI;
-    dtMi=dt.getMilliseconds();
-    dtMa=dtMi+perfNow;
-
-    console.log("navStart "+navStart.toFixed(subSec)+", perfNow "+perfNow.toFixed(subSec)+", perf "+perf.toFixed(subSec)+", dtMi "+dtMi.toFixed(subSec)+", dtMa "+dtMa.toFixed(subSec));
-    res+=':'+dtMa.toFixed(subSec);
-  }
-  return res;
-}
-
-timeNavStart=gettime();
-function navDurationSec() {
-  return (performance.now()-navStart)/1000;
-}
-var timer_init=0;      
-function timer() {
-  if (timer_init === 0) {
-    timer_init=navDurationSec();
-    return -1;          
-  }
-  var tdur=navDurationSec()-timer_init;
-  timer_init=0;
-  return tdur;
-}
-
-function gettimeMilli(milli=true) {
-  dt=new Date();
-  res=dt.toLocaleTimeString();
-  if (milli) res+='.'+dt.getMilliseconds();
-  return res;
-}
-
     </script>
   </head>
   <body>
+    <button id='lsb'>list directory</button>
+    <input  id='lsp' type="text" value="."/>
     <!--button onclick='navDur.textContent="navStart "+navStart+", perf.now "+performance.now()+", navDuration in second with 5 microsecond precision "+navDurationSec();'>Get nav duration</button>
     <label id="navDur"></label--!>
     <div id="time"></div>
@@ -64,35 +17,55 @@ function gettimeMilli(milli=true) {
   </body>
     <script>
 
-
-function start_clock() {
-  time.textContent=gettime(false);
-  setInterval(() => { time.textContent=gettime(false); } , 400);
+var fstat_res="";
+function fstat_pthen (func, result) {
+  fstat_res=result;
 }
 
-function promise_run (func, param) {
-  dv.insertAdjacentHTML("beforeend", "Lancement de la promesse "+func.name+" à "+gettime()+"<br>");
-  let promise;
-  if (typeof param !== 'undefined') promise=func(param);
-  else promise=func();
-  promise.then(result => {
-    dv.insertAdjacentHTML("beforeend", "Promesse "+func.name+" résolue à "+gettime()+" avec le message '"+result+"'<br>");
+function fstat_pfinal (func) {
+  dv.innerHTML="";
+  dv.insertAdjacentHTML("beforeend", fstat_res.join("<br>"));
+  fstat_res="";
+}
+
+function lsl (lst) {
+//  promise_run(lsl, ls_res, lsl_pthen, lsl_pfinal);
+//  dv.innerHTML="";
+//  dv.insertAdjacentHTML("beforeend", ls_res.join("<br>"));
+  lst.forEach((elt, idx, arr) => {
+    console.log(idx+':'+elt);
+
   });
-  promise.finally(() => {
-    dv.insertAdjacentHTML("beforeend", "Promesse terminée "+func.name+" à "+gettime()+"<br>");
-  });
-  dv.insertAdjacentHTML("beforeend", "Promesse lancée "+func.name+" à "+gettime()+"<br>");
+}
+
+var ls_res="";
+function ls_pthen (func, result) {
+  ls_res=result;
+}
+
+function ls_pfinal (func) {
+  lsl(ls_res);
+  ls_res="";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  start_clock();
-  stim="Date.getTime "+new Date().getTime()+", gettime "+gettime()+", timeNavStart "+timeNavStart+", navStart "+navStart+", performance "+performance.now();
-  //console.log(stim);
-  dv.insertAdjacentHTML("beforeend", stim+"<br>");
+//  start_clock();
+//  stim="Date.getTime "+new Date().getTime()+", gettime "+gettime()+", timeNavStart "+timeNavStart+", navStart "+navStart+", performance "+performance.now();
+//  console.log(stim);
+//  dv.insertAdjacentHTML("beforeend", stim+"<br>");
+
+  var lsb=document.getElementById("lsb");
+  var lsp=document.getElementById("lsp");
+
+  lsb.addEventListener( "click", (event) => {
+    //console.log(lsp.value);
+    promise_run(ls, lsp.value, ls_pthen, ls_pfinal);
+  });
+
 
         
-  promise_run(wait_thread,   7); // Ne fige pas l'ihm
-//promise_run(wait_nothread, 5); // Fige l'ihm
+//  promise_run(wait_thread,   7); // Ne fige pas l'ihm
+//  promise_run(wait_nothread, 5); // Fige l'ihm
 });
   </script>
 
