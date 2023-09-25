@@ -128,6 +128,31 @@ std::string sec_wait(std::string ssec) {
   return '"'+msg+" is over.\"";
 }
 
+template <typename TP>
+std::time_t to_time_t(TP tp) {
+  namespace ch=std::chrono;
+  auto sctp=ch::time_point_cast<ch::system_clock::duration>(tp-TP::clock::now()+ch::system_clock::now());
+  return ch::system_clock::to_time_t(sctp);
+}
+
+// Convert a file time to a string, default format is ISO8601 and default time zone is local
+std::string file_time_to_string(std::filesystem::file_time_type file_time, std::string fmt="%Y-%m-%dT%H:%M:%S", bool gm=false) {
+  std::time_t tt=to_time_t(file_time);
+  std::tm *tim;
+  if (gm) tim=std::gmtime(&tt);
+  else tim=std::localtime(&tt);
+  std::stringstream buffer;
+  buffer << std::put_time(tim, fmt.c_str());
+  std::string fmtime=buffer.str();
+
+  return fmtime;
+}
+
+std::string lastwrite(std::filesystem::path p) {
+  return file_time_to_string(std::filesystem::last_write_time(p));
+}
+
+
 void create_binds(webview::webview &w) {
   w.bind("wait_nothread", [&](const std::string & req) -> std::string {
     return sec_wait(webview::detail::json_parse(req, "", 0));
@@ -147,19 +172,26 @@ void create_binds(webview::webview &w) {
       "fstat",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
-          std::filesystem::path p=webview::detail::json_parse(req, "", 0);
+          std::string sp=webview::detail::json_parse(req, "", 0);
+          std::filesystem::path p=sp;
           auto fs=std::filesystem::status(p);
 
           auto ft=fs.type();
           std::uintmax_t sz;
-          if (ft != std::filesystem::file_type::directory &&
-              ft != std::filesystem::file_type::not_found &&
-              ft != std::filesystem::file_type::unknown   &&
-              ft != std::filesystem::file_type::none)
-            sz=std::filesystem::file_size(p);
+          /* if (ft != std::filesystem::file_type::directory && ft != std::filesystem::file_type::not_found && ft != std::filesystem::file_type::unknown   && ft != std::filesystem::file_type::none) */
+          if (ft == std::filesystem::file_type::regular) sz=std::filesystem::file_size(p);
           else sz=static_cast<std::uintmax_t>(-1);
 
-          auto res="{\"type\":" + std::to_string(forced_file_type(ft))+",\"perms\":"+to_js_oct((unsigned)fs.permissions())+",\"size\":"+std::to_string(sz)+"}";
+          std::string lastwr="****-**-**T**:**:**";
+          if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
+
+          std::string res ="{\"file\":\""     + sp+"\","+
+                            "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
+                            "\"perms\":"      +      to_js_oct((unsigned)fs.permissions())+","+
+                            "\"size\":"       +      std::to_string(sz)+","+
+                            "\"last_write\":" + "\""+ lastwr+"\""+
+          "}";
+          //std::cout << res << std::endl;
           //unsigned int p=(unsigned int)fs.permissions();
           //std::cout << p << " <=> " << to_js_oct(p) <<  " <=> " << to_js_hex(p) << std::endl;
           w.resolve(seq, 0, res);

@@ -8,130 +8,83 @@ if (typeof webapp_title === "function") {
 //window.webapp_get_title().then(result => { console.log(result.value); });
 }
   
-function grant_in_number (val, sing, plur) {
-    ret=val+' ';
-    if (val > 1) {
-      if (plur === "") ret+=sing+'s';
-      else ret+=plur;
-    } else ret+=sing;
-    return ret;
-}
+function dir(path=".", rec=false, dst_textarea=output_text) {
+  //console.log("path "+path+", ta "+dst_textarea);
+  function grant_in_number (val, sing, plur) {
+      ret=val+' ';
+      if (val > 1) {
+        if (plur === "") ret+=sing+'s';
+        else ret+=plur;
+      } else ret+=sing;
+      return ret;
+  }
 
-// dir()
-function dir(fld=".", stxta="output_text", rec=false) {
-  var dirlist="[]\n", dos, finalRes="";
+  var target_path="";
+  var full_list=[];
+  var list_size=0;
+  function fstat_promise (func, param) {
+    if (typeof param !== 'undefined') {
+      this.elt=param;
+    } else {
+      full_list.push(elt);
 
-  fpwd=absolute(fld);
-
-  fpwd.then((cwd) => {
-    dos=cwd;
-//    console.log("DOS "+dos);
-    //chdir(cwd);
-    dirlist=cwd+"\n";
-
-  fpwd.finally(() => {
-    console.log("DOS "+dos);
-    dirlist=dos+"\n";
-  });
-
-  if (rec) lstdir=lsr(dos);
-  else lstdir=ls(dos);
-  var nfiles=0, ndirs=0, nothers=0;
-  spc=10;
-  txta=document.getElementById(stxta);
-
-  var res="", log_res="";
-  lstdir.then(r => {
-    //console.log(dos);
-    r.forEach((f) =>  {
-      sta=fstat(f);
-      sta.then(r => {
-        re=/^(\.*\/)*/;
-        f=f.replace(dos, "").replace(/^\//, "");
-        res=log=show_status(r);
-        res+=' ';
-
-        if (r.type == file_type.regular) {
-          nfiles++;
-          if (r.size.toString().length < spc) {
-            rp=spc-r.size.toString().length;
-            res+=' '.repeat(rp)+r.size;
-          } else res+=' '.repeat(spc);
-        } else {
-          res+=' '.repeat(spc);
-          if (r.type == file_type.directory) ndirs++;
-          else nothers++;
-        }
-
-        res+=' '+f;
-        finalRes+=res+"\n";
-
-        log+=','+f+','+ftype2s(r.type);
-        if (r.type !== file_type.directory) log+=','+r.size;
-
-        console.log(log);
-      });
-    });
-
-    sta.finally(() => {
-      //if (idx === r.length-1) {
-      // Nombre d'entrées dans la liste, fichiers, répertoire et autres ...
-      txta.value+="\n"+dirlist+finalRes+"  "+grant_in_number(r.length, 'entry', 'entries') +', '+grant_in_number(nfiles, 'file', 'files') +', '+grant_in_number(ndirs, 'folder', 'folders') +' and '+grant_in_number(nothers, 'of other type', 'other type');
-      end_cmd();
-      //}
-    });
-    });
-  });
-
-  lstdir.finally(() => {
-  });
-}
-
-function dirRES(_pth=".", stxta="output_text", rec=false) {
-  var nfiles=0, ndirs=0, nothers=0;
-  var spc=10;
-  var txta=document.getElementById(stxta);
-  var renoas=/^\//;
-  var absdir=absolute(_pth);
-  absdir.then(cwd => {
-    //console.log("cwd "+cwd);
-    if (rec) lstdir=lsr(cwd);
-    else lstdir=ls(cwd);
-
-    var lines=[];
-    lstdir.then(ld => {
-      ld.forEach((elt, ie) =>  {
-        _fstat=fstat(elt);
-        _fstat.then(stat => {
-          var line="";
-
-          if (stat.type == file_type.regular) {
+      if (full_list.length === list_size) {
+        var res_list=[];
+        var nfiles=0, ndirs=0, nothers=0;
+        var spc=10;
+        full_list.forEach((el, idx) => {
+          line=show_status(el)+' ';
+          if (el.type == file_type.regular) {
             nfiles++;
-            if (stat.size.toString().length < spc) {
-              rp=spc-stat.size.toString().length;
-              line+=' '.repeat(rp)+stat.size;
+            if (el.size.toString().length < spc) {
+              rp=spc-el.size.toString().length;
+              line+=' '.repeat(rp)+el.size;
             } else line+=' '.repeat(spc);
           } else {
             line+=' '.repeat(spc);
-            if (stat.type == file_type.directory) ndirs++;
+            if (el.type == file_type.directory) ndirs++;
             else nothers++;
           }
 
-          line+=' '+elt.replace(cwd, "").replace(renoas, "")+' '+show_status(stat);
-          lines.push(line);
-          //console.log("LINE"+ie+':'+line);
+          line+=' '+el.last_write+' '+el.file.replace(target_path, "").replace(/^\//, "");
+          res_list.push(line);
         });
-        return Promise.all(lines);
-      });
-    });
 
-    lstdir.finally(() => {
-      lines.forEach((e, i) => { console.log(e); });
-      txta.value+=cwd+"\n";
-      txta.value+=lines.join("\n");
-      txta.value+="  "+grant_in_number(lines.length, 'entry', 'entries') +', '+grant_in_number(nfiles, 'file', 'files') +', '+grant_in_number(ndirs, 'folder', 'folders') +' and '+grant_in_number(nothers, 'of other type', 'other type');
-      end_cmd();
-    });
-  });
+        dst_textarea.value+=target_path+"\n";
+        dst_textarea.value+=res_list.join("\n");
+        dst_textarea.value+="\n  "+grant_in_number(res_list.length, 'entry', 'entries') +', '+grant_in_number(nfiles, 'file', 'files') +', '+grant_in_number(ndirs, 'folder', 'folders') +' and '+grant_in_number(nothers, 'of other type', 'other type')+"\n";
+        console.log(dst_textarea.value);
+        dst_textarea.scrollTop=dst_textarea.scrollHeight;
+        target_path="";
+        full_list=[];
+        res_list=[];
+        list_size=0;
+      }
+    }
+  }
+
+  function ls_promise (func, param) {
+    if (typeof param !== 'undefined') {
+      this.ls_res=param;
+    } else {
+      list_size=ls_res.length;
+      this.ls_res.forEach((elt, idx, arr) => {
+        promise_run(fstat, elt, fstat_promise);
+      });
+      this.ls_res=[];
+    }
+  }
+
+  function abs_promise (func, param) {
+    if (typeof param !== 'undefined') {
+      this.abs_res=param;
+    } else {
+      target_path=this.abs_res;
+      if (rec) promise_run(lsr, this.abs_res, ls_promise);
+      else promise_run(ls, this.abs_res, ls_promise);
+    }
+  }
+
+  promise_run(absolute, path, abs_promise);
 }
 
