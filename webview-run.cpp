@@ -135,14 +135,22 @@ std::time_t to_time_t(TP tp) {
   return ch::system_clock::to_time_t(sctp);
 }
 
+#ifdef _WIN32
+#define my_gmtime(a,b) gmtime_s(b,a)
+#define my_localtime(a,b) localtime_s(b,a)
+#else
+#define my_gmtime(a,b) std::gmtime_r(a,b)
+#define my_localtime(a,b) std::localtime_r(a,b)
+#endif
+
 // Convert a file time to a string, default format is ISO8601 and default time zone is local
-std::string file_time_to_string(std::filesystem::file_time_type file_time, std::string fmt="%Y-%m-%dT%H:%M:%S", bool gm=false) {
+std::string file_time_to_string(std::filesystem::file_time_type file_time, std::string fmt="%Y-%m-%d %H:%M:%S", bool gm=false) {
   std::time_t tt=to_time_t(file_time);
-  std::tm *tim;
-  if (gm) tim=std::gmtime(&tt);
-  else tim=std::localtime(&tt);
+  std::tm tim;
+  if (gm) my_gmtime(&tt, &tim);
+  else my_localtime(&tt, &tim);
   std::stringstream buffer;
-  buffer << std::put_time(tim, fmt.c_str());
+  buffer << std::put_time(&tim, fmt.c_str());
   std::string fmtime=buffer.str();
 
   return fmtime;
@@ -189,8 +197,7 @@ void create_binds(webview::webview &w) {
                             "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
                             "\"perms\":"      +      to_js_oct((unsigned)fs.permissions())+","+
                             "\"size\":"       +      std::to_string(sz)+","+
-                            "\"last_write\":" + "\""+ lastwr+"\""+
-          "}";
+                            "\"last_write\":" + "\""+ lastwr+"\"}";
           //std::cout << res << std::endl;
           //unsigned int p=(unsigned int)fs.permissions();
           //std::cout << p << " <=> " << to_js_oct(p) <<  " <=> " << to_js_hex(p) << std::endl;
