@@ -55,11 +55,11 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
 std::string lsdir(std::string path, bool recursive=false) {
   std::string res="[";
   if (path.empty()) path=".";
-
+/* Pas de récursif, trop dangereux, ça plante le PC ...
   if (recursive) 
     for (const auto& e:std::filesystem::recursive_directory_iterator(path))
       res+='"'+e.path().string()+"\",";
-  else
+  else*/
     for (const auto& e:std::filesystem::directory_iterator(path))
       res+='"'+e.path().string()+"\",";
 
@@ -87,16 +87,17 @@ void print_file_types() {
   static int un=true;
   if (un) {
     un=false;
-    std::cout << "none      :" << (unsigned int)std::filesystem::file_type::none << std::endl;
-    std::cout << "not_found :" << (unsigned int)std::filesystem::file_type::not_found << std::endl;
-    std::cout << "regular   :" << (unsigned int)std::filesystem::file_type::regular << std::endl;
-    std::cout << "directory :" << (unsigned int)std::filesystem::file_type::directory << std::endl;
-    std::cout << "symlink   :" << (unsigned int)std::filesystem::file_type::symlink << std::endl;
-    std::cout << "block     :" << (unsigned int)std::filesystem::file_type::block << std::endl;
-    std::cout << "character :" << (unsigned int)std::filesystem::file_type::character << std::endl;
-    std::cout << "fifo      :" << (unsigned int)std::filesystem::file_type::fifo << std::endl;
-    std::cout << "socket    :" << (unsigned int)std::filesystem::file_type::socket << std::endl;
-    std::cout << "unknown   :" << (unsigned int)std::filesystem::file_type::unknown << std::endl;
+    std::cout << "none      :" << (int)std::filesystem::file_type::none << std::endl;
+    std::cout << "not_found :" << (int)std::filesystem::file_type::not_found << std::endl;
+    std::cout << "regular   :" << (int)std::filesystem::file_type::regular << std::endl;
+    std::cout << "directory :" << (int)std::filesystem::file_type::directory << std::endl;
+    std::cout << "symlink   :" << (int)std::filesystem::file_type::symlink << std::endl;
+    std::cout << "block     :" << (int)std::filesystem::file_type::block << std::endl;
+    std::cout << "character :" << (int)std::filesystem::file_type::character << std::endl;
+    std::cout << "fifo      :" << (int)std::filesystem::file_type::fifo << std::endl;
+    std::cout << "socket    :" << (int)std::filesystem::file_type::socket << std::endl;
+    std::cout << "unknown   :" << (int)std::filesystem::file_type::unknown << std::endl;
+    std::cout << std::flush;
   }
 }
 // As file_type have unspecified values in the C++ standard
@@ -192,13 +193,14 @@ void create_binds(webview::webview &w) {
 
           std::string lastwr="****-**-**T**:**:**";
           if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
+          print_file_types();
 
+          //std::cout << "file: " << sp << ", type: " << (int)ft << ", perms: " << to_js_oct((unsigned)fs.permissions()) << ", size: " << sz << ", last_write: " << lastwr << std::endl << std::flush;
           std::string res ="{\"file\":\""     + sp+"\","+
                             "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
                             "\"perms\":"      +      to_js_oct((unsigned)fs.permissions())+","+
                             "\"size\":"       +      std::to_string(sz)+","+
                             "\"last_write\":" + "\""+ lastwr+"\"}";
-          //std::cout << res << std::endl;
           //unsigned int p=(unsigned int)fs.permissions();
           //std::cout << p << " <=> " << to_js_oct(p) <<  " <=> " << to_js_hex(p) << std::endl;
           w.resolve(seq, 0, res);
