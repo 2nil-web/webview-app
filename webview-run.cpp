@@ -115,8 +115,7 @@ int forced_file_type(std::filesystem::file_type ft) {
     case std::filesystem::file_type::fifo      : return 7;
     case std::filesystem::file_type::socket    : return 8;
     case std::filesystem::file_type::unknown   :
-    default : 
-                                                 return 9;
+    default :                                    return 9;
   }
 }
 
@@ -193,7 +192,7 @@ void create_binds(webview::webview &w) {
 
           std::string lastwr="****-**-**T**:**:**";
           if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
-          print_file_types();
+          //print_file_types();
 
           //std::cout << "file: " << sp << ", type: " << (int)ft << ", perms: " << to_js_oct((unsigned)fs.permissions()) << ", size: " << sz << ", last_write: " << lastwr << std::endl << std::flush;
           std::string res ="{\"file\":\""     + sp+"\","+
