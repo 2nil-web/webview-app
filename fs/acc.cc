@@ -8,19 +8,10 @@
 #include <vector>
 #include <algorithm>
 #include <filesystem>
+#include <regex>
+
+#include "../base64.hpp"
  
-
-std::string ws2s(std::wstring ws) {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  return converter.to_bytes(ws);
-}
-
-std::wstring s2ws(std::string s) {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  return converter.from_bytes(s);
-}
-
-
 template <typename TP>
 std::time_t to_time_t(TP tp) {
   namespace ch=std::chrono;
@@ -29,6 +20,7 @@ std::time_t to_time_t(TP tp) {
 }
 
 #ifdef _WIN32
+#include <windows.h>
 #define my_gmtime(a,b) gmtime_s(b,a)
 #define my_localtime(a,b) localtime_s(b,a)
 #else
@@ -56,7 +48,7 @@ std::string lastwrite(std::filesystem::path p) {
 std::string show_status(std::filesystem::file_status fs) {
     using std::filesystem::perms;
     auto show = [=](char op, perms perm) { return (perms::none == (perm & fs.permissions()) ? '-' : op); };
-    std::string ret=(fs.type() == std::filesystem::file_type::directory) ? "d":" ";
+    std::string ret=(fs.type() == std::filesystem::file_type::directory) ? "d":"-";
     ret+=show('r', perms::owner_read);
     ret+=show('w', perms::owner_write);
     ret+=show('x', perms::owner_exec);
@@ -101,11 +93,14 @@ struct path_elem {
   uintmax_t size;
   std::filesystem::file_time_type last_write;
   std::filesystem::path name;
+  std::string b64_path_name;
 };
 
 struct path_list {
   std::filesystem::path path;
+  std::string b64_path_name;
   uintmax_t biggest_size;
+  size_t biggest_name_size;
   std::vector<path_elem> list;
 };
 
@@ -117,74 +112,71 @@ path_elem get_path_elem(std::filesystem::path p) {
   else pe.size=0;
   pe.last_write=std::filesystem::last_write_time(p);
   pe.name=p;
+  pe.b64_path_name=base64::to_base64(pe.name.string().c_str());
   return pe;
+}
+
+void add_path_elem(path_list& pl, std::filesystem::path p) {
+  auto pe=get_path_elem(p);
+  if (pe.size > pl.biggest_size) pl.biggest_size=pe.size;
+  auto bns=pe.name.wstring().size();
+  if (bns > pl.biggest_name_size) pl.biggest_name_size=bns;
+  pl.list.push_back(pe);
 }
 
 path_list get_path_list(std::filesystem::path _path, bool recursive=false) {
   if (_path.empty()) _path=".";
   path_list pl;
   pl.path=std::filesystem::absolute(_path);
+  pl.b64_path_name=base64::to_base64(pl.path.string().c_str());
   pl.biggest_size=0;
+  pl.biggest_name_size=0;
   path_elem pe;
 
-  for (const auto& e:std::filesystem::directory_iterator(pl.path)) {
-    pe=get_path_elem(e);
-    if (pe.size > pl.biggest_size) pl.biggest_size=pe.size;
-    pl.list.push_back(pe);
+  auto fs=std::filesystem::status(pl.path);
+
+  if (fs.type() == std::filesystem::file_type::directory) {
+    for (const auto& e:std::filesystem::directory_iterator(pl.path)) {
+      add_path_elem(pl, e);
+    }
+  } else {
+    add_path_elem(pl, pl.path);
+    pl.path=pl.path.parent_path();
   }
 
   return pl;
 }
 
 void display_path_list(path_list pl) {
-  //std::cout << pl.path.string() << std::endl;
-  std::cout << std::filesystem::canonical(pl.path) << std::endl;
+  std::cout << replace_all(std::filesystem::canonical(pl.path).string(), "\\", "/") << std::endl;
 
+  int parent_path_size=pl.path.string().size();
   int rj=std::to_string(pl.biggest_size).size();
+
   for (auto& pe:pl.list) {
-    std::cout << pe.perms << ' ' << std::setw(rj) << pe.size << ' ' << file_time_to_string(pe.last_write) << ' ' << std::filesystem::canonical(pe.name).generic_string().substr(pl.path.string().size()+1) << std::endl;
+    std::cout << pe.perms << ' ' << std::setw(rj) << pe.size << ' ' << file_time_to_string(pe.last_write) << ' ';
+    std::cout << std::filesystem::canonical(pe.name).generic_string().substr(parent_path_size+1) << ' ';
+    std::cout << std::string(pl.biggest_name_size-pe.name.wstring().size(), ' ');
+    std::cout << pe.b64_path_name;
+    std::cout << std::endl;
   }
-
 }
 
-void fstat(std::filesystem::path p, size_t path_l) {
-  auto fs=std::filesystem::status(p);
-  auto ft=fs.type();
-  std::uintmax_t sz;
-  if (ft == std::filesystem::file_type::regular) sz=std::filesystem::file_size(p);
-  else sz=static_cast<std::uintmax_t>(-1);
-  std::string lastwr="****-**-**T**:**:**";
-  if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
-
-  // Perms, size, last write, name
-  std::cout << show_status(fs) << ' ' << std::setw(12);
-  if (ft != std::filesystem::file_type::directory) std::cout << sz;
-  else std::cout << ' ';
-  std::cout << ' ' << lastwr << ' ';
-  std::wcout << replace_all(p.wstring().substr(path_l+1), L"\\", L"/");
-  std::cout << std::endl;
-}
-
-void lsdir(std::string _path, bool recursive=false) {
-  if (_path.empty()) _path=".";
-  auto path=std::filesystem::absolute(_path);
-
-/* Pas de récursif, trop dangereux, ça plante le PC ... Voir éventuellement faire un try/catch
-  if (recursive) 
-    for (const auto& e:std::filesystem::recursive_directory_iterator(path))
-      std::cout << +e.path().string() << std::endl;;
-  else*/
-  std::cout << replace_all(path.string(), "\\", "/") << ':' << std::endl;
-    for (const auto& e:std::filesystem::directory_iterator(path)) {
-      fstat(e, path.string().size());
-    }
-
+bool isBase64(const std::string s) {
+  if (s.length()%4 == 0) return std::regex_match(s, std::regex("^[A-Za-z0-9+/]*={0,2}$"));
+  return false;
 }
 
 int main(int argc, char **argv) {
-  setlocale(LC_ALL, "C");
+#ifdef _WIN32
+  SetConsoleOutputCP(CP_UTF8);
+#endif
 
-  if (argc == 2) display_path_list(get_path_list(argv[1]));
-  else display_path_list(get_path_list("."));
+  if (argc == 2) {
+    if (isBase64(argv[1])) {
+      display_path_list(get_path_list(base64::from_base64(argv[1])));
+    } else display_path_list(get_path_list(argv[1]));
+  } else display_path_list(get_path_list("."));
   return 0;
 }
+
