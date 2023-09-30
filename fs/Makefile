@@ -1,4 +1,5 @@
 
+# Intégrer clang-format
 
 CXXFLAGS += -std=c++20 -g -Wall
 LDFLAGS += -static
