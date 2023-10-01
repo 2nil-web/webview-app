@@ -1,4 +1,7 @@
 
+# Intégrer clang-format
+# js check + minify
+
 ifneq ($(shell uname -s),Linux)
 ECHO=echo -e
 else
