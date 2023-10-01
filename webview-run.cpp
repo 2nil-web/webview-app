@@ -13,10 +13,12 @@
 #include <thread>
 #include <algorithm>
 #include <filesystem>
+#include <regex>
 
 #include <webview.h>
 
 #include "util.h"
+#include "base64.hpp"
 #include "winapi.h"
 
 webview::webview *w=nullptr;
@@ -51,6 +53,10 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
   else MessageBox(NULL, "", "No Win", MB_OK);
 }
 
+bool is_only_ascii(const std::string s) {
+  return std::all_of(s.begin(), s.end(), ::isprint);
+}
+
 // Return a javascript array of strings corresponding to a directory list, recursively or not
 std::string lsdir(std::string path, bool recursive=false) {
   std::string res="[";
@@ -60,9 +66,12 @@ std::string lsdir(std::string path, bool recursive=false) {
     for (const auto& e:std::filesystem::recursive_directory_iterator(path))
       res+='"'+e.path().string()+"\",";
   else*/
-    for (const auto& e:std::filesystem::directory_iterator(path))
-      res+='"'+e.path().string()+"\",";
-
+    for (const auto& e:std::filesystem::directory_iterator(path)) {
+      // Will return also a path_base64 field if path is not only made of ascii characters in order to workaround the utf16 Window$ shit
+      res+="{\"path\":\""     + e.path().string()+"\"";
+      if (!is_only_ascii(e.path().string())) res+=",\"path_base64\":\"" + base64::to_base64(e.path().string().c_str())+"\"";
+      res+="},";
+  }
   res[res.size()-1]=']';
   replace_all(res, "\\", "/");
   //std::cout << res << std::endl;
@@ -161,6 +170,11 @@ std::string lastwrite(std::filesystem::path p) {
 }
 
 
+bool isBase64(const std::string s) {
+  if (s.length()%4 == 0) return std::regex_match(s, std::regex("^[A-Za-z0-9+/]*={0,2}$"));
+  return false;
+}
+
 void create_binds(webview::webview &w) {
   w.bind("wait_nothread", [&](const std::string & req) -> std::string {
     return sec_wait(webview::detail::json_parse(req, "", 0));
@@ -176,12 +190,17 @@ void create_binds(webview::webview &w) {
   },
   nullptr);
 
-   w.bind(
+  w.bind(
       "fstat",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
-          std::string sp=webview::detail::json_parse(req, "", 0);
-          std::filesystem::path p=sp;
+          auto sp=webview::detail::json_parse(req, "", 0);
+          std::filesystem::path p;
+
+          if (isBase64(sp)) p=base64::from_base64(sp);
+          else p=sp;
+
+          //std::cout << "P " << p << std::endl;
           auto fs=std::filesystem::status(p);
 
           auto ft=fs.type();
@@ -194,8 +213,10 @@ void create_binds(webview::webview &w) {
           if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
           //print_file_types();
 
+          sp=p.string();
+          replace_all(sp, "\\", "/");
           //std::cout << "file: " << sp << ", type: " << (int)ft << ", perms: " << to_js_oct((unsigned)fs.permissions()) << ", size: " << sz << ", last_write: " << lastwr << std::endl << std::flush;
-          std::string res ="{\"file\":\""     + sp+"\","+
+          std::string res ="{\"file\":\""     +      sp+"\","+
                             "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
                             "\"perms\":"      +      to_js_oct((unsigned)fs.permissions())+","+
                             "\"size\":"       +      std::to_string(sz)+","+
