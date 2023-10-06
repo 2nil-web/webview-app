@@ -197,10 +197,20 @@ void create_binds(webview::webview &w) {
           auto sp=webview::detail::json_parse(req, "", 0);
           std::filesystem::path p;
 
-          if (isBase64(sp)) p=base64::from_base64(sp);
-          else p=sp;
+          if (isBase64(sp)) {
+            sp=base64::from_base64(sp);
+            replace_all(sp, "\\", "/");
+            p=sp;
+            sp=p.string();
+            std::cout << "B64 ";
+          } else {
+            replace_all(sp, "\\", "/");
+            p=sp;
+            std::cout << "TXT ";
+          }
 
-          //std::cout << "P " << p << std::endl;
+          std::cout << "SP " << sp << std::endl;
+          std::cout << "P  " << p.string() << std::endl;
           auto fs=std::filesystem::status(p);
 
           auto ft=fs.type();
@@ -213,8 +223,7 @@ void create_binds(webview::webview &w) {
           if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
           //print_file_types();
 
-          sp=p.string();
-          replace_all(sp, "\\", "/");
+          //std::cout << sp << std::endl << std::flush;
           //std::cout << "file: " << sp << ", type: " << (int)ft << ", perms: " << to_js_oct((unsigned)fs.permissions()) << ", size: " << sz << ", last_write: " << lastwr << std::endl << std::flush;
           std::string res ="{\"file\":\""     +      sp+"\","+
                             "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
