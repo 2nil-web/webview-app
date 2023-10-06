@@ -175,7 +175,56 @@ bool isBase64(const std::string s) {
   return false;
 }
 
+
+void fwrite(std::string fname, std::string s, std::ios_base::openmode omod=std::ios::app) {
+  std::ofstream f(fname, omod);
+  f << s;
+  f.close();
+}
+
 void create_binds(webview::webview &w) {
+  //fwrite("file.txt", "String1", "String2")
+  w.bind("res_fwrite", [&](const std::string &req) -> std::string {
+//    std::string fn;
+//    fn=webview::detail::json_parse(req, "", 0);
+    write_cons(req);
+    return "";
+  });
+
+  w.bind("fwrite", [&](const std::string &req) -> std::string {
+    std::string fn, s;
+    size_t n=0;
+    fn=webview::detail::json_parse(req, "", n++);
+    for(;;) {
+      s=webview::detail::json_parse(req, "", n++);
+      if (s.empty()) break;
+      if (n == 2) {
+        fwrite(fn, s, std::ios::out);
+      } else {
+        fwrite(fn, "\n");
+        fwrite(fn, s);
+      }
+    }
+    return "";
+  });
+
+  w.bind("fappend", [&](const std::string &req) -> std::string {
+    std::string fn, s;
+    size_t n=0;
+    fn=webview::detail::json_parse(req, "", n++);
+    for(;;) {
+      s=webview::detail::json_parse(req, "", n++);
+      if (s.empty()) break;
+      if (n == 2) {
+        fwrite(fn, s);
+      } else {
+        fwrite(fn, "\n");
+        fwrite(fn, s);
+      }
+    }
+    return "";
+  });
+
   w.bind("wait_nothread", [&](const std::string & req) -> std::string {
     return sec_wait(webview::detail::json_parse(req, "", 0));
   });
@@ -202,15 +251,15 @@ void create_binds(webview::webview &w) {
             replace_all(sp, "\\", "/");
             p=sp;
             sp=p.string();
-            std::cout << "B64 ";
+            //std::cout << "B64 ";
           } else {
             replace_all(sp, "\\", "/");
             p=sp;
-            std::cout << "TXT ";
+            //std::cout << "TXT ";
           }
 
-          std::cout << "SP " << sp << std::endl;
-          std::cout << "P  " << p.string() << std::endl;
+          //std::cout << "SP " << sp << std::endl;
+          //std::cout << "P  " << p.string() << std::endl;
           auto fs=std::filesystem::status(p);
 
           auto ft=fs.type();
@@ -354,12 +403,6 @@ ls().then(r=>{
   );
 
 
-  w.bind("write", [&](const std::string &req) -> std::string {
-    auto s=webview::detail::json_parse(req, "", 0);
-    write_cons(s);
-    return "";
-  });
-
   w.bind("writeln", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
     write_cons(s);
@@ -379,6 +422,16 @@ ls().then(r=>{
     write_cons("\n", std::cerr);
     return "";
   });
+
+  w.bind(
+      "fwrite",
+      [&](const std::string &seq, const std::string &req, void *) {
+        std::thread([&, seq, req] {
+          w.resolve(seq, 0, lsdir(webview::detail::json_parse(req, "", 0)));
+        }).detach();
+      },
+      nullptr);
+
 }
 
 bool run_and_exit=false;
