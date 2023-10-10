@@ -1,7 +1,7 @@
 
 # Intégrer clang-format
 
-CXXFLAGS += -std=c++20 -g -Wall
+CXXFLAGS += -std=c++20 -g -Wall 
 LDFLAGS += -static
 SRCS=$(wildcard *.cc)
 EXES=${SRCS:.cc=.exe}

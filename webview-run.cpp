@@ -24,6 +24,37 @@
 webview::webview *w=nullptr;
 
 
+// Convert a wstring to a string containing a suite of hexa numbers, separated by a space and representing the utf code of each characters of the wstring
+// i.e. the wstring "totö要らない" will result in a string "74 6f 74 f6 8981 3089 306a 3044"
+std::string s_w2h(std::wstring ws) {
+  std::stringstream cnv;
+  bool not_first=false;
+  for (auto e:ws) {
+    if (not_first) cnv << ' ';
+    else not_first=true;
+    cnv << std::hex << (unsigned int)e;
+  }
+
+  return cnv.str();
+}
+
+
+
+// Convert a string containing a suite of hexa numbers, separated by a space and representing utf code to a wstring
+// i.e. the string "74 6f 74 f6 8981 3089 306a 3044"  will give the wstring "totö要らない" 
+std::wstring s_h2w(std::string hs) {
+  std::string hex_chars(hs);
+
+  std::istringstream hex_chars_stream(hex_chars);
+  std::wstring ws=L"";
+  unsigned int c;
+  while (hex_chars_stream >> std::hex >> c) {
+    ws+= (wchar_t)c;
+  }
+
+  return ws;
+}
+
 void write_cons(std::string s, std::ostream& out=std::cout) {
   if (s.empty()) return;
 #ifdef _WIN32
@@ -57,6 +88,7 @@ bool is_only_ascii(const std::string s) {
   return std::all_of(s.begin(), s.end(), ::isprint);
 }
 
+const std::string hexa_pfx="UTF_IN_HEXA_STRING";
 // Return a javascript array of strings corresponding to a directory list, recursively or not
 std::string lsdir(std::string path, bool recursive=false) {
   std::string res="[";
@@ -67,9 +99,11 @@ std::string lsdir(std::string path, bool recursive=false) {
       res+='"'+e.path().string()+"\",";
   else*/
     for (const auto& e:std::filesystem::directory_iterator(path)) {
-      // Will return also a path_base64 field if path is not only made of ascii characters in order to workaround the utf16 Window$ shit
+      // Will return also a path_hexa field if path is not only made of ascii characters in order to workaround the utf8 Window$ shitty processing
       res+="{\"path\":\""     + e.path().string()+"\"";
-      if (!is_only_ascii(e.path().string())) res+=",\"path_base64\":\"" + base64::to_base64(e.path().string().c_str())+"\"";
+      if (!is_only_ascii(e.path().string())) {
+        res+=",\"path_hexa\":\""+hexa_pfx+s_w2h(e.path().wstring())+"\"";
+      }
       res+="},";
   }
   res[res.size()-1]=']';
@@ -246,20 +280,22 @@ void create_binds(webview::webview &w) {
           auto sp=webview::detail::json_parse(req, "", 0);
           std::filesystem::path p;
 
-          if (isBase64(sp)) {
-            sp=base64::from_base64(sp);
-            replace_all(sp, "\\", "/");
-            p=sp;
+          if (sp.starts_with(hexa_pfx)) {
+            sp=sp.substr(hexa_pfx.size());
+            p=s_h2w(sp);
             sp=p.string();
-            //std::cout << "B64 ";
+            replace_all(sp, "\\", "/");
+            std::cout << "HEX SP " << sp << std::endl;
+            std::cout << "HEX P  " << p << std::endl;
           } else {
             replace_all(sp, "\\", "/");
             p=sp;
-            //std::cout << "TXT ";
+            std::cout << "TXT SP " << sp << std::endl;
+            std::cout << "TXT P  " << p.string() << std::endl;
           }
 
-          //std::cout << "SP " << sp << std::endl;
-          //std::cout << "P  " << p.string() << std::endl;
+          std::cout << std::flush;
+
           auto fs=std::filesystem::status(p);
 
           auto ft=fs.type();

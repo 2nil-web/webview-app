@@ -2,7 +2,7 @@
 #include <iostream>
 #include <type_traits>
 
-#include "base64.hpp"
+#include "../base64.hpp"
 
 int main() {
   std::string original;

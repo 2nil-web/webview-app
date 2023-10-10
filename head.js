@@ -75,14 +75,16 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
       this.ls_res=param;
     } else {
       list_size=ls_res.length;
-        console.log("TGT "+target_path);
+//      console.log("TGT "+target_path);
       this.ls_res.forEach((elt, idx, arr) => {
+        elt.path=elt.path.replace(/\\/g, "\/");
 
-        if (elt.hasOwnProperty('path_base64')) {
-          console.log("PB "+atob(elt.path_base64).replace(target_path+"\/","")+", PS "+elt.path.replace(target_path+"\/",""));
-          promise_run(fstat, elt.path_base64, fstat_promise);
+        if (elt.hasOwnProperty('path_hexa')) {
+//          console.log("HEX "+elt.path_hexa);
+//          console.log("TXB "+elt.path.replace(target_path+"\/",""));
+          promise_run(fstat, elt.path_hexa, fstat_promise);
         } else {
-          console.log("PS "+elt.path.replace(target_path+"\/",""));
+//          console.log("TXT "+elt.path.replace(target_path+"\/",""));
           promise_run(fstat, elt.path, fstat_promise);
         }
       });
