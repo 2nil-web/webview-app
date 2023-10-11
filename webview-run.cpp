@@ -24,14 +24,14 @@
 webview::webview *w=nullptr;
 
 
-// Convert a wstring to a string containing a suite of hexa numbers, separated by a space and representing the utf code of each characters of the wstring
+// Convert a wstring to a string containing a suite of hexa numbers, separated by space and representing the utf code of each characters of the wstring
 // i.e. the wstring "totö要らない" will result in a string "74 6f 74 f6 8981 3089 306a 3044"
 std::string s_w2h(std::wstring ws) {
   std::stringstream cnv;
-  bool not_first=false;
   for (auto e:ws) {
-    if (not_first) cnv << ' ';
-    else not_first=true;
+    //if (cnv.tellp() != 0)
+    if (!cnv.str().empty())
+      cnv << ' ';
     cnv << std::hex << (unsigned int)e;
   }
 
@@ -40,7 +40,7 @@ std::string s_w2h(std::wstring ws) {
 
 
 
-// Convert a string containing a suite of hexa numbers, separated by a space and representing utf code to a wstring
+// Convert a string containing a suite of hexa numbers, separated by space and representing utf code to a wstring
 // i.e. the string "74 6f 74 f6 8981 3089 306a 3044"  will give the wstring "totö要らない" 
 std::wstring s_h2w(std::string hs) {
   std::string hex_chars(hs);
@@ -64,9 +64,6 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
   //out << gctres << std::endl;
   if (gctres > 0) {
     tit=title;
-    //MessageBox(NULL, "", title, MB_OK);
-    //out << gctres << ", [[" << title << "]]" << std::endl; //out.flush();
-
     if (tit.find("invisible cygwin console") != std::string::npos) {
       out << s; out.flush();
     } else {
@@ -108,7 +105,6 @@ std::string lsdir(std::string path, bool recursive=false) {
   }
   res[res.size()-1]=']';
   replace_all(res, "\\", "/");
-  //std::cout << res << std::endl;
   return res;
 }
 
@@ -285,13 +281,13 @@ void create_binds(webview::webview &w) {
             p=s_h2w(sp);
             sp=p.string();
             replace_all(sp, "\\", "/");
-            std::cout << "HEX SP " << sp << std::endl;
-            std::cout << "HEX P  " << p << std::endl;
+//            std::cout << "HEX SP " << sp << std::endl;
+//            std::cout << "HEX P  " << p << std::endl;
           } else {
             replace_all(sp, "\\", "/");
             p=sp;
-            std::cout << "TXT SP " << sp << std::endl;
-            std::cout << "TXT P  " << p.string() << std::endl;
+//            std::cout << "TXT SP " << sp << std::endl;
+//            std::cout << "TXT P  " << p.string() << std::endl;
           }
 
           std::cout << std::flush;
@@ -303,45 +299,25 @@ void create_binds(webview::webview &w) {
           /* if (ft != std::filesystem::file_type::directory && ft != std::filesystem::file_type::not_found && ft != std::filesystem::file_type::unknown   && ft != std::filesystem::file_type::none) */
           if (ft == std::filesystem::file_type::regular) sz=std::filesystem::file_size(p);
           else sz=static_cast<std::uintmax_t>(-1);
-
           std::string lastwr="****-**-**T**:**:**";
           if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
-          //print_file_types();
-
-          //std::cout << sp << std::endl << std::flush;
-          //std::cout << "file: " << sp << ", type: " << (int)ft << ", perms: " << to_js_oct((unsigned)fs.permissions()) << ", size: " << sz << ", last_write: " << lastwr << std::endl << std::flush;
           std::string res ="{\"file\":\""     +      sp+"\","+
                             "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
                             "\"perms\":"      +      to_js_oct((unsigned)fs.permissions())+","+
                             "\"size\":"       +      std::to_string(sz)+","+
                             "\"last_write\":" + "\""+ lastwr+"\"}";
-          //unsigned int p=(unsigned int)fs.permissions();
-          //std::cout << p << " <=> " << to_js_oct(p) <<  " <=> " << to_js_hex(p) << std::endl;
           w.resolve(seq, 0, res);
         }).detach();
       },
       nullptr);
 
-  // ls().then(r=>{r.forEach((d)=>console.log(d))});
-  // ls().then(r=>{r.forEach((d)=>output_text.value+=d+"\n")});
-  /*
-ls().then(r=>{
-  r.forEach((d)=>output_text.value+=d.replace(/^\.\//, "")+"\n");
-  output_text.value+=r.length+" files(s)\n";
-});
-  */
-  // ls().then(r=>{r.forEach((d)=>writeln(d))});
   w.bind(
       "absolute",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
           auto pth=webview::detail::json_parse(req, "", 0);
           auto res=std::filesystem::absolute(pth).string();
-//          std::cout << "absolute, canonical        " << std::filesystem::canonical(pth).string() << std::endl;
-//          std::cout << "absolute, weakly_canonical " << std::filesystem::weakly_canonical(pth).string() << std::endl;
-          //std::cout << std::filesystem::canonical(pth).string() << std::endl;
           replace_all(res, "\\", "/");
-//          std::cout << res << std::endl;
           w.resolve(seq, 0, '"'+res+'"');
         }).detach();
       },
@@ -350,8 +326,6 @@ ls().then(r=>{
   w.bind("chdir", [&](const std::string &req) -> std::string {
     auto pth=webview::detail::json_parse(req, "", 0);
     std::filesystem::current_path(pth);
-//    std::cout << "chdir, canonical        " << std::filesystem::canonical(pth).string() << std::endl;
-//    std::cout << "chdir, weakly_canonical " << std::filesystem::weakly_canonical(pth).string() << std::endl;
     return "";
   });
 
@@ -373,8 +347,6 @@ ls().then(r=>{
       },
       nullptr);
 
-//  w.bind("simple_ls", [&](const std::string &req) -> std::string { return lsdir(webview::detail::json_parse(req, "", 0)); });
-
   // Change window title
   w.bind("webapp_get_title", [&](const std::string &seq, const std::string &req, void *) {
      std::thread([&, seq, req] {
@@ -383,7 +355,6 @@ ls().then(r=>{
         prev_title=GetWindowText((HWND)w.window());
 #endif
         auto result="{\"value\": \""+prev_title+"\"}";
-        //auto result=res_cmd;
         w.resolve(seq, 0, result);
       }).detach();
     },
@@ -399,7 +370,6 @@ ls().then(r=>{
         auto title=webview::detail::json_parse(req, "", 0);
         w.set_title(title);
         auto result="{\"value\": \""+prev_title+"\"}";
-        //auto result=res_cmd;
         w.resolve(seq, 0, result);
       }).detach();
     },

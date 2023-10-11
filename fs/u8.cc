@@ -1,3 +1,4 @@
+
 #include <cstdio>
 #ifdef _WIN32
 #include <fcntl.h>
@@ -19,10 +20,11 @@ int main()
 #endif
  
     std::filesystem::path p(u8"要らない.txt");
-    std::ofstream(p) << "File contents"; // Prior to LWG2676 uses operator string_type()
-                                         // on MSVC, where string_type is wstring, only
-                                         // works due to non-standard extension.
-                                         // Post-LWG2676 uses new fstream constructors
+    std::ofstream(p) << "File contents: 要らない";
+        // Prior to LWG2676 uses operator string_type()
+        // on MSVC, where string_type is wstring, only
+        // works due to non-standard extension.
+        // Post-LWG2676 uses new fstream constructors
  
     // Native string representation can be used with OS-specific APIs
 #ifdef _WIN32
@@ -38,3 +40,4 @@ int main()
  
 //    std::filesystem::remove(p);
 }
+
