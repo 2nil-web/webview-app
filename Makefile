@@ -25,10 +25,27 @@ DECORATION=Nawak-Bidon
 WVDIR=webview
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include --include=webview_mingw_support.h
+
+CPPFLAGS+=-IC:/Software/UnixTools/msys64/mingw64/include
+CPPFLAGS+=-DCURL_STATICLIB
+
+
 CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
 LDFLAGS += -static -mwindows -g
+LDFLAGS += -LC:/Software/UnixTools/msys64/mingw64/lib 
+
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
+
+#pacman -S mingw-w64-x86_64-curl-gnutls
+LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
+LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+
+# pacman -S mingw-w64-x86_64-curl-gnutls
+#LDLIBS += -lcurl -lrtmp -lz -lgmp -lgnutls -lhogweed -lnettle -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lnettle -lgnutls -lwldap32 -lzstd -lzstd -lbrotlidec
+#LDLIBS += -lbrotlidec -lz -lws2_32 -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+
+
 
 MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
