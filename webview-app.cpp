@@ -9,9 +9,9 @@
 #include <thread>
 #include <filesystem>
 
-#include "util.h"
-#include "runopt.h"
-#include "webview-run.h"
+#include "wv-util.h"
+#include "wv-opts.h"
+#include "wv-binds.h"
 
 bool devmode=false;
 bool runjs_and_exit=false;

@@ -17,9 +17,9 @@
 
 #include <webview.h>
 
-#include "util.h"
+#include "wv-util.h"
 #include "base64.hpp"
-#include "winapi.h"
+#include "wv-winapi.h"
 
 webview::webview *w=nullptr;
 

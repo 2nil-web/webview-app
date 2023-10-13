@@ -6,7 +6,7 @@ file_status("webview-app.exe");
 file_status("win.cpp");
 file_status("NUL");
 file_status("NotFound");
-file_status("runopt.o");
+file_status("wv-runopt.o");
 */
 if (cmd.value === "") {
   cmd.value='dir()';

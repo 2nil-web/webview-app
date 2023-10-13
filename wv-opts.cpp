@@ -22,8 +22,8 @@
 #include <iostream>
 
 #include "version.h"
-#include "util.h"
-#include "runopt.h"
+#include "wv-util.h"
+#include "wv-opts.h"
 
 bool open_console() {
 #ifdef _WIN32

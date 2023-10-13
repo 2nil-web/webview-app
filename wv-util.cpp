@@ -23,7 +23,7 @@
 #include <filesystem>
 #endif
 
-#include "util.h"
+#include "wv-util.h"
 
 bool any_of_ctype(const std::string s, std::function<int(int)> istype) {
   return std::any_of(s.begin(), s.end(), [istype](char c) { return istype(c); } );

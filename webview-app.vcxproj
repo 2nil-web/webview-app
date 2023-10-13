@@ -149,22 +149,22 @@
   <ItemGroup>
     <ClInclude Include="getopt_vs\getopt.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="runopt.h" />
-    <ClInclude Include="util.h" />
+    <ClInclude Include="wv-opts.h" />
+    <ClInclude Include="wv-util.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="webview-app.h" />
-    <ClInclude Include="webview-run.h" />
+    <ClInclude Include="wv-binds.h" />
     <ClInclude Include="webview\webview.h" />
-    <ClInclude Include="winapi.h" />
+    <ClInclude Include="wv-winapi.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="getopt_vs\getopt.cpp" />
-    <ClCompile Include="runopt.cpp" />
-    <ClCompile Include="util.cpp" />
+    <ClCompile Include="wv-opts.cpp" />
+    <ClCompile Include="wv-util.cpp" />
     <ClCompile Include="webview-app.cpp" />
-    <ClCompile Include="webview-run.cpp" />
+    <ClCompile Include="wv-binds.cpp" />
     <ClCompile Include="win.cpp" />
-    <ClCompile Include="winapi.cpp" />
+    <ClCompile Include="wv-winapi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="webview-app_res.rc" />
