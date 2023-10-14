@@ -87,7 +87,7 @@ bool is_only_ascii(const std::string s) {
 
 bool w32_is_only_ascii(const std::string s) {
   for (size_t i=0; i < s.size(); i++) {
-    if ((unsigned int)s[i] > 255) return false;
+    if ((unsigned int)s[i] < 32 || (unsigned int)s[i] > 127) return false;
   }
   return true;
 }
@@ -116,10 +116,15 @@ std::string lsdir(std::string path, bool recursive=false) {
     for (const auto& e:std::filesystem::directory_iterator(path)) {
       // Will return also a path_hexa field if path is not only made of ascii characters in order to workaround the utf8 Window$ shitty processing
 #ifdef _MSC_VER
+          std::cout <<  e.path() << std::endl;
         std::string w2s = ws2s(e.path().wstring());
+        if (w2s.ends_with("要らない.txt")) {
+          std::wcout <<  e.path().wstring() << std::endl;
+        }
         //std::cout << w2s << std::endl;
         res += "{\"path\":\"" + sfilt(w2s) + "\"";
         if (!w32_is_only_ascii(w2s)) {
+          std::wcout << "w32o " << e.path().wstring() << std::endl;
             res += ",\"path_hexa\":\"" + hexa_pfx + s_w2h(e.path().wstring()) + "\"";
         }
 #else
@@ -244,27 +249,23 @@ std::string do_fstat(std::string sp) {
   std::filesystem::path p;
   if (sp.starts_with(hexa_pfx)) {
     sp=sp.substr(hexa_pfx.size());
+    replace_all(sp, "\\", "/");
     p=s_h2w(sp);
 #ifdef _MSC_VER
     sp=sfilt(p.string());
+    if (sp != p.string()) std::cout << "HEX " << sp << "\n  # " << p << std::endl;
 #else
     sp=p.string();
 #endif
-    replace_all(sp, "\\", "/");
-//            std::cout << "HEX SP " << sp << std::endl;
-//            std::cout << "HEX P  " << p << std::endl;
   } else {
     replace_all(sp, "\\", "/");
     p=sp;
-//            std::cout << "TXT SP " << sp << std::endl;
-//            std::cout << "TXT P  " << p.string() << std::endl;
   }
 
   std::cout << std::flush;
   auto fs=std::filesystem::status(p);
   auto ft=fs.type();
   std::uintmax_t sz;
-  /* if (ft != std::filesystem::file_type::directory && ft != std::filesystem::file_type::not_found && ft != std::filesystem::file_type::unknown   && ft != std::filesystem::file_type::none) */
   if (ft == std::filesystem::file_type::regular) sz=std::filesystem::file_size(p);
   else sz=static_cast<std::uintmax_t>(-1);
   std::string lastwr="****-**-**T**:**:**";

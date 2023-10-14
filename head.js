@@ -85,7 +85,7 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
 
         if (elt.hasOwnProperty('path_hexa')) {
           //console.log("HX1 "+elt.path_hexa);
-          //console.log("HX2 "+elt.path.replace(target_path+"\/",""));
+          console.log("HX2 "+elt.path.replace(target_path+"\/",""));
           promise_run(fstat, elt.path_hexa, fstat_promise);
         } else {
           //console.log("TXT "+elt.path.replace(target_path+"\/",""));
