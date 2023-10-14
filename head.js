@@ -24,7 +24,7 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   var list_size=0;
   function fstat_promise (func, param) {
     if (typeof param !== 'undefined') {
-      console.log(param.path);
+      //console.log(param.file);
       this.elt=param;
     } else {
       //console.log("LS "+list_size+", L "+full_list.length+', v '+elt.file);
