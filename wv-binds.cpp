@@ -116,7 +116,7 @@ std::string lsdir(std::string path, bool recursive=false) {
     for (const auto& e:std::filesystem::directory_iterator(path)) {
       // Will return also a path_hexa field if path is not only made of ascii characters in order to workaround the utf8 Window$ shitty processing
 #ifdef _MSC_VER
-          std::cout <<  e.path() << std::endl;
+          std::wcout <<  e.path().wstring() << std::endl;
         std::string w2s = ws2s(e.path().wstring());
         if (w2s.ends_with("要らない.txt")) {
           std::wcout <<  e.path().wstring() << std::endl;
