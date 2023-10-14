@@ -14,6 +14,9 @@ PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc);
 #endif
 #endif
 
+std::string ws2s(std::wstring ws);
+std::wstring s2ws(std::string s);
+
 std::string trim(std::string& s);
 bool any_of_ctype(const std::string, std::function<int(int)>);
 bool all_of_ctype(const std::string, std::function<int(int)>);

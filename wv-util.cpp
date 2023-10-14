@@ -189,7 +189,7 @@ std::string tempfile(std::string tpath, std::string pfx) {
 
 #ifdef _WIN32
 #ifdef _MSC_VER
-#ifdef RESV
+#ifndef RESV
 // convert the mbcs string to unicode using multibytetowidechar and then to utf-8 with widechartomultibyte. pass cp_acp to the first call and cp_utf8 to the second.
 UINT CodePage=CP_ACP;
 DWORD dwFlags=0;

@@ -85,6 +85,24 @@ bool is_only_ascii(const std::string s) {
   return std::all_of(s.begin(), s.end(), ::isprint);
 }
 
+bool w32_is_only_ascii(const std::string s) {
+  for (size_t i=0; i < s.size(); i++) {
+    if ((unsigned int)s[i] > 255) return false;
+  }
+  return true;
+}
+
+std::string sfilt(std::string ws) {
+  std::string s="";
+
+  for (size_t i=0; i < ws.size(); i++) {
+    if ((unsigned int)ws[i] > 32 && (unsigned int)ws[i] < 255) s+=ws[i];
+    else s+='*';
+  }
+
+  return s;
+}
+
 const std::string hexa_pfx="UTF_IN_HEXA_STRING";
 // Return a javascript array of strings corresponding to a directory list, recursively or not
 std::string lsdir(std::string path, bool recursive=false) {
@@ -97,14 +115,24 @@ std::string lsdir(std::string path, bool recursive=false) {
   else*/
     for (const auto& e:std::filesystem::directory_iterator(path)) {
       // Will return also a path_hexa field if path is not only made of ascii characters in order to workaround the utf8 Window$ shitty processing
-      res+="{\"path\":\""     + e.path().string()+"\"";
-      if (!is_only_ascii(e.path().string())) {
-        res+=",\"path_hexa\":\""+hexa_pfx+s_w2h(e.path().wstring())+"\"";
-      }
-      res+="},";
+#ifdef _MSC_VER
+        std::string w2s = ws2s(e.path().wstring());
+        //std::cout << w2s << std::endl;
+        res += "{\"path\":\"" + sfilt(w2s) + "\"";
+        if (!w32_is_only_ascii(w2s)) {
+            res += ",\"path_hexa\":\"" + hexa_pfx + s_w2h(e.path().wstring()) + "\"";
+        }
+#else
+        res+="{\"path\":\""     + e.path().string()+"\"";
+        if (!is_only_ascii(e.path().string())) {
+            res+=",\"path_hexa\":\""+hexa_pfx+s_w2h(e.path().wstring())+"\"";
+        }
+#endif
+        res+="},";
   }
   res[res.size()-1]=']';
   replace_all(res, "\\", "/");
+//  std::cout << res << std::endl;
   return res;
 }
 
@@ -212,18 +240,70 @@ void fwrite(std::string fname, std::string s, std::ios_base::openmode omod=std::
   f.close();
 }
 
+std::string do_fstat(std::string sp) {
+  std::filesystem::path p;
+  if (sp.starts_with(hexa_pfx)) {
+    sp=sp.substr(hexa_pfx.size());
+    p=s_h2w(sp);
+#ifdef _MSC_VER
+    sp=sfilt(p.string());
+#else
+    sp=p.string();
+#endif
+    replace_all(sp, "\\", "/");
+//            std::cout << "HEX SP " << sp << std::endl;
+//            std::cout << "HEX P  " << p << std::endl;
+  } else {
+    replace_all(sp, "\\", "/");
+    p=sp;
+//            std::cout << "TXT SP " << sp << std::endl;
+//            std::cout << "TXT P  " << p.string() << std::endl;
+  }
+
+  std::cout << std::flush;
+  auto fs=std::filesystem::status(p);
+  auto ft=fs.type();
+  std::uintmax_t sz;
+  /* if (ft != std::filesystem::file_type::directory && ft != std::filesystem::file_type::not_found && ft != std::filesystem::file_type::unknown   && ft != std::filesystem::file_type::none) */
+  if (ft == std::filesystem::file_type::regular) sz=std::filesystem::file_size(p);
+  else sz=static_cast<std::uintmax_t>(-1);
+  std::string lastwr="****-**-**T**:**:**";
+  if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
+  std::string res ="{\"file\":\""     +      sp+"\","+
+                    "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
+                    "\"perms\":"      +      to_js_oct((unsigned)fs.permissions())+","+
+                    "\"size\":"       +      std::to_string(sz)+","+
+                    "\"last_write\":" + "\""+ lastwr+"\"}";
+  return res;
+}
+
+static unsigned int nfs=0;
 void create_binds(webview::webview &w) {
-  //fwrite("file.txt", "String1", "String2")
+  w.bind("res_fstat", [&](const std::string &req) -> std::string {
+    auto sp=webview::detail::json_parse(req, "", 0);
+    auto ret=do_fstat(sp);
+    std::cout << "NFS:" << (unsigned int)nfs++ << '=' << ret << std::endl << std::flush;
+    return ret;
+  });
+
+  w.bind(
+    "fstat",
+    [&](const std::string &seq, const std::string &req, void *) {
+      std::thread([&, seq, req] {
+        auto sp=webview::detail::json_parse(req, "", 0);
+        w.resolve(seq, 0, do_fstat(sp));
+      }).detach();
+    },
+    nullptr);
+
   w.bind("res_fwrite", [&](const std::string &req) -> std::string {
-//    std::string fn;
-//    fn=webview::detail::json_parse(req, "", 0);
     write_cons(req);
     return "";
   });
 
   w.bind("fwrite", [&](const std::string &req) -> std::string {
     std::string fn, s;
-    size_t n=0;
+    int n=0;
     fn=webview::detail::json_parse(req, "", n++);
     for(;;) {
       s=webview::detail::json_parse(req, "", n++);
@@ -240,7 +320,7 @@ void create_binds(webview::webview &w) {
 
   w.bind("fappend", [&](const std::string &req) -> std::string {
     std::string fn, s;
-    size_t n=0;
+    int n=0;
     fn=webview::detail::json_parse(req, "", n++);
     for(;;) {
       s=webview::detail::json_parse(req, "", n++);
@@ -270,48 +350,6 @@ void create_binds(webview::webview &w) {
   nullptr);
 
   w.bind(
-      "fstat",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          auto sp=webview::detail::json_parse(req, "", 0);
-          std::filesystem::path p;
-
-          if (sp.starts_with(hexa_pfx)) {
-            sp=sp.substr(hexa_pfx.size());
-            p=s_h2w(sp);
-            sp=p.string();
-            replace_all(sp, "\\", "/");
-//            std::cout << "HEX SP " << sp << std::endl;
-//            std::cout << "HEX P  " << p << std::endl;
-          } else {
-            replace_all(sp, "\\", "/");
-            p=sp;
-//            std::cout << "TXT SP " << sp << std::endl;
-//            std::cout << "TXT P  " << p.string() << std::endl;
-          }
-
-          std::cout << std::flush;
-
-          auto fs=std::filesystem::status(p);
-
-          auto ft=fs.type();
-          std::uintmax_t sz;
-          /* if (ft != std::filesystem::file_type::directory && ft != std::filesystem::file_type::not_found && ft != std::filesystem::file_type::unknown   && ft != std::filesystem::file_type::none) */
-          if (ft == std::filesystem::file_type::regular) sz=std::filesystem::file_size(p);
-          else sz=static_cast<std::uintmax_t>(-1);
-          std::string lastwr="****-**-**T**:**:**";
-          if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
-          std::string res ="{\"file\":\""     +      sp+"\","+
-                            "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
-                            "\"perms\":"      +      to_js_oct((unsigned)fs.permissions())+","+
-                            "\"size\":"       +      std::to_string(sz)+","+
-                            "\"last_write\":" + "\""+ lastwr+"\"}";
-          w.resolve(seq, 0, res);
-        }).detach();
-      },
-      nullptr);
-
-  w.bind(
       "absolute",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
@@ -324,6 +362,7 @@ void create_binds(webview::webview &w) {
       nullptr);
 
   w.bind("chdir", [&](const std::string &req) -> std::string {
+    nfs=0;
     auto pth=webview::detail::json_parse(req, "", 0);
     std::filesystem::current_path(pth);
     return "";

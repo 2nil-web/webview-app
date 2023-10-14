@@ -27,3 +27,18 @@ Application using the : [webview library](https://github.com/webview/webview.git
    - To set the webview library run the "initlib.sh" script under bash or the "initlib.bat" script under Windows cmd.
    - Then run make under gcc.
    - Or build the webview-app.sln under MS Visual Studio.
+6. libcurl
+   
+   * Download
+     
+     * git clone https://github.com/curl/curl.git
+   
+   * Static build under visual studio "x64 Native Tools COmmand Prompt for VS 2022"
+     
+     * rename src/tool_hugehelp.c.cvs to src/tool_hugehelp.c
+     
+     * cd curl\winbuild
+     
+     * nmake /f Makefile.vc mode=static
+     
+     * copy ..\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel where you need it.

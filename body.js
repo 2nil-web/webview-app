@@ -9,6 +9,7 @@ file_status("NotFound");
 file_status("wv-runopt.o");
 */
 if (cmd.value === "") {
+  //cmd.value='js_http_req()';
   cmd.value='dir()';
 }
 

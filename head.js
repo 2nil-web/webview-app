@@ -24,7 +24,7 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   var list_size=0;
   function fstat_promise (func, param) {
     if (typeof param !== 'undefined') {
-      //console.log(param.file);
+      console.log(param.path);
       this.elt=param;
     } else {
       //console.log("LS "+list_size+", L "+full_list.length+', v '+elt.file);
@@ -71,20 +71,24 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   }
 
   function ls_promise (func, param) {
+    //console.log("Entrée ls_promise ");
+
     if (typeof param !== 'undefined') {
       this.ls_res=param;
+      //console.log("ls_res "+this.ls_res);
     } else {
-      list_size=ls_res.length;
+      list_size=this.ls_res.length;
 //      console.log("TGT "+target_path);
+      //console.log("ls_res "+this.ls_res);
       this.ls_res.forEach((elt, idx, arr) => {
         elt.path=elt.path.replace(/\\/g, "\/");
 
         if (elt.hasOwnProperty('path_hexa')) {
-//          console.log("HEX "+elt.path_hexa);
-//          console.log("TXB "+elt.path.replace(target_path+"\/",""));
+          //console.log("HX1 "+elt.path_hexa);
+          //console.log("HX2 "+elt.path.replace(target_path+"\/",""));
           promise_run(fstat, elt.path_hexa, fstat_promise);
         } else {
-//          console.log("TXT "+elt.path.replace(target_path+"\/",""));
+          //console.log("TXT "+elt.path.replace(target_path+"\/",""));
           promise_run(fstat, elt.path, fstat_promise);
         }
       });
@@ -94,8 +98,10 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
 
   function abs_promise (func, param) {
     if (typeof param !== 'undefined') {
+      //console.log("target_path "+param);
       this.abs_res=param;
     } else {
+      //console.log("target_path "+this.abs_res);
       target_path=this.abs_res;
       if (rec) promise_run(lsr, this.abs_res, ls_promise);
       else promise_run(ls, this.abs_res, ls_promise);
@@ -106,12 +112,20 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
 }
 
 function reqListener() {
-  console.log(this.responseText);
+  //console.log(this.responseText);
+  jres=JSON.parse(this.responseText);
+  output_text.value += "login: "+jres.login;
+  output_text.value += '\n';
+  output_text.value += "url: "+jres.url;
 }
 
-function myreq() {
+function js_http_req() {
   const req = new XMLHttpRequest();
   req.addEventListener("load", reqListener);
-  req.open("GET", "https://lalannd2:ocvdBum12$*3@wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-02&limit=1000");
+  //req.open("GET", "https://lalannd2:ocvdBum12$*3@wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-02&limit=1000");
+  req.open("GET", "https://api.github.com/users/2nil-web");
   req.send();
-  }
+}
+
+function wv_http_req() {
+}
