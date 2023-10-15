@@ -81,23 +81,37 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
   else MessageBox(NULL, "", "No Win", MB_OK);
 }
 
-bool is_only_ascii(const std::string s) {
-  return std::all_of(s.begin(), s.end(), ::isprint);
-}
-
-bool w32_is_only_ascii(const std::string s) {
-  for (size_t i=0; i < s.size(); i++) {
-    if ((unsigned int)s[i] < 32 || (unsigned int)s[i] > 127) return false;
+bool isWideString(const std::string s) {    
+  for (auto& c : s) { 
+    if(c & 0x80) return true;
   }
-  return true;
+
+  return false;
 }
 
-std::string sfilt(std::string ws) {
-  std::string s="";
+bool isWideString(const std::wstring s) {    
+  for (auto& c : s) { 
+    if(c & 0x80) return true;
+  }
 
-  for (size_t i=0; i < ws.size(); i++) {
-    if ((unsigned int)ws[i] > 32 && (unsigned int)ws[i] < 255) s+=ws[i];
-    else s+='*';
+  return false;
+}
+
+std::string skipWideChars(std::string ws) {
+  std::string s;
+  for(auto& c : ws) { 
+    if(c & 0x80) s+='*';
+    else s+=(char)c;
+  }
+
+  return s;
+}
+
+std::string skipWideChars(std::wstring ws) {
+  std::string s;
+  for(auto& c : ws) { 
+    if(c & 0x80) s+='*';
+    else s+=(char)c;
   }
 
   return s;
@@ -115,25 +129,31 @@ std::string lsdir(std::string path, bool recursive=false) {
   else*/
     for (const auto& e:std::filesystem::directory_iterator(path)) {
       // Will return also a path_hexa field if path is not only made of ascii characters in order to workaround the utf8 Window$ shitty processing
-#ifdef _MSC_VER
-          std::wcout <<  e.path().wstring() << std::endl;
-        std::string w2s = ws2s(e.path().wstring());
-        if (w2s.ends_with("要らない.txt")) {
-          std::wcout <<  e.path().wstring() << std::endl;
-        }
-        //std::cout << w2s << std::endl;
-        res += "{\"path\":\"" + sfilt(w2s) + "\"";
-        if (!w32_is_only_ascii(w2s)) {
-          std::wcout << "w32o " << e.path().wstring() << std::endl;
-            res += ",\"path_hexa\":\"" + hexa_pfx + s_w2h(e.path().wstring()) + "\"";
-        }
-#else
-        res+="{\"path\":\""     + e.path().string()+"\"";
-        if (!is_only_ascii(e.path().string())) {
-            res+=",\"path_hexa\":\""+hexa_pfx+s_w2h(e.path().wstring())+"\"";
-        }
+
+#ifdef RES_MSC_VER
+      std::wcout << "wstr " << e.path().wstring() << std::endl;
+      //std::cout << " str " << e.path().string() << std::endl;
+      res += "{\"path\":\""+skipWideChars(w2s) + "\"";
+      if (isWideString(w2s)) {
+        std::wcout << "wstr " << e.path().wstring() << std::endl;
+        res += ",\"path_hexa\":\"" + hexa_pfx + s_w2h(e.path().wstring()) + "\"";
+      }
 #endif
-        res+="},";
+
+#ifdef _MSC_VER
+      std::string eps = ws2s(e.path().wstring());
+#else
+      std::string eps = e.path().string();
+#endif
+      std::cout << e.path() << std::endl;
+      std::cout << eps << std::endl;
+      res+="{\"path\":\""+eps+"\"";
+      if (isWideString(eps)) {
+        std::string hs=hexa_pfx+s_w2h(e.path().wstring());
+        res+=",\"path_hexa\":\""+hs+"\"";
+        std::cout << hs << std::endl;
+      }
+      res+="},";
   }
   res[res.size()-1]=']';
   replace_all(res, "\\", "/");
@@ -252,7 +272,7 @@ std::string do_fstat(std::string sp) {
     replace_all(sp, "\\", "/");
     p=s_h2w(sp);
 #ifdef _MSC_VER
-    sp=sfilt(p.string());
+    sp=skipWideChars(p.string());
     if (sp != p.string()) std::cout << "HEX " << sp << "\n  # " << p << std::endl;
 #else
     sp=p.string();
