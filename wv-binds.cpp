@@ -20,6 +20,7 @@
 #include "wv-util.h"
 #include "base64.hpp"
 #include "wv-winapi.h"
+#include "wv-curl.h"
 
 webview::webview *w=nullptr;
 
@@ -306,6 +307,18 @@ void create_binds(webview::webview &w) {
     std::cout << "NFS:" << (unsigned int)nfs++ << '=' << ret << std::endl << std::flush;
     return ret;
   });
+
+  w.bind(
+    "httpget",
+    [&](const std::string &seq, const std::string &req, void *) {
+      std::thread([&, seq, req] {
+        auto sp=webview::detail::json_parse(req, "", 0);
+        auto res=httpget(sp);
+        std::cout << res << std::endl;
+        w.resolve(seq, 0, res);
+      }).detach();
+    },
+    nullptr);
 
   w.bind(
     "fstat",

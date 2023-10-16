@@ -111,21 +111,52 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   promise_run(absolute, path, abs_promise);
 }
 
-function reqListener() {
-  //console.log(this.responseText);
-  jres=JSON.parse(this.responseText);
+
+// XMLHttpRequest does not work on thales (TAS) local sites because of CORS restriction on them but works for sites outside because of edge proxy configuration.
+// Meanwhile curl request work on local sites but don't on external site because proxy not configured (although it could be done ...)
+function curl_promise(func, param) {
+  if (typeof param !== 'undefined') {
+    this.httpget_res=param;
+  } else {
+    console.log("httpget res: "+JSON.stringify(this.httpget_res));
+    // <= > jq -r '.results[].title'
+    this.httpget_res.results.forEach((el) => {
+      output_text.value+=el.title+'\n';
+    });
+  }
+}
+
+function curl() {
+  promise_run(httpget, "https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-02&limit=1000", curl_promise);
+}
+
+function process_http_res (jres) {
+  console.log("http res: "+JSON.stringify(jres));
   output_text.value += "login: "+jres.login;
   output_text.value += '\n';
   output_text.value += "url: "+jres.url;
 }
 
-function js_http_req() {
+function httpget_promise(func, param) {
+  if (typeof param !== 'undefined') {
+    this.httpget_res=param;
+  } else {
+    process_http_res(this.httget_res);
+  }
+}
+
+function reqListener() {
+  console.log(this.responseText);
+  process_http_res(JSON.parse(this.responseText));
+}
+
+function http_query() {
   const req = new XMLHttpRequest();
+
   req.addEventListener("load", reqListener);
-  //req.open("GET", "https://lalannd2:ocvdBum12$*3@wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-02&limit=1000");
   req.open("GET", "https://api.github.com/users/2nil-web");
+//  req.setRequestHeader("Access-Control-Allow-Origin", "*");
+//  req.setRequestHeader("Authorization", "Basic " + btoa("lalannd2:ocvdBum12$*3"));
   req.send();
 }
 
-function wv_http_req() {
-}
