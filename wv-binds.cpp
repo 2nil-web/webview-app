@@ -12,6 +12,7 @@
 #include <thread>
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 #include <regex>
 
 #include <webview.h>
@@ -120,44 +121,34 @@ std::string skipWideChars(std::wstring ws) {
 const std::string hexa_pfx="UTF_IN_HEXA_STRING";
 // Return a javascript array of strings corresponding to a directory list, recursively or not
 std::string lsdir(std::string path, bool recursive=false) {
-  std::string res="[";
+  std::string res, res_line;
   if (path.empty()) path=".";
-/* Pas de récursif, trop dangereux, ça plante le PC ...
-  if (recursive) 
-    for (const auto& e:std::filesystem::recursive_directory_iterator(path))
-      res+='"'+e.path().string()+"\",";
-  else*/
-    for (const auto& e:std::filesystem::directory_iterator(path)) {
-      // Will return also a path_hexa field if path is not only made of ascii characters in order to workaround the utf8 Window$ shitty processing
-
-#ifdef RES_MSC_VER
-      std::wcout << "wstr " << e.path().wstring() << std::endl;
-      //std::cout << " str " << e.path().string() << std::endl;
-      res += "{\"path\":\""+skipWideChars(w2s) + "\"";
-      if (isWideString(w2s)) {
-        std::wcout << "wstr " << e.path().wstring() << std::endl;
-        res += ",\"path_hexa\":\"" + hexa_pfx + s_w2h(e.path().wstring()) + "\"";
-      }
-#endif
-
+  // Pas de récursif, trop dangereux, ça plante le PC ...
+  for (const auto& e:std::filesystem::directory_iterator(path)) {
+    // Will return also a path_hexa field if path is not only made of ascii characters in order to workaround the utf8 Window$ shitty processing
+    std::string eps;
 #ifdef _MSC_VER
-      std::string eps = ws2s(e.path().wstring());
+    eps = ws2s(e.path().wstring());
 #else
-      std::string eps = e.path().string();
+    eps = e.path().string();
 #endif
-      std::cout << e.path() << std::endl;
-      std::cout << eps << std::endl;
-      res+="{\"path\":\""+eps+"\"";
-      if (isWideString(eps)) {
-        std::string hs=hexa_pfx+s_w2h(e.path().wstring());
-        res+=",\"path_hexa\":\""+hs+"\"";
-        std::cout << hs << std::endl;
-      }
-      res+="},";
+
+    res_line="\"path\":\""+eps+'"';
+
+    if (isWideString(eps)) {
+      std::string hs=hexa_pfx+s_w2h(e.path().wstring());
+      res_line+=",\"path_hexa\":\""+hs+'"';
+    }
+
+    //std::cout << res_line << std::endl;
+    res+='{'+res_line+"},";
+    replace_all(res, "\\", "/");
   }
-  res[res.size()-1]=']';
-  replace_all(res, "\\", "/");
-//  std::cout << res << std::endl;
+
+  // Remove last comma
+  res.pop_back();
+
+  res='['+res+']';
   return res;
 }
 
@@ -298,28 +289,20 @@ std::string do_fstat(std::string sp) {
   return res;
 }
 
+
+// Synchronous bind
+void bind_doc(webview::webview &w, const std::string &name, webview::webview::sync_binding_t fn) {
+  w.bind(name, fn);
+}
+
+// Asynchronous bind
+void bind_doc(webview::webview &w, const std::string &name,  webview::webview::binding_t fn, void *arg) {
+  w.bind(name, fn, arg);
+}
+
 static unsigned int nfs=0;
 void create_binds(webview::webview &w) {
-  w.bind("res_fstat", [&](const std::string &req) -> std::string {
-    auto sp=webview::detail::json_parse(req, "", 0);
-    auto ret=do_fstat(sp);
-    std::cout << "NFS:" << (unsigned int)nfs++ << '=' << ret << std::endl << std::flush;
-    return ret;
-  });
-
-  w.bind(
-    "httpget",
-    [&](const std::string &seq, const std::string &req, void *) {
-      std::thread([&, seq, req] {
-        auto sp=webview::detail::json_parse(req, "", 0);
-        auto res=httpget(sp);
-        std::cout << res << std::endl;
-        w.resolve(seq, 0, res);
-      }).detach();
-    },
-    nullptr);
-
-  w.bind(
+  bind_doc(w, 
     "fstat",
     [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
@@ -329,7 +312,8 @@ void create_binds(webview::webview &w) {
     },
     nullptr);
 
-  w.bind("fwrite", [&](const std::string &req) -> std::string {
+  bind_doc(w,
+    "fwrite", [&](const std::string &req) -> std::string {
     std::string fn, s;
     int n=0;
     fn=webview::detail::json_parse(req, "", n++);
@@ -346,7 +330,7 @@ void create_binds(webview::webview &w) {
     return "";
   });
 
-  w.bind("fappend", [&](const std::string &req) -> std::string {
+  bind_doc(w, "fappend", [&](const std::string &req) -> std::string {
     std::string fn, s;
     int n=0;
     fn=webview::detail::json_parse(req, "", n++);
@@ -363,11 +347,11 @@ void create_binds(webview::webview &w) {
     return "";
   });
 
-  w.bind("wait_nothread", [&](const std::string & req) -> std::string {
+  bind_doc(w, "wait_nothread", [&](const std::string & req) -> std::string {
     return sec_wait(webview::detail::json_parse(req, "", 0));
   });
 
-  w.bind(
+  bind_doc(w, 
     "wait_thread",
     [&](const std::string &seq, const std::string &req, void * /*arg*/) {
     std::thread([&, seq, req] {
@@ -377,7 +361,7 @@ void create_binds(webview::webview &w) {
   },
   nullptr);
 
-  w.bind(
+  bind_doc(w, 
       "absolute",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
@@ -389,23 +373,47 @@ void create_binds(webview::webview &w) {
       },
       nullptr);
 
-  w.bind("chdir", [&](const std::string &req) -> std::string {
+  bind_doc(w, "chdir", [&](const std::string &req) -> std::string {
     nfs=0;
     auto pth=webview::detail::json_parse(req, "", 0);
     std::filesystem::current_path(pth);
     return "";
   });
 
-  w.bind(
+  bind_doc(w, 
+    "httpget",
+    [&](const std::string &seq, const std::string &req, void *) {
+      std::thread([&, seq, req] {
+        auto sp=webview::detail::json_parse(req, "", 0);
+        auto res=httpget(sp);
+        std::cout << res << std::endl;
+        w.resolve(seq, 0, res);
+      }).detach();
+    },
+    nullptr);
+
+  bind_doc(w, 
+      "ls_attach",
+      [&](const std::string &req) {
+          auto param=webview::detail::json_parse(req, "", 0);
+          auto res=lsdir(param);
+          std::cout << res << std::endl;
+          return res;
+      });
+
+  bind_doc(w, 
       "ls",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
-          w.resolve(seq, 0, lsdir(webview::detail::json_parse(req, "", 0)));
+          auto param=webview::detail::json_parse(req, "", 0);
+          auto res=lsdir(param);
+          std::cout << res << std::endl;
+          w.resolve(seq, 0, res);
         }).detach();
       },
       nullptr);
 
-  w.bind(
+  bind_doc(w, 
       "lsr",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
@@ -415,7 +423,7 @@ void create_binds(webview::webview &w) {
       nullptr);
 
   // Change window title
-  w.bind("webapp_get_title", [&](const std::string &seq, const std::string &req, void *) {
+  bind_doc(w, "webapp_get_title", [&](const std::string &seq, const std::string &req, void *) {
      std::thread([&, seq, req] {
         std::string prev_title="";
 #ifdef _WIN32
@@ -428,7 +436,7 @@ void create_binds(webview::webview &w) {
     nullptr
   );
 
-  w.bind("webapp_title", [&](const std::string &seq, const std::string &req, void *) {
+  bind_doc(w, "webapp_title", [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
         std::string prev_title="";
 #ifdef _WIN32
@@ -444,7 +452,7 @@ void create_binds(webview::webview &w) {
   );
 
   // Change window dimension and sizing behaviour
-  w.bind("webapp_size", [&](const std::string & req) -> std::string {
+  bind_doc(w, "webapp_size", [&](const std::string & req) -> std::string {
       auto params=webview::detail::json_parse(req, "", 0);
       auto l_width = std::stoi(webview::detail::json_parse(req, "", 0));
       auto l_height = std::stoi(webview::detail::json_parse(req, "", 1));
@@ -454,11 +462,11 @@ void create_binds(webview::webview &w) {
     });
 
   // Exit from the web application
-  w.bind("webapp_exit", [&](const std::string &) -> std::string { w.terminate(); return ""; });
+  bind_doc(w, "webapp_exit", [&](const std::string &) -> std::string { w.terminate(); return ""; });
 
 
   // Run a local command and return an eventual result at a later time.
-  w.bind("webapp_exec", [&](const std::string &seq, const std::string &req, void *) {
+  bind_doc(w, "webapp_exec", [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
         auto cmd=webview::detail::json_parse(req, "", 0);
         std::string res_cmd=exec_cmd(cmd);
@@ -476,35 +484,25 @@ void create_binds(webview::webview &w) {
   );
 
 
-  w.bind("writeln", [&](const std::string &req) -> std::string {
+  bind_doc(w, "writeln", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
     write_cons(s);
     write_cons("\n");
     return "";
   });
 
-  w.bind("ewrite", [&](const std::string &req) -> std::string {
+  bind_doc(w, "ewrite", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
     write_cons(s, std::cerr);
     return "";
   });
 
-  w.bind("ewriteln", [&](const std::string &req) -> std::string {
+  bind_doc(w, "ewriteln", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
     write_cons(s, std::cerr);
     write_cons("\n", std::cerr);
     return "";
   });
-
-  w.bind(
-      "fwrite",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          w.resolve(seq, 0, lsdir(webview::detail::json_parse(req, "", 0)));
-        }).detach();
-      },
-      nullptr);
-
 }
 
 bool run_and_exit=false;

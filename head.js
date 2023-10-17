@@ -24,7 +24,7 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   var list_size=0;
   function fstat_promise (func, param) {
     if (typeof param !== 'undefined') {
-      //console.log(param.file);
+      console.log(param.file);
       this.elt=param;
     } else {
       //console.log("LS "+list_size+", L "+full_list.length+', v '+elt.file);
@@ -71,21 +71,21 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   }
 
   function ls_promise (func, param) {
-    //console.log("Entrée ls_promise ");
+    console.log("Entrée ls_promise ");
 
     if (typeof param !== 'undefined') {
       this.ls_res=param;
-      //console.log("ls_res "+this.ls_res);
+      console.log("len ls_res1="+param.length+", ls_res1 "+param);
     } else {
       list_size=this.ls_res.length;
 //      console.log("TGT "+target_path);
-      //console.log("ls_res "+this.ls_res);
+      console.log("len ls_res2="+this.ls_res.length+", ls_res2 "+this.ls_res);
       this.ls_res.forEach((elt, idx, arr) => {
         elt.path=elt.path.replace(/\\/g, "\/");
 
         if (elt.hasOwnProperty('path_hexa')) {
           //console.log("HX1 "+elt.path_hexa);
-          console.log("HX2 "+elt.path.replace(target_path+"\/",""));
+          //console.log("HX2 "+elt.path.replace(target_path+"\/",""));
           promise_run(fstat, elt.path_hexa, fstat_promise);
         } else {
           //console.log("TXT "+elt.path.replace(target_path+"\/",""));
@@ -98,10 +98,10 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
 
   function abs_promise (func, param) {
     if (typeof param !== 'undefined') {
-      //console.log("target_path "+param);
+      console.log("target_path1 "+param);
       this.abs_res=param;
     } else {
-      //console.log("target_path "+this.abs_res);
+      console.log("target_path2 "+this.abs_res);
       target_path=this.abs_res;
       if (rec) promise_run(lsr, this.abs_res, ls_promise);
       else promise_run(ls, this.abs_res, ls_promise);
@@ -118,7 +118,8 @@ function curl_promise(func, param) {
   if (typeof param !== 'undefined') {
     this.httpget_res=param;
   } else {
-    console.log("httpget res: "+JSON.stringify(this.httpget_res));
+    //console.log(this.httpget_res);
+    //console.log(JSON.stringify(this.httpget_res));
     // <= > jq -r '.results[].title'
     this.httpget_res.results.forEach((el) => {
       output_text.value+=el.title+'\n';
@@ -131,7 +132,8 @@ function curl() {
 }
 
 function process_http_res (jres) {
-  console.log("http res: "+JSON.stringify(jres));
+  //console.log(JSON.stringify(jres));
+  //console.log(jres);
   output_text.value += "login: "+jres.login;
   output_text.value += '\n';
   output_text.value += "url: "+jres.url;
@@ -146,7 +148,6 @@ function httpget_promise(func, param) {
 }
 
 function reqListener() {
-  console.log(this.responseText);
   process_http_res(JSON.parse(this.responseText));
 }
 
