@@ -1,5 +1,4 @@
 
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -329,11 +328,6 @@ void create_binds(webview::webview &w) {
       }).detach();
     },
     nullptr);
-
-  w.bind("res_fwrite", [&](const std::string &req) -> std::string {
-    write_cons(req);
-    return "";
-  });
 
   w.bind("fwrite", [&](const std::string &req) -> std::string {
     std::string fn, s;
