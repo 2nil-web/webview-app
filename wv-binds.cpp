@@ -84,7 +84,8 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
 
 bool isWideString(const std::string s) {    
   for (auto& c : s) { 
-    if(c & 0x80) return true;
+    //if(c & 0x80) return true;
+    if(c > 0xff) return true;
   }
 
   return false;
@@ -92,7 +93,8 @@ bool isWideString(const std::string s) {
 
 bool isWideString(const std::wstring s) {    
   for (auto& c : s) { 
-    if(c & 0x80) return true;
+    //if(c & 0x80) return true;
+    if(c > 0xff) return true;
   }
 
   return false;
@@ -101,7 +103,8 @@ bool isWideString(const std::wstring s) {
 std::string skipWideChars(std::string ws) {
   std::string s;
   for(auto& c : ws) { 
-    if(c & 0x80) s+='*';
+    //if (c & 0x80) s+='_';
+    if (c > 0xff) s+='_';
     else s+=(char)c;
   }
 
@@ -111,7 +114,8 @@ std::string skipWideChars(std::string ws) {
 std::string skipWideChars(std::wstring ws) {
   std::string s;
   for(auto& c : ws) { 
-    if(c & 0x80) s+='*';
+    //if(c & 0x80) s+='*';
+    if (c > 0xff) s+='_';
     else s+=(char)c;
   }
 
@@ -133,6 +137,7 @@ std::string lsdir(std::string path, bool recursive=false) {
     eps = e.path().string();
 #endif
 
+    replace_all(eps, "\\", "/");
     res_line="\"path\":\""+eps+'"';
 
     if (isWideString(eps)) {
@@ -141,14 +146,13 @@ std::string lsdir(std::string path, bool recursive=false) {
     }
 
     //std::cout << res_line << std::endl;
-    res+='{'+res_line+"},";
-    replace_all(res, "\\", "/");
+    res+="{"+res_line+"},";
   }
 
   // Remove last comma
   res.pop_back();
 
-  res='['+res+']';
+  res="{\"result\":["+res+"]}";
   return res;
 }
 
@@ -258,22 +262,24 @@ void fwrite(std::string fname, std::string s, std::ios_base::openmode omod=std::
 
 std::string do_fstat(std::string sp) {
   std::filesystem::path p;
+  std::cout << "deb fstat " << sp << std::endl;
   if (sp.starts_with(hexa_pfx)) {
-    sp=sp.substr(hexa_pfx.size());
-    replace_all(sp, "\\", "/");
-    p=s_h2w(sp);
+    auto sp2=sp.substr(hexa_pfx.size());
+    replace_all(sp2, "\\", "/");
+    p=s_h2w(sp2);
 #ifdef _MSC_VER
     sp=skipWideChars(p.string());
-    if (sp != p.string()) std::cout << "HEX " << sp << "\n  # " << p << std::endl;
+    //if (sp != p.string()) std::cout << "HEX " << sp << "\n  # " << p << std::endl;
 #else
-    sp=p.string();
+    sp=skipWideChars(p.wstring());
+    //sp=p.string();
 #endif
   } else {
-    replace_all(sp, "\\", "/");
     p=sp;
   }
+  replace_all(sp, "\\", "/");
+  std::cout << "mid fstat " << p << std::endl;
 
-  std::cout << std::flush;
   auto fs=std::filesystem::status(p);
   auto ft=fs.type();
   std::uintmax_t sz;
@@ -282,10 +288,11 @@ std::string do_fstat(std::string sp) {
   std::string lastwr="****-**-**T**:**:**";
   if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
   std::string res ="{\"file\":\""     +      sp+"\","+
-                    "\"type\":"       +      std::to_string(forced_file_type(ft))+","+
-                    "\"perms\":"      +      to_js_oct((unsigned)fs.permissions())+","+
-                    "\"size\":"       +      std::to_string(sz)+","+
+                    "\"type\":\""       +      std::to_string(forced_file_type(ft))+"\","+
+                    "\"perms\":\""      +      to_js_oct((unsigned)fs.permissions())+"\","+
+                    "\"size\":\""       +      std::to_string(sz)+"\","+
                     "\"last_write\":" + "\""+ lastwr+"\"}";
+  std::cout << "end fstat:" << res << std::endl << std::flush;
   return res;
 }
 

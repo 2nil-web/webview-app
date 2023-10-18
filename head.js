@@ -24,11 +24,11 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   var list_size=0;
   function fstat_promise (func, param) {
     if (typeof param !== 'undefined') {
-      console.log(param.file);
+      console.log("fs_prom1 "+param.file);
       this.elt=param;
     } else {
-      //console.log("LS "+list_size+", L "+full_list.length+', v '+elt.file);
-      full_list.push(elt);
+      console.log("fs_prom2 LS "+list_size+", L "+full_list.length+', v '+this.elt.file);
+      full_list.push(this.elt);
 
       if (full_list.length === list_size) {
         var res_list=[];
@@ -71,16 +71,14 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   }
 
   function ls_promise (func, param) {
-    console.log("Entrée ls_promise ");
-
     if (typeof param !== 'undefined') {
       this.ls_res=param;
-      console.log("len ls_res1="+param.length+", ls_res1 "+param);
+      console.log("A) ls_res2="+JSON.stringify(this.ls_res)+", len ls_res2 "+this.ls_res.result.length);
     } else {
-      list_size=this.ls_res.length;
-//      console.log("TGT "+target_path);
-      console.log("len ls_res2="+this.ls_res.length+", ls_res2 "+this.ls_res);
-      this.ls_res.forEach((elt, idx, arr) => {
+      list_size=this.ls_res.result.length;
+      console.log("B) TGT "+target_path);
+      console.log("B) ls_res2="+JSON.stringify(this.ls_res)+", len ls_res2 "+this.ls_res.result.length);
+      this.ls_res.result.forEach((elt, idx, arr) => {
         elt.path=elt.path.replace(/\\/g, "\/");
 
         if (elt.hasOwnProperty('path_hexa')) {
@@ -92,7 +90,7 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
           promise_run(fstat, elt.path, fstat_promise);
         }
       });
-      this.ls_res=[];
+      this.ls_res="";
     }
   }
 
@@ -119,7 +117,7 @@ function curl_promise(func, param) {
     this.httpget_res=param;
   } else {
     //console.log(this.httpget_res);
-    //console.log(JSON.stringify(this.httpget_res));
+    console.log(JSON.stringify(this.httpget_res));
     // <= > jq -r '.results[].title'
     this.httpget_res.results.forEach((el) => {
       output_text.value+=el.title+'\n';
