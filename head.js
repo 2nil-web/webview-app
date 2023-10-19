@@ -8,6 +8,21 @@ if (typeof webapp_title === "function") {
 //window.webapp_get_title().then(result => { console.log(result.value); });
 }
   
+function help () {
+  function help_promise (func, param) {
+    if (typeof param !== 'undefined') {
+      console.log("help text1 "+param);
+      this.help=param;
+    } else {
+      console.log("help text2 "+this.help);
+      output_text.value+=this.help;
+    }
+  }
+
+
+  promise_run(webapp_help, "-", help_promise);
+}
+
 function dir(path=".", rec=false, dst_textarea=output_text) {
   //console.log("path "+path+", ta "+dst_textarea);
   function grant_in_number (val, sing, plur) {

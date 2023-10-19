@@ -10,7 +10,7 @@ file_status("wv-runopt.o");
 */
 if (cmd.value === "") {
   //cmd.value='dir()';
-  cmd.value='http_query()';
+  cmd.value='help()';
 }
 
 cmd.focus();
