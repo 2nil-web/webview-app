@@ -189,65 +189,33 @@ std::string tempfile(std::string tpath, std::string pfx) {
 
 #ifdef _WIN32
 #ifdef _MSC_VER
-#ifndef RESV
-// convert the mbcs string to unicode using multibytetowidechar and then to utf-8 with widechartomultibyte. pass cp_acp to the first call and cp_utf8 to the second.
-UINT CodePage=CP_ACP;
-DWORD dwFlags=0;
-std::string ws2s(std::wstring ws) {
-  int l=WideCharToMultiByte(CodePage, dwFlags, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
+// Convert wstring (UTF16) to string (UTF8) in Window context
+std::string ws2s(const std::wstring s) {
+  std::string ret;
+  int cbn=WideCharToMultiByte(CP_UTF8, 0, s.c_str(), -1, NULL, 0, NULL, NULL);
 
-  if (l > 0) {
-    char *sTo=new char[l+1];
-    WideCharToMultiByte(CodePage, dwFlags, ws.c_str(), -1, sTo, l, nullptr, nullptr);
-    sTo[l]='\0';
-    std::string s=sTo;
-    delete sTo;
-    return s;
+  if (cbn > 0) {
+    char *utf8=new char[cbn];
+    if (WideCharToMultiByte(CP_UTF8, 0, s.c_str(), -1, utf8, cbn, NULL, NULL) != 0) ret=utf8;
+    delete[] utf8;
   }
 
-  return "";
+  return ret;
 }
 
-std::wstring s2ws(std::string s) {
-  wchar_t *wsTo=new wchar_t[s.size()+1];
-  wsTo[s.size()]='\0';
-  MultiByteToWideChar(CodePage, dwFlags, s.c_str(), -1, wsTo, (int)s.length());
-  std::wstring ws=wsTo;
-  delete wsTo;
-  return ws;
+// Convert string (UTF8) to wstring (UTF16) in Window context
+std::wstring s2ws(const std::string s) {
+  std::wstring ret;
+  int cchn=MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
+
+  if (cchn > 0) {
+    wchar_t *utf16=new wchar_t[cchn];
+    if (MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, utf16, cchn) != 0) ret=utf16;
+    delete[] utf16;
+  }
+
+  return ret;
 }
-#else
-std::string ws2s(const std::wstring& wide_string) {
-    if (wide_string.empty()) {
-        return "";
-    }
-
-    const auto size_needed = WideCharToMultiByte(CP_UTF8, 0, &wide_string.at(0), (int)wide_string.size(), nullptr, 0, nullptr, nullptr);
-    if (size_needed <= 0) {
-        throw std::runtime_error("WideCharToMultiByte() failed: " + std::to_string(size_needed));
-    }
-
-    std::string result(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, &wide_string.at(0), (int)wide_string.size(), &result.at(0), size_needed, nullptr, nullptr);
-    return result;
-}
-
-std::wstring s2ws(const std::string& string) {
-    if (string.empty()) {
-        return L"";
-    }
-
-    const auto size_needed = MultiByteToWideChar(CP_UTF8, 0, &string.at(0), (int)string.size(), nullptr, 0);
-    if (size_needed <= 0) {
-        throw std::runtime_error("MultiByteToWideChar() failed: " + std::to_string(size_needed));
-    }
-
-    std::wstring result(size_needed, 0);
-    MultiByteToWideChar(CP_UTF8, 0, &string.at(0), (int)string.size(), &result.at(0), size_needed);
-    return result;
-}
-
-#endif
 #else
 
 std::string ws2s(std::wstring ws) {
@@ -261,48 +229,48 @@ std::wstring s2ws(std::string s) {
 }
 #endif
 
-std::string Utf8FromUtf16(const std::wstring& utf16_string) {
-    if (utf16_string.empty()) {
-        return std::string();
-    }
-    int target_length = ::WideCharToMultiByte(
-        CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string.data(),
-        static_cast<int>(utf16_string.length()), nullptr, 0, nullptr, nullptr);
-    if (target_length == 0) {
-        return std::string();
-    }
-    std::string utf8_string;
-    utf8_string.resize(target_length);
-    int converted_length = ::WideCharToMultiByte(
-        CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string.data(),
-        static_cast<int>(utf16_string.length()), utf8_string.data(),
-        target_length, nullptr, nullptr);
-    if (converted_length == 0) {
-        return std::string();
-    }
-    return utf8_string;
-    }
+// Convert an utf8 string into an url encoded hexadecimal one
+std::string s2h(const std::string s) {
+  std::string ret;
+  char hs[5];
+  for (const char *p=s.c_str(); *p; p++) {
+    _snprintf(hs, sizeof(hs), "%%%2.2X", (unsigned char)*p);
+    ret.append(hs);
+  }
 
-std::wstring Utf16FromUtf8(const std::string& utf8_string) {
-    if (utf8_string.empty()) {
-        return std::wstring();
-    }
-    int target_length =
-        ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8_string.data(),
-            static_cast<int>(utf8_string.length()), nullptr, 0);
-    if (target_length == 0) {
-        return std::wstring();
-    }
-    std::wstring utf16_string;
-    utf16_string.resize(target_length);
-    int converted_length =
-        ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8_string.data(),
-            static_cast<int>(utf8_string.length()),
-            utf16_string.data(), target_length);
-    if (converted_length == 0) {
-        return std::wstring();
-    }
-    return utf16_string;
+  return ret;
+}
+
+// Convert an url hexadecimal encoded string into an utf8 string 
+std::string h2s(const std::string s) {
+  std::string ret;
+  int ch;
+
+  for (const char *p=s.c_str(); *p; ) {
+    if (p[0] == '%' && isxdigit(p[1]) && isxdigit(p[2])) {
+      ch=(isdigit(p[1]) ? p[1] - '0' : toupper(p[1]) - 'A' + 10) * 16 + (isdigit(p[2]) ? p[2] - '0' : toupper(p[2]) - 'A' + 10);
+      ret.push_back((char)ch);
+      p += 3;
+    } else if (p[0] == '%' && p[1] == '#' && isdigit(p[2])) {
+      ch=atoi(p + 2);
+      ret.push_back((char)ch);
+      p += 2;
+      while (*p && isdigit(*p)) p++;
+      if (*p == ';') p++;
+    } else ret.push_back(*p++);
+  }
+
+  return ret;
+}
+
+// Convert a wstring to into an url encoded hexadecimal string <=> to javascript 
+std::string ws2u8h(const std::wstring s) {
+  return s2h(ws2s(s));
+}
+
+// Convert an url encoded hexadecimal string into a wstring
+std::wstring u8h2ws(const std::string s) {
+  return s2ws(h2s(s));
 }
 
 std::wstring wfile2wstr(std::string filename) {

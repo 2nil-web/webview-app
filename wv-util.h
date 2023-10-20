@@ -14,8 +14,17 @@ PCHAR* CommandLineToArgvA( PCHAR CmdLine, int* _argc);
 #endif
 #endif
 
+// Convert wstring to string
 std::string ws2s(std::wstring ws);
+// Convert string to wstring
 std::wstring s2ws(std::string s);
+
+// Convert an utf8 string into an url encoded hexadecimal one
+std::string h2s(const std::string s);
+// Convert an url hexadecimal encoded string into an utf8 string 
+std::string s2h(const std::string s);
+
+
 
 std::string trim(std::string& s);
 bool any_of_ctype(const std::string, std::function<int(int)>);

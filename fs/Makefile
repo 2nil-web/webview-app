@@ -19,7 +19,7 @@ else
 	CPPFLAGS+=-DCURL_STATICLIB
 	CXXFLAGS += -std=c++20 -g -Wall 
 	LDFLAGS += -static
-	LDFLAGS += -static -mwindows -g
+	LDFLAGS += -static -g # -mwindows
 	LDFLAGS += -LC:/Software/UnixTools/msys64/mingw64/lib 
 	LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 	#pacman -S mingw-w64-x86_64-curl-gnutls
