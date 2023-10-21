@@ -1,6 +1,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <cstdio>
 #include <cstdlib>
 #include <windows.h>
@@ -41,7 +42,7 @@ std::string s2h(const std::string s) {
   unsigned char uc;
   for (const char *p=s.c_str(); *p; p++) {
     uc=(unsigned char)*p;
-    _snprintf(hs, sizeof(hs), "%%%2.2X", uc);
+    _snprintf_s(hs, sizeof(hs), sizeof(hs), "%%%2.2X", uc);
     ret.append(hs);
   }
 
@@ -87,7 +88,7 @@ std::string EX_s2h(const std::string s) {
   unsigned char uc;
   for (const char *p=s.c_str(); *p; p++) {
     uc=(unsigned char)*p;
-    _snprintf(hs, sizeof(hs), "%%%2.2X", uc);
+    _snprintf_s(hs, sizeof(hs), sizeof(hs), "%%%2.2X", uc);
     ret.append(hs);
   }
 
@@ -113,8 +114,23 @@ void prth(std::string s) {
   prth(s2ws(s));
 }
 
-std::string s2he(std::string s) {
+template<class T>
+std::string Ts2h(T ws) {
+  std::stringstream cnv;
+  std::string res="";
 
+  for (auto wc : ws) {
+    unsigned int ui=(unsigned int)wc;
+    if (ui > 32 && ui < 127) {
+      res+=(char)wc;
+    }else {
+      cnv.str("");
+      cnv << std::hex << ' ' << (unsigned int)wc;
+      res+=cnv.str();
+    }
+  }
+
+  return res;
 }
 
 // Convert non ascii portion of a wstring into url encoded hexadecimal string
@@ -127,7 +143,7 @@ std::string url_encode(std::wstring ws){
     uc=(unsigned char)*p;
     if (uc < 128) s += *p;
     else {
-      _snprintf(hs, sizeof(hs), "%%%02.2X", uc);
+      _snprintf_s(hs, sizeof(hs), sizeof(hs), "%%%02.2X", uc);
       //if (uc < 16) s += "%0"; 
       //else s += "%";
       s.append(hs);
@@ -141,14 +157,15 @@ std::string url_encode(std::wstring ws){
 std::wstring url_decode(std::string str) {
   std::string ret;
   char ch;
-  int i, ii, len=str.length();
+  size_t i, ii;
+  size_t len=str.length();
 
   for (i=0; i < len; i++) {
     if (str[i] != '%') {
       if (str[i] == '+') ret += ' ';
       else ret += str[i];
     } else {
-      sscanf(str.substr(i + 1, 2).c_str(), "%x", &ii);
+      sscanf_s(str.substr(i + 1, 2).c_str(), "%x", &ii);
       ch=static_cast<char>(ii);
       ret += ch;
       i=i + 2;
@@ -173,14 +190,21 @@ int main(int, char*[]) {
   std::cout << "to=" << s_ja << std::endl << std::flush;
   std::cout << "back=" << ws2s(ws_ja2) << std::endl << std::flush;
 
-*/
 
   std::string sja="string=😀ドイツ語で検索していてこちらのサイトにたどり着きました。";
   prth(sja);
+*/
 
-  std::wstring ja=L"string=😀ドイツ語で検索していてこちらのサイトにたどり着きました。";
-  prth(ja);
-  return 0;
+  std::wstring ws=L"string=😀ドイツ語で検索していてこちらのサイトにたどり着きました。";
+  prth(ws);
+  std::cout << Ts2h(ws) << std::endl;
+
+  std::string s="string=😀ドイツ語で検索していてこちらのサイトにたどり着きました。";
+  prth(s);
+  std::cout << Ts2h(s) << std::endl;
+
+ return 0;
+ /*
   std::cout << "wstring to utf8 hex " << std::endl;
   std::cout << ws2s(ja) << std::endl;
   std::cout << ws2u8h(ja) << std::endl;
@@ -192,6 +216,6 @@ int main(int, char*[]) {
   std::cout << ws2s(newja) << std::endl;
   std::cout << "match?=" << (newja == ja ? "yes" : "no") << std::endl;
 
-  return 0;
+  return 0;*/
 }
 

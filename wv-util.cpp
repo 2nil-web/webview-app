@@ -234,7 +234,7 @@ std::string s2h(const std::string s) {
   std::string ret;
   char hs[5];
   for (const char *p=s.c_str(); *p; p++) {
-    _snprintf(hs, sizeof(hs), "%%%2.2X", (unsigned char)*p);
+    _snprintf_s(hs, sizeof(hs), sizeof(hs), "%%%2.2X", (unsigned char)*p);
     ret.append(hs);
   }
 
