@@ -296,8 +296,8 @@ std::string do_fstat(std::string sp) {
   return res;
 }
 
-std::vector <std::pair<std::string, std::string>> func_help={
-};
+using pair_of_string = std::pair<std::string, std::string>;
+std::vector <pair_of_string> func_help;
 
 void add_to_doc(const std::string name, const std::string desc) {
   func_help.push_back(make_pair(name, desc));
@@ -305,31 +305,47 @@ void add_to_doc(const std::string name, const std::string desc) {
 
 
 // Synchronous bind
-void bind_doc(webview::webview &w, const std::string &name, const std::string desc, webview::webview::sync_binding_t fn) {
+void bind_doc(webview::webview &w, const std::string &name, const std::string desc, webview::webview::sync_binding_t fn, bool indoc=true) {
+  //std::cout << "sync bind " << name << std::endl;
   w.bind(name, fn);
-  add_to_doc(name, desc);
+  if (indoc) add_to_doc(name, desc);
 }
 
 // Asynchronous bind
-void bind_doc(webview::webview &w, const std::string &name, const std::string desc,  webview::webview::binding_t fn, void *arg) {
+void bind_doc(webview::webview &w, const std::string &name, const std::string desc,  webview::webview::binding_t fn, void *arg=nullptr, bool indoc=true) {
+  //std::cout << "async bind " << name << std::endl;
   w.bind(name, fn, arg);
-  add_to_doc(name, desc);
+  if (indoc) add_to_doc(name, desc);
 }
 
+// console.log(webapp_help())
 static unsigned int nfs=0;
 void create_binds(webview::webview &w) {
-  w.bind("webapp_help", [&](const std::string & req) -> std::string {
-    std::string s;
-    for (const auto &fh:func_help) {
-//      std::cout << fh.first+':'+fh.second << std::endl << std::flush;
-      s+=fh.first+':'+fh.second+'\n';
+  bind_doc(w, "webapp_help", "return a help message.", [&](const std::string & req) -> std::string {
+    auto arg1=webview::detail::json_parse(req, "", 0);
+    std::string res, s="";
+
+    if (arg1 == "tab") {
+      for (auto fh:func_help) {
+        s+="\""+fh.first+"\":\""+fh.second+"\",";
+      }
+
+      // Remove last comma
+      s.pop_back();
+      res="{"+s+"}";
+    } else {
+      for (auto fh:func_help) {
+        s+=fh.first+':'+fh.second;
+      }
+      res='"'+s+'"';
     }
-    std::cout << s << std::endl;
-    return '"'+s+'"';
+
+    //std::cout << res << std::endl;
+    return res;
   });
 
   bind_doc(w, 
-    "fstat", "Gives information details on a file.",
+    "fstat", "gives information details on a file.",
     [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
         auto sp=webview::detail::json_parse(req, "", 0);
@@ -339,7 +355,7 @@ void create_binds(webview::webview &w) {
     nullptr);
 
   bind_doc(w,
-    "fwrite", "Truncate and write to file with provided file name.", [&](const std::string &req) -> std::string {
+    "fwrite", "truncate and write to file with provided file name.", [&](const std::string &req) -> std::string {
     std::string fn, s;
     int n=0;
     fn=webview::detail::json_parse(req, "", n++);
@@ -356,7 +372,7 @@ void create_binds(webview::webview &w) {
     return "";
   });
 
-  bind_doc(w, "fappend", "Append to file with provided file name.", [&](const std::string &req) -> std::string {
+  bind_doc(w, "fappend", "append to file with provided file name.", [&](const std::string &req) -> std::string {
     std::string fn, s;
     int n=0;
     fn=webview::detail::json_parse(req, "", n++);
@@ -388,7 +404,7 @@ void create_binds(webview::webview &w) {
   nullptr);
 
   bind_doc(w, 
-      "absolute", "Gives absolute path of a file path.",
+      "absolute", "gives absolute path of a file path.",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
           auto pth=webview::detail::json_parse(req, "", 0);
@@ -399,7 +415,7 @@ void create_binds(webview::webview &w) {
       },
       nullptr);
 
-  bind_doc(w, "chdir", "Change current directory.", [&](const std::string &req) -> std::string {
+  bind_doc(w, "chdir", "change current directory.", [&](const std::string &req) -> std::string {
     nfs=0;
     auto pth=webview::detail::json_parse(req, "", 0);
     std::filesystem::current_path(pth);
@@ -407,7 +423,7 @@ void create_binds(webview::webview &w) {
   });
 
   bind_doc(w, 
-    "httpget", "Run an http get with the provided url.",
+    "httpget", "run an http get with the provided url.",
     [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
         auto sp=webview::detail::json_parse(req, "", 0);
@@ -419,7 +435,7 @@ void create_binds(webview::webview &w) {
     nullptr);
 
   bind_doc(w, 
-      "ls_attach", "List provided directory in foreground.",
+      "ls_attach", "list provided directory in foreground.",
       [&](const std::string &req) {
           auto param=webview::detail::json_parse(req, "", 0);
           auto res=lsdir(param);
@@ -428,7 +444,7 @@ void create_binds(webview::webview &w) {
       });
 
   bind_doc(w, 
-      "ls", "List provided directory in background",
+      "ls", "list provided directory in background",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
           auto param=webview::detail::json_parse(req, "", 0);
@@ -440,7 +456,7 @@ void create_binds(webview::webview &w) {
       nullptr);
 
   bind_doc(w, 
-      "lsr", "List provided directory recursively in background ==> very dangerous may hangs the machine !",
+      "lsr", "list provided directory recursively in background ==> very dangerous may hangs the machine !",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
           w.resolve(seq, 0, lsdir(webview::detail::json_parse(req, "", 0), true));
@@ -448,8 +464,15 @@ void create_binds(webview::webview &w) {
       },
       nullptr);
 
-  // Change window title
-  bind_doc(w, "webapp_get_title", "Return webapp window title.", [&](const std::string &seq, const std::string &req, void *) {
+  bind_doc(w, "webapp_get_title", "return webapp window title in foreground.", [&](const std::string &req) -> std::string {
+        std::string prev_title="";
+#ifdef _WIN32
+        prev_title=GetWindowText((HWND)w.window());
+#endif
+        return "{\"value\": \""+prev_title+"\"}";
+  });
+
+  bind_doc(w, "webapp_get_title_bg", "return webapp window title in background.", [&](const std::string &seq, const std::string &req, void *) {
      std::thread([&, seq, req] {
         std::string prev_title="";
 #ifdef _WIN32
@@ -462,7 +485,8 @@ void create_binds(webview::webview &w) {
     nullptr
   );
 
-  bind_doc(w, "webapp_title", "Change webapp window title. ", [&](const std::string &seq, const std::string &req, void *) {
+  // Change window title
+  bind_doc(w, "webapp_title", "change webapp window title.", [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
         std::string prev_title="";
 #ifdef _WIN32
@@ -478,7 +502,7 @@ void create_binds(webview::webview &w) {
   );
 
   // Change window dimension and sizing behaviour
-  bind_doc(w, "webapp_size", "Set dimension and hint of webapp window.", [&](const std::string & req) -> std::string {
+  bind_doc(w, "webapp_size", "set dimension and hint of webapp window.", [&](const std::string & req) -> std::string {
       auto params=webview::detail::json_parse(req, "", 0);
       auto l_width = std::stoi(webview::detail::json_parse(req, "", 0));
       auto l_height = std::stoi(webview::detail::json_parse(req, "", 1));
@@ -488,11 +512,11 @@ void create_binds(webview::webview &w) {
     });
 
   // Exit from the web application
-  bind_doc(w, "webapp_exit", "Exit from webapp.", [&](const std::string &) -> std::string { w.terminate(); return ""; });
+  bind_doc(w, "webapp_exit", "exit from webapp.", [&](const std::string &) -> std::string { w.terminate(); return ""; });
 
 
   // Run a local command and return an eventual result at a later time.
-  bind_doc(w, "webapp_exec", "Run an external command.", [&](const std::string &seq, const std::string &req, void *) {
+  bind_doc(w, "webapp_exec", "run an external command.", [&](const std::string &seq, const std::string &req, void *) {
       std::thread([&, seq, req] {
         auto cmd=webview::detail::json_parse(req, "", 0);
         std::string res_cmd=exec_cmd(cmd);
@@ -510,20 +534,26 @@ void create_binds(webview::webview &w) {
   );
 
 
-  bind_doc(w, "writeln", "", [&](const std::string &req) -> std::string {
+  bind_doc(w, "write", "write a string to stdout.", [&](const std::string &req) -> std::string {
+    auto s=webview::detail::json_parse(req, "", 0);
+    write_cons(s);
+    return "";
+  });
+
+  bind_doc(w, "writeln", "write a string to stdout and add a carriage return.", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
     write_cons(s);
     write_cons("\n");
     return "";
   });
 
-  bind_doc(w, "ewrite", "", [&](const std::string &req) -> std::string {
+  bind_doc(w, "ewrite", "write a string to stderr.", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
     write_cons(s, std::cerr);
     return "";
   });
 
-  bind_doc(w, "ewriteln", "", [&](const std::string &req) -> std::string {
+  bind_doc(w, "ewriteln", "write a string to stderr and add a carriage return.", [&](const std::string &req) -> std::string {
     auto s=webview::detail::json_parse(req, "", 0);
     write_cons(s, std::cerr);
     write_cons("\n", std::cerr);

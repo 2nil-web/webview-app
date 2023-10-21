@@ -8,19 +8,23 @@ if (typeof webapp_title === "function") {
 //window.webapp_get_title().then(result => { console.log(result.value); });
 }
   
-function help () {
+function help (fmt) {
   function help_promise (func, param) {
     if (typeof param !== 'undefined') {
-      console.log("help text1 "+param);
-      this.help=param;
+      this.obj=param;
     } else {
-      console.log("help text2 "+this.help);
-      output_text.value+=this.help;
+      if (fmt === "tab") {
+        Object.keys(this.obj).forEach(key => {
+          output_text.value+=key+": "+obj[key]+"\n";
+        });
+      } else {
+          output_text.value+=this.obj.replace(/\./g, ".\n");;
+      }
     }
   }
 
 
-  promise_run(webapp_help, "-", help_promise);
+  promise_run(webapp_help, fmt, help_promise);
 }
 
 function dir(path=".", rec=false, dst_textarea=output_text) {
