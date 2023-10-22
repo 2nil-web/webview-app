@@ -21,6 +21,9 @@
 #include "base64.hpp"
 #include "wv-winapi.h"
 #include "wv-curl.h"
+#include "Utf8Conv.hpp"
+using Utf8Conv::Utf16ToUtf8;
+using Utf8Conv::Utf8ToUtf16;
 
 webview::webview *w=nullptr;
 
@@ -262,13 +265,13 @@ void fwrite(std::string fname, std::string s, std::ios_base::openmode omod=std::
 
 std::string do_fstat(std::string sp) {
   std::filesystem::path p;
-  std::cout << "deb fstat " << sp << std::endl;
+//  std::cout << "deb fstat " << sp << std::endl;
   if (sp.starts_with(hexa_pfx)) {
     auto sp2=sp.substr(hexa_pfx.size());
     replace_all(sp2, "\\", "/");
     p=s_h2w(sp2);
 #ifdef _MSC_VER
-    sp=skipWideChars(p.string());
+    sp=Utf16ToUtf8(p.wstring());
     //if (sp != p.string()) std::cout << "HEX " << sp << "\n  # " << p << std::endl;
 #else
     sp=skipWideChars(p.wstring());
@@ -278,7 +281,7 @@ std::string do_fstat(std::string sp) {
     p=sp;
   }
   replace_all(sp, "\\", "/");
-  std::cout << "mid fstat " << p << std::endl;
+//  std::cout << "mid fstat " << p << std::endl;
 
   auto fs=std::filesystem::status(p);
   auto ft=fs.type();
@@ -287,11 +290,14 @@ std::string do_fstat(std::string sp) {
   else sz=static_cast<std::uintmax_t>(-1);
   std::string lastwr="****-**-**T**:**:**";
   if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
-  std::string res ="{\"file\":\""     +      sp+"\","+
-                    "\"type\":\""       +      std::to_string(forced_file_type(ft))+"\","+
-                    "\"perms\":\""      +      to_js_oct((unsigned)fs.permissions())+"\","+
-                    "\"size\":\""       +      std::to_string(sz)+"\","+
-                    "\"last_write\":" + "\""+ lastwr+"\"}";
+  else {
+    std::cout << "NOT FOUND " << sp << std::endl;
+  }
+  std::string res ="{\"file\":\""       + sp+"\","+
+                    "\"type\":\""       + std::to_string(forced_file_type(ft))+"\","+
+                    "\"perms\":\""      + to_js_oct((unsigned)fs.permissions())+"\","+
+                    "\"size\":\""       + std::to_string(sz)+"\","+
+                    "\"last_write\":\"" + lastwr+"\"}";
   std::cout << "end fstat:" << res << std::endl << std::flush;
   return res;
 }
@@ -449,7 +455,7 @@ void create_binds(webview::webview &w) {
         std::thread([&, seq, req] {
           auto param=webview::detail::json_parse(req, "", 0);
           auto res=lsdir(param);
-          std::cout << res << std::endl;
+          //std::cout << res << std::endl;
           w.resolve(seq, 0, res);
         }).detach();
       },

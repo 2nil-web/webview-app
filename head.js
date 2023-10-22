@@ -43,10 +43,10 @@ function dir(path=".", rec=false, dst_textarea=output_text) {
   var list_size=0;
   function fstat_promise (func, param) {
     if (typeof param !== 'undefined') {
-      console.log("fs_prom1 "+param.file);
+      //console.log("fs_prom1 "+param.file);
       this.elt=param;
     } else {
-      console.log("fs_prom2 LS "+list_size+", L "+full_list.length+', v '+this.elt.file);
+      console.log("fs_prom2 LS "+list_size+", L "+full_list.length+', perm '+this.elt.perms+', v '+this.elt.file);
       full_list.push(this.elt);
 
       if (full_list.length === list_size) {

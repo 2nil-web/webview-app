@@ -1,7 +1,7 @@
 
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
-#DO_MSBUILD=0
+DO_MSBUILD=0
 
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64
@@ -19,7 +19,7 @@ else
 	CPPFLAGS+=-DCURL_STATICLIB
 	CXXFLAGS += -std=c++20 -g -Wall 
 	LDFLAGS += -static
-	LDFLAGS += -static -g # -mwindows
+	LDFLAGS += -static -g -mwindows
 	LDFLAGS += -LC:/Software/UnixTools/msys64/mingw64/lib 
 	LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 	#pacman -S mingw-w64-x86_64-curl-gnutls
@@ -34,7 +34,7 @@ EXES=${SRCS:.cc=.exe}
 all : ${EXES}
 
 clean :
-	rm -f ${EXES}
+	rm -f ${EXES} *.mslog
 
 %.exe: %.cc
 ifeq ($(DO_MSBUILD),1)
@@ -43,3 +43,4 @@ ifeq ($(DO_MSBUILD),1)
 else
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 endif
+
