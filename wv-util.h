@@ -24,6 +24,7 @@ std::string h2s(const std::string s);
 // Convert an url hexadecimal encoded string into an utf8 string 
 std::string s2h(const std::string s);
 
+std::string file2str(std::string filename);
 
 
 std::string trim(std::string& s);

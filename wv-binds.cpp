@@ -596,8 +596,16 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
   }
 }
 
+void nav(std::string url) {
+#ifdef _WIN32
+  w->navigate(url);
+#else
+  w->set_html(file2str(url));
+#endif
+}
+
 void webview_run(std::string url, std::string title, std::string init_js) {
-  std::cout << "URL " << url << ", TITLE " << title << ", JS " << init_js << std::endl;
+  //std::cout << "URL " << url << ", TITLE " << title << ", JS " << init_js << std::endl;
   w->set_title(title);
 
   if (run_and_exit) {
@@ -612,7 +620,8 @@ void webview_run(std::string url, std::string title, std::string init_js) {
     if (url.starts_with("html://")) {
       w->set_html(url);
     } else {
-      w->navigate(url);
+      //w->navigate(url);
+      nav(url);
     }
   }
 

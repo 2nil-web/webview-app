@@ -80,7 +80,7 @@ std::vector<run_opt> r_opts = {
 
 
 std::string get_index() {
-  std::cout << "get_index" << std::endl;
+  //std::cout << "get_index" << std::endl;
 
   std::string idx=std::filesystem::absolute("index.html").generic_string();
   if (std::filesystem::is_regular_file(idx)) {

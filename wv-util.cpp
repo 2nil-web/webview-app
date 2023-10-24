@@ -40,6 +40,13 @@ std::string trim(std::string& s) {
   return s;
 }
 
+std::string file2str(std::string filename) {
+    std::ifstream ifs(filename);
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    return ss.str();
+}
+
 #ifdef _WIN32
 void WinError(const char *fmt, ...) {
   CHAR *lpMsgBuf;
@@ -330,13 +337,6 @@ std::wstring SystemToString(const std::string cmd) {
   return s;
 }
 #endif
-
-std::string file2str(std::string filename) {
-    std::ifstream ifs(filename);
-    std::stringstream ss;
-    ss << ifs.rdbuf();
-    return ss.str();
-}
 
 std::string exec_cmd(std::string cmd) {
 #ifdef _WIN32
