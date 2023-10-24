@@ -7,6 +7,7 @@
 #include <string.h>
 #endif
 
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -175,12 +176,13 @@ std::string tempfile(std::string tpath, std::string pfx) {
   if (GetTempFileName(tpath.c_str(), pfx.c_str(), 0, tfnw) != 0) tfn=tfnw;
 #else
   tfn=std::string((tpath+pfx).c_str());
-  int id=mkstemp(tfn.c_str());
+  char *stfn=strdup(tfn.c_str());
+  int id=mkstemp(stfn);
 
   if (id != -1) {
     close(id);
-    unlink(tfnl.c_str());
-    tfn=tfnl;
+    unlink(stfn);
+    tfn=stfn;
   }
 #endif
 
@@ -285,13 +287,6 @@ std::wstring wfile2wstr(std::string filename) {
     return wss.str();
 }
 
-std::string file2str(std::string filename) {
-    std::ifstream ifs(filename);
-    std::stringstream ss;
-    ss << ifs.rdbuf();
-    return ss.str();
-}
-
 const wchar_t *getcmdw() {
   static wchar_t cmd_path[MAX_PATH];
   if (SearchPathW(nullptr, L"cmd", L".exe", MAX_PATH, cmd_path, nullptr)) return cmd_path;
@@ -335,6 +330,13 @@ std::wstring SystemToString(const std::string cmd) {
   return s;
 }
 #endif
+
+std::string file2str(std::string filename) {
+    std::ifstream ifs(filename);
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    return ss.str();
+}
 
 std::string exec_cmd(std::string cmd) {
 #ifdef _WIN32

@@ -19,11 +19,13 @@
 
 #include "wv-util.h"
 #include "base64.hpp"
+#ifdef _WIN32
 #include "wv-winapi.h"
-#include "wv-curl.h"
 #include "Utf8Conv.hpp"
 using Utf8Conv::Utf16ToUtf8;
 using Utf8Conv::Utf8ToUtf16;
+#endif
+#include "wv-curl.h"
 
 webview::webview *w=nullptr;
 
@@ -82,7 +84,9 @@ void write_cons(std::string s, std::ostream& out=std::cout) {
 #endif
 
   if (w != nullptr) w->eval("console.log('[["+s+"]]');");
+#ifdef _WIN32
   else MessageBox(NULL, "", "No Win", MB_OK);
+#endif
 }
 
 bool isWideString(const std::string s) {    
@@ -229,8 +233,8 @@ std::time_t to_time_t(TP tp) {
 #define my_gmtime(a,b) gmtime_s(b,a)
 #define my_localtime(a,b) localtime_s(b,a)
 #else
-#define my_gmtime(a,b) std::gmtime_r(a,b)
-#define my_localtime(a,b) std::localtime_r(a,b)
+#define my_gmtime(a,b) gmtime_r(a,b)
+#define my_localtime(a,b) localtime_r(a,b)
 #endif
 
 // Convert a file time to a string, default format is ISO8601 and default time zone is local
@@ -593,6 +597,7 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
 }
 
 void webview_run(std::string url, std::string title, std::string init_js) {
+  std::cout << "URL " << url << ", TITLE " << title << ", JS " << init_js << std::endl;
   w->set_title(title);
 
   if (run_and_exit) {

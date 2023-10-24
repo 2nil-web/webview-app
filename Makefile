@@ -2,7 +2,9 @@
 # Intégrer clang-format
 # js check + minify
 
-ifneq ($(shell uname -s),Linux)
+OS=$(shell uname -s)
+
+ifneq (${OS},Linux)
 ECHO=echo -e
 else
 ECHO=echo
@@ -13,7 +15,9 @@ PGF86=${PGF} (x86)
 PATH:=${PATH}:${PGF86}/Inno Setup 6
 PATH:=${PATH}:${PGF}/Inkscape/bin
 
-MAGICK=magick
+ifneq (${OS},Linux)
+ MAGICK=magick
+endif
 RC=windres
 STRIP=strip
 UPX=upx
@@ -24,16 +28,26 @@ DECORATION=Nawak-Bidon
 
 WVDIR=webview
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
-CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include --include=webview_mingw_support.h
+CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include
 
-CPPFLAGS+=-IC:/Software/UnixTools/msys64/mingw64/include
 CPPFLAGS+=-DCURL_STATICLIB
 
 
 CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
-LDFLAGS += -static -mwindows -g
+LDLIBS += -lcurl
+LDFLAGS += -g
+
+ifeq (${OS},Linux)
+CXXFLAGS += $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-4.0)
+LDFLAGS +=-L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/webkit2gtk-4.0 -L/usr/lib/x86_64-linux-gnu/cmake/harfbuzz -L/usr/lib/python3/dist-packages/cairo -L/usr/lib/x86_64-linux-gnu/glib-2.0 -L/usr/lib/x86_64-linux-gnu/glib-2.0
+LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.0)
+else
+CPPFLAGS+=-IC:/Software/UnixTools/msys64/mingw64/include
+CPPFLAGS += --include=webview_mingw_support.h
+LDFLAGS += -mwindows
 LDFLAGS += -LC:/Software/UnixTools/msys64/mingw64/lib 
+LDFLAGS += -static
 
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
@@ -44,6 +58,7 @@ LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
 # pacman -S mingw-w64-x86_64-curl-gnutls
 #LDLIBS += -lcurl -lrtmp -lz -lgmp -lgnutls -lhogweed -lnettle -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lnettle -lgnutls -lwldap32 -lzstd -lzstd -lbrotlidec
 #LDLIBS += -lbrotlidec -lz -lws2_32 -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+endif
 
 
 
@@ -55,8 +70,14 @@ DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
 EXEXT=.exe
 PREFIX=webview-app
 SRCS=$(wildcard *.cpp)
-OBJS=$(SRCS:.cpp=.o)
-OBJS += ${PREFIX}_res.o
+ifeq (${OS},Linux)
+SRCS:=$(filter-out wv-winapi.cpp,${SRCS})
+else
+OBJS=${PREFIX}_res.o
+RES_SRC=${PREFIX}_res.rc
+endif
+
+OBJS+=$(SRCS:.cpp=.o)
 
 TARGET=${PREFIX}${EXEXT}
 
@@ -71,7 +92,7 @@ all : version_check.txt version.h ${PREFIX}.ico ${TARGET}
 
 ${TARGET} : ${ARCH}/${CONF}/${TARGET}
 
-${ARCH}/${CONF}/${TARGET} : ${SRCS} ${PREFIX}_res.rc
+${ARCH}/${CONF}/${TARGET} : ${SRCS} ${RES_SRC}
 	${MSBUILD} webview-app.sln -p:Configuration=${CONF}
 	cp ${ARCH}/${CONF}/*.exe .
 else

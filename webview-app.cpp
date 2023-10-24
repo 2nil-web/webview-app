@@ -1,5 +1,8 @@
 
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -77,10 +80,19 @@ std::vector<run_opt> r_opts = {
 
 
 std::string get_index() {
+  std::cout << "get_index" << std::endl;
+
   std::string idx=std::filesystem::absolute("index.html").generic_string();
-  if (std::filesystem::is_regular_file(idx)) return idx;
+  if (std::filesystem::is_regular_file(idx)) {
+    std::cout << "html " << idx << std::endl;
+    return idx;
+  }
+
   idx=std::filesystem::absolute("index.js").generic_string();
-  if (std::filesystem::is_regular_file(idx)) return idx;
+  if (std::filesystem::is_regular_file(idx)) {
+    std::cout << "js " << idx << std::endl;
+    return idx;
+  }
 
   return "";
 }

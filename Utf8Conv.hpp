@@ -97,7 +97,7 @@
 //                              Includes
 //------------------------------------------------------------------------------
 
-#include <Windows.h>        // Windows Platform SDK
+#include <windows.h>        // Windows Platform SDK
 #include <crtdbg.h>         // _ASSERTE
 
 #include <limits>           // For std::numeric_limits
