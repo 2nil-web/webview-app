@@ -1,8 +1,4 @@
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
@@ -24,6 +20,7 @@
 #include "Utf8Conv.hpp"
 using Utf8Conv::Utf16ToUtf8;
 using Utf8Conv::Utf8ToUtf16;
+#include <windows.h>
 #endif
 #include "wv-curl.h"
 
@@ -598,9 +595,9 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
 
 void nav(std::string url) {
 #ifdef _WIN32
-  w->navigate(url);
+  w->navigate(url); // Bug pas sous linux (Debian - pb webkit ?) mais fonctionne correctement sous windows
 #else
-  w->set_html(file2str(url));
+  w->set_html(file2str(url)); // Ne fonctionne pas correctement sous win et linux
 #endif
 }
 
