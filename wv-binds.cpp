@@ -594,11 +594,13 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
 }
 
 void nav(std::string url) {
-#ifdef _WIN32
-  w->navigate(url); // Bug pas sous linux (Debian - pb webkit ?) mais fonctionne correctement sous windows
-#else
-  w->set_html(file2str(url)); // Ne fonctionne pas correctement sous win et linux
-#endif
+std::cout << "fstat2" << std::endl;
+do_fstat(url);
+//#ifdef _WIN32
+  w->navigate(url); // Bug ne fonctionne pas sous linux (Debian - pb webkit ?) mais fonctionne correctement sous windows
+//#else
+//  w->set_html(file2str(url)); // Ne fonctionne pas correctement sous win et linux
+//#endif
 }
 
 void webview_run(std::string url, std::string title, std::string init_js) {
@@ -617,6 +619,9 @@ void webview_run(std::string url, std::string title, std::string init_js) {
     if (url.starts_with("html://")) {
       w->set_html(url);
     } else {
+      if (!url.starts_with("http://") && !url.starts_with("https://")) {
+        url="file://"+url;
+      }
       //w->navigate(url);
       nav(url);
     }

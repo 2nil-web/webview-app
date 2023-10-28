@@ -31,8 +31,13 @@ std::string url, title="", init_js="";
 // short_opt, long_opt, value of opt or empty string
 
 void set_url(char, std::string, std::string val) {
-//  url=val;
-  url=std::filesystem::absolute(val).generic_string();
+  if (val.starts_with("http:") || val.starts_with("https:")) {
+    url=val;
+  } else {
+    url=std::filesystem::absolute(val).generic_string();
+  }
+
+  std::cout << "set_url " << url << std::endl;
   if (title.empty()) title=url;
 }
 
@@ -115,6 +120,9 @@ int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLi
 int main(int argc, char **argv, char **) {
 #endif
   getopt_init(argc, argv, r_opts, "WebView app.", "", "(c) Denis LALANNE. Provided as is. NO WARRANTY of any kind.");
+extern std::string do_fstat(std::string sp);
+std::cout << "fstat1" << std::endl;
+do_fstat(url);
 
   if (url.empty()) {
     if (optind < argc) {
