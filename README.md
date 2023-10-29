@@ -25,8 +25,37 @@ Application using the : [webview library](https://github.com/webview/webview.git
 5) Built
    
    - To set the webview library run the "initlib.sh" script under bash or the "initlib.bat" script under Windows cmd.
+   
    - Then run make under gcc.
+   
    - Or build the webview-app.sln under MS Visual Studio.
+   
+   - And from time to time update the webview header with :
+     
+     ```bash
+     cd webview
+     curl -sO https://raw.githubusercontent.com/webview/webview/master/webview.h
+     curl -sO https://raw.githubusercontent.com/webview/webview/master/webview.cc
+     ```
+
+Patch to webview.h 0.11.0 for linux
+
+```bash
+--- webview.h    2023-10-29 10:21:37.270757522 +0100
++++ my_webview.h    2023-10-29 10:20:14.734136652 +0100
+@@ -686,7 +686,7 @@
+   }
+
+   void eval(const std::string &js) {
+
+- webkit_web_view_run_javascript(WEBKIT_WEB_VIEW(m_webview), js.c_str(),
++ webkit_web_view_evaluate_javascript(WEBKIT_WEB_VIEW(m_webview), js.c_str(), js.size(), nullptr, nullptr,
+  
+                                 nullptr, nullptr, nullptr);
+  
+  }
+```
+
 6. libcurl
    
    * Download

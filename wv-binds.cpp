@@ -299,7 +299,7 @@ std::string do_fstat(std::string sp) {
                     "\"perms\":\""      + to_js_oct((unsigned)fs.permissions())+"\","+
                     "\"size\":\""       + std::to_string(sz)+"\","+
                     "\"last_write\":\"" + lastwr+"\"}";
-  std::cout << "end fstat:" << res << std::endl << std::flush;
+  //std::cout << "end fstat:" << res << std::endl << std::flush;
   return res;
 }
 
@@ -435,7 +435,7 @@ void create_binds(webview::webview &w) {
       std::thread([&, seq, req] {
         auto sp=webview::detail::json_parse(req, "", 0);
         auto res=httpget(sp);
-        std::cout << res << std::endl;
+        //std::cout << res << std::endl;
         w.resolve(seq, 0, res);
       }).detach();
     },
@@ -446,7 +446,7 @@ void create_binds(webview::webview &w) {
       [&](const std::string &req) {
           auto param=webview::detail::json_parse(req, "", 0);
           auto res=lsdir(param);
-          std::cout << res << std::endl;
+          //std::cout << res << std::endl;
           return res;
       });
 
@@ -593,16 +593,6 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
   }
 }
 
-void nav(std::string url) {
-std::cout << "fstat2" << std::endl;
-do_fstat(url);
-//#ifdef _WIN32
-  w->navigate(url); // Bug ne fonctionne pas sous linux (Debian - pb webkit ?) mais fonctionne correctement sous windows
-//#else
-//  w->set_html(file2str(url)); // Ne fonctionne pas correctement sous win et linux
-//#endif
-}
-
 void webview_run(std::string url, std::string title, std::string init_js) {
   //std::cout << "URL " << url << ", TITLE " << title << ", JS " << init_js << std::endl;
   w->set_title(title);
@@ -622,8 +612,7 @@ void webview_run(std::string url, std::string title, std::string init_js) {
       if (!url.starts_with("http://") && !url.starts_with("https://")) {
         url="file://"+url;
       }
-      //w->navigate(url);
-      nav(url);
+      w->navigate(url);
     }
   }
 

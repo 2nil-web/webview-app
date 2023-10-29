@@ -39,10 +39,12 @@ LDLIBS += -lcurl
 LDFLAGS += -g
 
 ifeq (${OS},Linux)
-CXXFLAGS += $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-4.0)
-LDFLAGS +=-L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/webkit2gtk-4.0 -L/usr/lib/x86_64-linux-gnu/cmake/harfbuzz -L/usr/lib/python3/dist-packages/cairo -L/usr/lib/x86_64-linux-gnu/glib-2.0 -L/usr/lib/x86_64-linux-gnu/glib-2.0
-LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.0)
+CXXFLAGS += $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-4.1)
+LDFLAGS +=-L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1 -L/usr/lib/x86_64-linux-gnu/cmake/harfbuzz -L/usr/lib/python3/dist-packages/cairo -L/usr/lib/x86_64-linux-gnu/glib-2.0 -L/usr/lib/x86_64-linux-gnu/glib-2.0
+LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.1 webkit2gtk-web-extension-4.1)
+#LDFLAGS += -static
 else
+EXEXT=.exe
 CPPFLAGS+=-IC:/Software/UnixTools/msys64/mingw64/include
 CPPFLAGS += --include=webview_mingw_support.h
 LDFLAGS += -mwindows
@@ -67,7 +69,6 @@ MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Curre
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
 #DO_MSBUILD=1
 
-EXEXT=.exe
 PREFIX=webview-app
 SRCS=$(wildcard *.cpp)
 ifeq (${OS},Linux)
@@ -149,13 +150,13 @@ ifneq ($(MAKECMDGOALS),clean)
 	${MAGICK} convert -background none $< $@
 
 ifneq ($(DO_MSBUILD),1)
-%.exe: %.o
+%${EXEXT}: %.o
 	$(LINK.cpp) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-%.exe: %.c
+%${EXEXT}: %.c
 	$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-%.exe: %.cpp
+%${EXEXT}: %.cpp
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 # Régles pour construire les fichier objet d'après les .rc

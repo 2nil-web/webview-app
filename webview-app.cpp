@@ -37,7 +37,7 @@ void set_url(char, std::string, std::string val) {
     url=std::filesystem::absolute(val).generic_string();
   }
 
-  std::cout << "set_url " << url << std::endl;
+  //std::cout << "set_url " << url << std::endl;
   if (title.empty()) title=url;
 }
 
@@ -89,13 +89,13 @@ std::string get_index() {
 
   std::string idx=std::filesystem::absolute("index.html").generic_string();
   if (std::filesystem::is_regular_file(idx)) {
-    std::cout << "html " << idx << std::endl;
+    //std::cout << "html " << idx << std::endl;
     return idx;
   }
 
   idx=std::filesystem::absolute("index.js").generic_string();
   if (std::filesystem::is_regular_file(idx)) {
-    std::cout << "js " << idx << std::endl;
+    //std::cout << "js " << idx << std::endl;
     return idx;
   }
 
@@ -120,9 +120,9 @@ int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLi
 int main(int argc, char **argv, char **) {
 #endif
   getopt_init(argc, argv, r_opts, "WebView app.", "", "(c) Denis LALANNE. Provided as is. NO WARRANTY of any kind.");
-extern std::string do_fstat(std::string sp);
-std::cout << "fstat1" << std::endl;
-do_fstat(url);
+//extern std::string do_fstat(std::string sp);
+//std::cout << "fstat1" << std::endl;
+//do_fstat(url);
 
   if (url.empty()) {
     if (optind < argc) {
