@@ -55,7 +55,8 @@ Patch to webview.h 0.11.0 for linux
   
   }
 ```
-
+cd webview
+patch webview.h <../patch_webview_linux
 6. libcurl
    
    * Download
