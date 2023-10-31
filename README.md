@@ -40,7 +40,9 @@ Application using the : [webview library](https://github.com/webview/webview.git
 
 Patch to webview.h 0.11.0 for linux
 
-```bash
+Patch file
+
+```diff
 --- webview.h    2023-10-29 10:21:37.270757522 +0100
 +++ my_webview.h    2023-10-29 10:20:14.734136652 +0100
 @@ -686,7 +686,7 @@
@@ -50,25 +52,30 @@ Patch to webview.h 0.11.0 for linux
 
 - webkit_web_view_run_javascript(WEBKIT_WEB_VIEW(m_webview), js.c_str(),
 + webkit_web_view_evaluate_javascript(WEBKIT_WEB_VIEW(m_webview), js.c_str(), js.size(), nullptr, nullptr,
-  
+
                                  nullptr, nullptr, nullptr);
-  
+
   }
 ```
+
+Then patch command to apply
+
+```bash
 cd webview
 patch webview.h <../patch_webview_linux
+```
+
 6. libcurl
-   
-   * Download
-     
-     * git clone https://github.com/curl/curl.git
-   
-   * Static build under visual studio "x64 Native Tools COmmand Prompt for VS 2022"
-     
-     * rename src/tool_hugehelp.c.cvs to src/tool_hugehelp.c
-     
-     * cd curl\winbuild
-     
-     * nmake /f Makefile.vc mode=static
-     
-     * copy ..\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel where you need it.
+* Download
+  
+  * git clone https://github.com/curl/curl.git
+
+* Static build under visual studio "x64 Native Tools COmmand Prompt for VS 2022"
+  
+  * rename src/tool_hugehelp.c.cvs to src/tool_hugehelp.c
+  
+  * cd curl\winbuild
+  
+  * nmake /f Makefile.vc mode=static
+  
+  * copy ..\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel where you need it.

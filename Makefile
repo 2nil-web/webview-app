@@ -45,25 +45,24 @@ LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.1 webkit2gtk-web-exten
 #LDFLAGS += -static
 else
 EXEXT=.exe
-//CPPFLAGS+=-IC:/Software/UnixTools/msys64/mingw64/include
+#CPPFLAGS+=-IC:/Software/UnixTools/msys64/mingw64/include
 CPPFLAGS += --include=webview_mingw_support.h
 LDFLAGS += -mwindows
-//LDFLAGS += -LC:/Software/UnixTools/msys64/mingw64/lib 
+#LDFLAGS += -LC:/Software/UnixTools/msys64/mingw64/lib 
 LDFLAGS += -static
 
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
 #pacman -S mingw-w64-x86_64-curl-gnutls
-LDLIBS += -lcurl -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lbrotlidec -lz -lws2_32 -lbrotlicommon -lidn2 -liconv -lunistring
+LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
+LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
 
 # pacman -S mingw-w64-x86_64-curl-gnutls
 #LDLIBS += -lcurl -lrtmp -lz -lgmp -lgnutls -lhogweed -lnettle -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lnettle -lgnutls -lwldap32 -lzstd -lzstd -lbrotlidec
 #LDLIBS += -lbrotlidec -lz -lws2_32 -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
 endif
 
-
-
-MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
+#MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
 
@@ -82,7 +81,7 @@ TARGET=${PREFIX}${EXEXT}
 
 .PHONY: FORCE
 
-#DO_MSBUILD=0
+DO_MSBUILD=0
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64
 CONF=Release

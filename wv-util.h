@@ -5,6 +5,7 @@
 #include <functional>
 
 #ifdef _WIN32
+#include <Windows.h>
 void WinError(const char *fmt, ...);
 #ifdef UNICODE
 #define CommandLineToArgv CommandLineToArgvW

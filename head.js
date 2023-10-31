@@ -145,7 +145,8 @@ function curl_promise(func, param) {
 }
 
 function curl() {
-  promise_run(httpget, "https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-02&limit=1000", curl_promise);
+  //promise_run(httpget, "https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-02&limit=1000", curl_promise);
+  promise_run(httpget, "https://api.github.com/users/2nil-web", curl_promise);
 }
 
 function process_http_res (jres) {
@@ -176,5 +177,21 @@ function http_query() {
 //  req.setRequestHeader("Access-Control-Allow-Origin", "*");
 //  req.setRequestHeader("Authorization", "Basic " + btoa("lalannd2:ocvdBum12$*3"));
   req.send();
+}
+
+function unicode_promise(func, param) {
+  if (typeof param === 'undefined') {
+    console.log(param);
+    this.unicode=param;
+  } else {
+    //console.log(this.httpget_res);
+    console.log(this.unicode);
+    // <= > jq -r '.results[].title'
+    output_text.value+=this.unicode+'\n';
+  }
+}
+
+function unicode() {
+  promise_run(utf, "", unicode_promise);
 }
 

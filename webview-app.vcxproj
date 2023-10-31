@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="getopt_vs\getopt.h" />
+    <ClInclude Include="webview_wrapper.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="wv-opts.h" />
     <ClInclude Include="wv-util.h" />
@@ -164,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="getopt_vs\getopt.cpp" />
+    <ClCompile Include="webview_wrapper.cpp" />
     <ClCompile Include="wv-curl.cpp" />
     <ClCompile Include="wv-opts.cpp" />
     <ClCompile Include="wv-util.cpp" />
