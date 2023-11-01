@@ -14,7 +14,7 @@ std::string json_parse(const std::string &s, const std::string &key, const int i
 class webview_wrapper {
 public:
   webview_wrapper();
-  webview_wrapper(bool debug = false, void *wnd = nullptr);
+  webview_wrapper(bool debug, void *wnd = nullptr);
   void create(bool debug = false, void *wnd = nullptr);
   ~webview_wrapper();
   void navigate(const std::string &url);
