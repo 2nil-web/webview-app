@@ -1,8 +1,8 @@
 
 #include <string>
 
-#include "webview_wrapper.h"
 #include <webview.h>
+#include "wv-wrap.h"
 
 #define WP ((webview::webview *)w)
 

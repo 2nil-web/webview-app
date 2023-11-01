@@ -11,10 +11,6 @@
 #include <functional>
 #include <regex>
 
-#include "webview_wrapper.h"
-
-#include "wv-util.h"
-#include "base64.hpp"
 #ifdef _WIN32
 #include "wv-winapi.h"
 #include "Utf8Conv.hpp"
@@ -22,7 +18,11 @@ using Utf8Conv::Utf16ToUtf8;
 using Utf8Conv::Utf8ToUtf16;
 #include <windows.h>
 #endif
+
 #include "wv-curl.h"
+#include "wv-wrap.h"
+#include "wv-util.h"
+#include "base64.hpp"
 
 webview_wrapper *w=nullptr;
 
