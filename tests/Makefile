@@ -1,7 +1,7 @@
 
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
-#DO_MSBUILD=0
+DO_MSBUILD=0
 
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64

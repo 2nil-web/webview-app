@@ -18,6 +18,28 @@ async function help () {
 }
 
 
+async function unicode () {
+  output_text.innerHTML+=await new Promise((resolve) => {
+    window.utf().then(result => { resolve(result); });
+  });
+}
+
+function unicode_promise(func, param) {
+  if (typeof param === 'undefined') {
+    console.log(param);
+    this.unicode=param;
+  } else {
+    //console.log(this.httpget_res);
+    console.log(this.unicode);
+    // <= > jq -r '.results[].title'
+    output_text.value+=this.unicode+'\n';
+  }
+}
+
+function unicoderes() {
+  promise_run(utf, "", unicode_promise);
+}
+
 function dir(path=".", rec=false, dst_textarea=output_text) {
   //console.log("path "+path+", ta "+dst_textarea);
   function grant_in_number (val, sing, plur) {
@@ -168,21 +190,5 @@ function http_query() {
 //  req.setRequestHeader("Access-Control-Allow-Origin", "*");
 //  req.setRequestHeader("Authorization", "Basic " + btoa("lalannd2:ocvdBum12$*3"));
   req.send();
-}
-
-function unicode_promise(func, param) {
-  if (typeof param === 'undefined') {
-    console.log(param);
-    this.unicode=param;
-  } else {
-    //console.log(this.httpget_res);
-    console.log(this.unicode);
-    // <= > jq -r '.results[].title'
-    output_text.value+=this.unicode+'\n';
-  }
-}
-
-function unicode() {
-  promise_run(utf, "", unicode_promise);
 }
 
