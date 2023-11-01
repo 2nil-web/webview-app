@@ -1,7 +1,7 @@
 
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
-DO_MSBUILD=0
+#DO_MSBUILD=0
 
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64
@@ -15,7 +15,9 @@ define genmsexe
 endef
 else
 	# Intégrer clang-format
-	CPPFLAGS+=-IC:/Software/UnixTools/msys64/mingw64/include
+	WVDIR=../webview
+	WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
+	CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include
 	CPPFLAGS+=-DCURL_STATICLIB
 	CXXFLAGS += -std=c++20 -g -Wall 
 	LDFLAGS += -static
@@ -32,6 +34,12 @@ EXES=${SRCS:.cc=.exe}
 
 
 all : ${EXES}
+
+strip :
+	strip *.exe | true
+
+upx : strip
+	upx *.exe | true
 
 clean :
 	rm -f ${EXES} *.mslog
