@@ -7,25 +7,16 @@ if (typeof webapp_title === "function") {
   webapp_size(640, 400, 1);
 //window.webapp_get_title().then(result => { console.log(result.value); });
 }
-  
-function help (fmt) {
-  function help_promise (func, param) {
-    if (typeof param !== 'undefined') {
-      this.obj=param;
-    } else {
-      if (fmt === "tab") {
-        Object.keys(this.obj).forEach(key => {
-          output_text.value+=key+": "+obj[key]+"\n";
-        });
-      } else {
-          output_text.value+=this.obj.replace(/\./g, ".\n");;
-      }
-    }
-  }
-
-
-  promise_run(webapp_help, fmt, help_promise);
+ 
+async function help () {
+  output_text.value+=await new Promise((resolve) => {
+    // Récupére une chaine de caractéres et ajoute un retour chariot après tous les points.
+    //window.webapp_help().then(result => { resolve(result.replace(/\./g, ".\n")); });
+    // Récupére un tableau de paires clef/valeur, sépare la clef de la valeur par un ':' et ajoute un retour chariot à la fin de chaque valeur
+    window.webapp_help("tab").then(result => { var res=""; Object.keys(result).forEach(key => { res+=key+": "+result[key]+"\n"; }); resolve(res); });
+  });
 }
+
 
 function dir(path=".", rec=false, dst_textarea=output_text) {
   //console.log("path "+path+", ta "+dst_textarea);

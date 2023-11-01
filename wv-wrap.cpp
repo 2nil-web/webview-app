@@ -1,5 +1,7 @@
 
+#include <iostream>
 #include <string>
+
 
 #include <webview.h>
 #include "wv-wrap.h"
@@ -69,5 +71,9 @@ void webview_wrapper::bind_doc(const std::string &name, const std::string desc, 
 void webview_wrapper::bind_doc(const std::string &name, const std::string desc,  binding_t fn, void *arg, bool indoc) {
   WP->bind(name, fn, arg);
   if (indoc) func_help.push_back(make_pair(name, desc));
+}
+
+void webview_wrapper::bind_noprom(const std::string &name, sync_binding_t fn) {
+  WP->bind(name, fn);
 }
 

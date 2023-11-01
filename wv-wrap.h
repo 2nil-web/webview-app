@@ -21,6 +21,8 @@ public:
   void bind(const std::string &name, sync_binding_t fn);
   void bind(const std::string &name, binding_t fn, void *arg);
   void bind_doc(const std::string &name, const std::string desc, sync_binding_t fn, bool indoc=true);
+  void bind_noprom(const std::string &name, sync_binding_t fn);
+
   void bind_doc(const std::string &name, const std::string desc,  binding_t fn, void *arg=nullptr, bool indoc=true);
   void run();
   void unbind(const std::string &name);
