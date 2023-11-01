@@ -1,6 +1,6 @@
 webview-app
 webview/*
-!webview/examples
+!webview/examples/*
 .vs
 *.vcxproj.user
 x64
