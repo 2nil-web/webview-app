@@ -7,13 +7,32 @@ if (typeof webapp_title === "function") {
   webapp_size(640, 400, 1);
 //window.webapp_get_title().then(result => { console.log(result.value); });
 }
- 
-async function help () {
+
+
+function cons_or_notRES(res) {
+  hlp_msg=res.replace(/\./g, ".\n");
+  console.log(hlp_msg);
+  output_text.innerHTML+=hlp_msg;
+}
+
+function cons_or_not(res, obj) {
+  var hlp_msg="";
+  Object.keys(res).forEach(key => { hlp_msg+=key+": "+res[key]+"\n"; });
+  console.log(hlp_msg);
+  if (obj instanceof HTMLElement) obj.innerHTML+=hlp_msg;
+}
+
+async function help (obj) {
+  new Promise((resolve) => {
+    window.webapp_help("tab").then(result => { resolve(cons_or_not(result, obj)); });
+    //window.webapp_help("tab").then(result => { var res=""; Object.keys(result).forEach(key => { res+=key+": "+result[key]+"\n"; }); resolve(res); });
+  });
+}
+
+async function helpRES () {
   output_text.value+=await new Promise((resolve) => {
-    // Récupére une chaine de caractéres et ajoute un retour chariot après tous les points.
-    //window.webapp_help().then(result => { resolve(result.replace(/\./g, ".\n")); });
-    // Récupére un tableau de paires clef/valeur, sépare la clef de la valeur par un ':' et ajoute un retour chariot à la fin de chaque valeur
-    window.webapp_help("tab").then(result => { var res=""; Object.keys(result).forEach(key => { res+=key+": "+result[key]+"\n"; }); resolve(res); });
+    window.webapp_help().then(result => { resolve(result.replace(/\./g, ".\n")); console.log(result); });
+    //window.webapp_help("tab").then(result => { var res=""; Object.keys(result).forEach(key => { res+=key+": "+result[key]+"\n"; }); resolve(res); });
   });
 }
 

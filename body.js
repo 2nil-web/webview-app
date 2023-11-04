@@ -10,7 +10,7 @@ file_status("wv-runopt.o");
 */
 if (cmd.value === "") {
   //cmd.value='dir()';
-  cmd.value='help()';
+  cmd.value='help(output_text)';
 }
 
 cmd.focus();
