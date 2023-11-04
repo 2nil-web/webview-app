@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=webview-app
+Comment=Multiplatform html/css/javscript standalone application builder !
+Exec=/home/denis/webview-app/webview-app -d -f /home/denis/webview-app/index.html
+Icon=/home/denis/webview-app/webview-app.svg
+Terminal=false
+Type=Application
