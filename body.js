@@ -10,13 +10,13 @@ file_status("wv-runopt.o");
 */
 if (cmd.value === "") {
   //cmd.value='dir()';
-  cmd.value='help(output_text)';
+  cmd.value='help(output)';
 }
 
 cmd.focus();
 
 function end_cmd() {
-  output_text.scrollTop=output_text.scrollHeight;
+  output.scrollTop=output.scrollHeight;
   run_cmd.disabled=false;
   cmd.focus();
 }
@@ -36,7 +36,7 @@ function exec_cmd(cmd_value) {
     tout_warn.innerHTML='&nbsp;';
     setTimeout(exec_cmd_no_return, tout.value, cmd_value, tout.value);
     window.webapp_exec(cmd_value, true).then(result => {
-      output_text.value += result.value;//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+      output.value += result.value;//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
       end_cmd();
     });
 }

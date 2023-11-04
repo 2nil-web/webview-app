@@ -12,25 +12,24 @@ if (typeof webapp_title === "function") {
 function cons_or_notRES(res) {
   hlp_msg=res.replace(/\./g, ".\n");
   console.log(hlp_msg);
-  output_text.innerHTML+=hlp_msg;
+  output.innerHTML+=hlp_msg;
 }
 
 function cons_or_not(res, obj) {
   var hlp_msg="";
   Object.keys(res).forEach(key => { hlp_msg+=key+": "+res[key]+"\n"; });
-  console.log(hlp_msg);
   if (obj instanceof HTMLElement) obj.innerHTML+=hlp_msg;
+  else console.log(hlp_msg);
 }
 
 async function help (obj) {
   new Promise((resolve) => {
     window.webapp_help("tab").then(result => { resolve(cons_or_not(result, obj)); });
-    //window.webapp_help("tab").then(result => { var res=""; Object.keys(result).forEach(key => { res+=key+": "+result[key]+"\n"; }); resolve(res); });
   });
 }
 
 async function helpRES () {
-  output_text.value+=await new Promise((resolve) => {
+  output.value+=await new Promise((resolve) => {
     window.webapp_help().then(result => { resolve(result.replace(/\./g, ".\n")); console.log(result); });
     //window.webapp_help("tab").then(result => { var res=""; Object.keys(result).forEach(key => { res+=key+": "+result[key]+"\n"; }); resolve(res); });
   });
@@ -38,7 +37,7 @@ async function helpRES () {
 
 
 async function unicode () {
-  output_text.innerHTML+=await new Promise((resolve) => {
+  output.innerHTML+=await new Promise((resolve) => {
     window.utf().then(result => { resolve(result); });
   });
 }
@@ -51,7 +50,7 @@ function unicode_promise(func, param) {
     //console.log(this.httpget_res);
     console.log(this.unicode);
     // <= > jq -r '.results[].title'
-    output_text.value+=this.unicode+'\n';
+    output.value+=this.unicode+'\n';
   }
 }
 
@@ -59,7 +58,7 @@ function unicoderes() {
   promise_run(utf, "", unicode_promise);
 }
 
-function dir(path=".", rec=false, dst_textarea=output_text) {
+function dir(path=".", rec=false, dst_textarea=output) {
   //console.log("path "+path+", ta "+dst_textarea);
   function grant_in_number (val, sing, plur) {
       ret=val+' ';
@@ -171,7 +170,7 @@ function curl_promise(func, param) {
     console.log(JSON.stringify(this.httpget_res));
     // <= > jq -r '.results[].title'
     this.httpget_res.results.forEach((el) => {
-      output_text.value+=el.title+'\n';
+      output.value+=el.title+'\n';
     });
   }
 }
@@ -184,9 +183,9 @@ function curl() {
 function process_http_res (jres) {
   //console.log(JSON.stringify(jres));
   //console.log(jres);
-  output_text.value += "login: "+jres.login;
-  output_text.value += '\n';
-  output_text.value += "url: "+jres.url;
+  output.value += "login: "+jres.login;
+  output.value += '\n';
+  output.value += "url: "+jres.url;
 }
 
 function httpget_promise(func, param) {
