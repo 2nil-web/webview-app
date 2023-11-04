@@ -14,6 +14,7 @@ PGF=$(subst \,/,$(subst C:\,/c/,$(PROGRAMFILES)))
 PGF86=${PGF} (x86)
 PATH:=${PATH}:${PGF86}/Inno Setup 6
 PATH:=${PATH}:${PGF}/Inkscape/bin
+PATH:=${PATH}:${PGF86}/Pandoc
 
 ifneq (${OS},Linux)
  MAGICK=magick
@@ -43,12 +44,11 @@ CXXFLAGS += $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-4.1)
 LDFLAGS +=-L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1 -L/usr/lib/x86_64-linux-gnu/cmake/harfbuzz -L/usr/lib/python3/dist-packages/cairo -L/usr/lib/x86_64-linux-gnu/glib-2.0 -L/usr/lib/x86_64-linux-gnu/glib-2.0
 LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.1 webkit2gtk-web-extension-4.1)
 #LDFLAGS += -static
+PANDOC=pandoc
 else
 EXEXT=.exe
-#CPPFLAGS+=-IC:/Software/UnixTools/msys64/mingw64/include
 CPPFLAGS += --include=webview_mingw_support.h
 LDFLAGS += -mwindows
-#LDFLAGS += -LC:/Software/UnixTools/msys64/mingw64/lib 
 LDFLAGS += -static
 
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
@@ -56,10 +56,6 @@ LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 #pacman -S mingw-w64-x86_64-curl-gnutls
 LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
 LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
-
-# pacman -S mingw-w64-x86_64-curl-gnutls
-#LDLIBS += -lcurl -lrtmp -lz -lgmp -lgnutls -lhogweed -lnettle -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lnettle -lgnutls -lwldap32 -lzstd -lzstd -lbrotlidec
-#LDLIBS += -lbrotlidec -lz -lws2_32 -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
 endif
 
 #MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
@@ -76,28 +72,31 @@ RES_SRC=${PREFIX}_res.rc
 endif
 
 OBJS+=$(SRCS:.cpp=.o)
-
 TARGET=${PREFIX}${EXEXT}
 
 .PHONY: FORCE
 
-#DO_MSBUILD=0
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64
 CONF=Release
-all : version_check.txt version.h ${PREFIX}.ico ${TARGET}
-#	pandoc -o README.docx -f markdown -t docx README.md
+DEFAULT_TARGET=version_check.txt version.h ${PREFIX}.ico ${TARGET} README.docx
+gcc : all
 
+ifeq ($(MAKECMDGOALS),gcc)
+${TARGET} : ${OBJS}
+else
 ${TARGET} : ${ARCH}/${CONF}/${TARGET}
+	cp ${ARCH}/${CONF}/${TARGET} .
 
 ${ARCH}/${CONF}/${TARGET} : ${SRCS} ${RES_SRC}
 	${MSBUILD} webview-app.sln -p:Configuration=${CONF}
-	cp ${ARCH}/${CONF}/*.exe .
-else
-all : version_check.txt version.h ${TARGET}
-
-${TARGET} : ${OBJS}
 endif
+else
+${TARGET} : ${OBJS}
+DEFAULT_TARGET=version_check.txt version.h ${TARGET}
+endif
+
+all : ${DEFAULT_TARGET}
 
 ${PREFIX}_res.o : ${PREFIX}.ico
 
@@ -111,7 +110,7 @@ upx : strip
 clean :
 	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET)
 ifeq ($(DO_MSBUILD),1)
-	rm -rf ${ARCH}
+	rm -rf ${ARCH} README.docx
 endif
 
 # Génération du version.h intégré dans l'appli
@@ -140,6 +139,9 @@ cfg :
 
 # Ces régles implicites ne sont pas utiles quand on fait 'make clean'
 ifneq ($(MAKECMDGOALS),clean)
+%.docx : %.md
+	pandoc -o $@ -f markdown -t docx $<
+
 %.ico : %.png
 	${MAGICK} convert -background none $< $@
 

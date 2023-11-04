@@ -31,12 +31,12 @@ Application using the : [webview library](https://github.com/webview/webview.git
    - Or build the webview-app.sln under MS Visual Studio.
    
    - And from time to time update the webview header with :
-     
-     ```bash
-     cd webview
-     curl -sO https://raw.githubusercontent.com/webview/webview/master/webview.h
-     curl -sO https://raw.githubusercontent.com/webview/webview/master/webview.cc
-     ```
+
+```bash
+cd webview
+curl -sO https://raw.githubusercontent.com/webview/webview/master/webview.h
+curl -sO https://raw.githubusercontent.com/webview/webview/master/webview.cc
+```
 
 Patch to webview.h 0.11.0 for linux
 
