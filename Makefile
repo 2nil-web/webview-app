@@ -61,9 +61,13 @@ endif
 #MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
+ifeq ($(MAKECMDGOALS),gcc)
+DO_MSBUILD=0
+endif
 
 PREFIX=webview-app
 SRCS=$(wildcard *.cpp)
+
 ifeq (${OS},Linux)
 SRCS:=$(filter-out wv-winapi.cpp,${SRCS})
 else
@@ -80,23 +84,22 @@ ifeq ($(DO_MSBUILD),1)
 ARCH=x64
 CONF=Release
 DEFAULT_TARGET=version_check.txt version.h ${PREFIX}.ico ${TARGET} README.docx
-gcc : all
 
-ifeq ($(MAKECMDGOALS),gcc)
-${TARGET} : ${OBJS}
-else
 ${TARGET} : ${ARCH}/${CONF}/${TARGET}
 	cp ${ARCH}/${CONF}/${TARGET} .
 
-${ARCH}/${CONF}/${TARGET} : ${SRCS} ${RES_SRC}
+${ARCH}/${CONF}/${TARGET} : ${PREFIX}.ico ${SRCS} ${RES_SRC}
 	${MSBUILD} webview-app.sln -p:Configuration=${CONF}
-endif
 else
-${TARGET} : ${OBJS}
 DEFAULT_TARGET=version_check.txt version.h ${TARGET}
+
+${TARGET} : ${OBJS}
 endif
 
 all : ${DEFAULT_TARGET}
+	@echo "All done ${DEFAULT_TARGET}"
+
+gcc : all
 
 ${PREFIX}_res.o : ${PREFIX}.ico
 
@@ -106,6 +109,10 @@ strip : $(TARGET)
 
 upx : strip
 	$(UPX) $(TARGET) | true
+
+ALL_SRCS=$(wildcard *.cpp) $(wildcard *.hpp) $(wildcard *.h)
+format :
+	@clang-format -style="{ BasedOnStyle: Microsoft, IndentWidth: 2 }" --sort-includes -i ${ALL_SRCS}
 
 clean :
 	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET)
@@ -148,7 +155,6 @@ ifneq ($(MAKECMDGOALS),clean)
 %.ico : %.svg
 	${MAGICK} convert -background none $< $@
 
-ifneq ($(DO_MSBUILD),1)
 %${EXEXT}: %.o
 	$(LINK.cpp) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
@@ -158,6 +164,7 @@ ifneq ($(DO_MSBUILD),1)
 %${EXEXT}: %.cpp
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
+ifneq ($(DO_MSBUILD),1)
 # Régles pour construire les fichier objet d'après les .rc
 %.o : %.rc
 	$(RC) $(CPPFLAGS) $< --include-dir . $(OUTPUT_OPTION)

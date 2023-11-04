@@ -1,30 +1,31 @@
 
 #include <cstdio>
-#include <iostream>
 #include <curl/curl.h>
+#include <iostream>
 
 size_t write_cb(char *contents, size_t size, size_t nmemb, void *userp)
 {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
+  ((std::string *)userp)->append((char *)contents, size * nmemb);
+  return size * nmemb;
 }
 
-std::string httpget(std::string url, bool peer_check, bool host_check, bool verbose) {
+std::string httpget(std::string url, bool peer_check, bool host_check, bool verbose)
+{
   CURL *curl;
   CURLcode res;
-  std::string buf="";
-
+  std::string buf = "";
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
-  curl=curl_easy_init();
-  if (curl) {
+  curl = curl_easy_init();
+  if (curl)
+  {
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
     if (verbose)
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-     // Does or does not check remote host certificate
+    // Does or does not check remote host certificate
     if (!peer_check)
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 
@@ -39,10 +40,12 @@ std::string httpget(std::string url, bool peer_check, bool host_check, bool verb
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf);
     /* Perform the request, res will get the return code */
-    res=curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
     /* Check for errors */
-    //if (res != CURLE_OK) std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-    if (res != CURLE_OK) buf+=std::string("curl_easy_perform() failed: ")+curl_easy_strerror(res);
+    // if (res != CURLE_OK) std::cerr << "curl_easy_perform() failed: " <<
+    // curl_easy_strerror(res) << std::endl;
+    if (res != CURLE_OK)
+      buf += std::string("curl_easy_perform() failed: ") + curl_easy_strerror(res);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
