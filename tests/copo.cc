@@ -1,8 +1,16 @@
 
+#include <algorithm>
+#include <chrono>
+#include <codecvt>
+#include <cstdlib>
+#include <fstream>
+#include <functional>
 #include <iostream>
+#include <locale>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 #include <vector>
-
 
 #ifdef _WIN32
 #include <windows.h>
@@ -49,7 +57,7 @@ std::string ws2s(std::wstring ws)
   return converter.to_bytes(ws);
 }
 
-std::wstring s2wss(std::string s)
+std::wstring s2ws(std::string s)
 {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   return converter.from_bytes(s);
@@ -57,7 +65,7 @@ std::wstring s2wss(std::string s)
 #endif
 
 // Return false if wide char is a printable ascii else true
-boolean not_printable_ascii(wchar_t wc) {
+bool not_printable_ascii(wchar_t wc) {
   if (wc > 31 && wc < 127) return false;
   return true;
 }
