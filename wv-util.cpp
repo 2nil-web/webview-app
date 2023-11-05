@@ -171,6 +171,18 @@ void replace_all(std::string &s, std::string srch, std::string repl)
   }
 }
 
+void replace_all(std::wstring &s, std::wstring srch, std::wstring repl)
+{
+  size_t pos = 0;
+  while (pos += repl.length())
+  {
+    pos = s.find(srch, pos);
+    if (pos == std::string::npos)
+      break;
+    s.replace(pos, srch.length(), repl);
+  }
+}
+
 void rep_crlf(std::string &s)
 {
   replace_all(s, "\r", "\\r");

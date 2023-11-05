@@ -7,6 +7,56 @@
 
 #define WP ((webview::webview *)w)
 
+// Converts a narrow (UTF-8-encoded) string into a wide (UTF-16-encoded) string.
+std::wstring my_widen_string(const std::string &input) {
+  if (input.empty()) {
+    return std::wstring();
+  }
+  UINT cp = CP_UTF8;
+  DWORD flags = MB_ERR_INVALID_CHARS;
+  auto input_c = input.c_str();
+  auto input_length = static_cast<int>(input.size());
+  auto required_length =
+      MultiByteToWideChar(cp, flags, input_c, input_length, nullptr, 0);
+  if (required_length > 0) {
+    std::wstring output(static_cast<std::size_t>(required_length), L'\0');
+    if (MultiByteToWideChar(cp, flags, input_c, input_length, &output[0],
+                            required_length) > 0) {
+      return output;
+    }
+  }
+  // Failed to convert string from UTF-8 to UTF-16
+  return std::wstring();
+}
+
+// Converts a wide (UTF-16-encoded) string into a narrow (UTF-8-encoded) string.
+std::string my_narrow_string(const std::wstring &input) {
+  struct wc_flags {
+    enum TYPE : unsigned int {
+      // WC_ERR_INVALID_CHARS
+      err_invalid_chars = 0x00000080U
+    };
+  };
+  if (input.empty()) {
+    return std::string();
+  }
+  UINT cp = CP_UTF8;
+  DWORD flags = wc_flags::err_invalid_chars;
+  auto input_c = input.c_str();
+  auto input_length = static_cast<int>(input.size());
+  auto required_length = WideCharToMultiByte(cp, flags, input_c, input_length,
+                                             nullptr, 0, nullptr, nullptr);
+  if (required_length > 0) {
+    std::string output(static_cast<std::size_t>(required_length), '\0');
+    if (WideCharToMultiByte(cp, flags, input_c, input_length, &output[0],
+                            required_length, nullptr, nullptr) > 0) {
+      return output;
+    }
+  }
+  // Failed to convert string from UTF-16 to UTF-8
+  return std::string();
+}
+
 void webview_wrapper::create(bool debug, void *wnd)
 {
   if (w != nullptr)
@@ -75,6 +125,19 @@ void webview_wrapper::resolve(const std::string &seq, int status, const std::str
 {
   WP->resolve(seq, status, result);
 }
+
+void webview_wrapper::resolve(const std::string &seq, int status, const std::wstring &result)
+{
+  std::cout << std::endl;
+  std::cout << "resolve narrow " << my_narrow_string(result) << std::endl;
+  std::cout << std::endl;
+  //std::wcout << "resolve        " << result << std::endl;
+  std::cout << std::endl;
+  WP->resolve(seq, status, my_narrow_string(result));
+}
+
+
+
 void webview_wrapper::run()
 {
   WP->run();

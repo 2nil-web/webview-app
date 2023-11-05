@@ -36,9 +36,10 @@ async function helpRES () {
 }
 
 
-async function unicode () {
+async function unicode (p) {
+  console.log("unicode " +p);
   output.innerHTML+=await new Promise((resolve) => {
-    window.utf().then(result => { resolve(result); });
+    window.utf(p).then(result => { resolve(result); });
   });
 }
 
@@ -102,15 +103,15 @@ function dir(path=".", rec=false, dst_textarea=output) {
           res_list.push(line);
         });
 
-        dst_textarea.value+=target_path+"\n";
-        dst_textarea.value+=res_list.join("\n");
-        dst_textarea.value+="\n  "+grant_in_number(res_list.length, 'entry', 'entries');
-        if (nfiles > 0) dst_textarea.value+=', '+grant_in_number(nfiles, 'file', 'files');
-        if (ndirs > 0) dst_textarea.value+=', '+grant_in_number(ndirs, 'folder', 'folders');
-        if (nothers > 0) dst_textarea.value+=', '+grant_in_number(nothers, 'of other type', 'other type');
-        if (nfiles > 0) dst_textarea.value+="\n";
+        dst_textarea.innerHTML+=target_path+"\n";
+        dst_textarea.innerHTML+=res_list.join("\n");
+        dst_textarea.innerHTML+="\n  "+grant_in_number(res_list.length, 'entry', 'entries');
+        if (nfiles > 0) dst_textarea.innerHTML+=', '+grant_in_number(nfiles, 'file', 'files');
+        if (ndirs > 0) dst_textarea.innerHTML+=', '+grant_in_number(ndirs, 'folder', 'folders');
+        if (nothers > 0) dst_textarea.innerHTML+=', '+grant_in_number(nothers, 'of other type', 'other type');
+        if (nfiles > 0) dst_textarea.innerHTML+="\n";
 
-        //console.log(dst_textarea.value);
+        //console.log(dst_textarea.innerHTML);
         dst_textarea.scrollTop=dst_textarea.scrollHeight;
         target_path="";
         full_list=[];
