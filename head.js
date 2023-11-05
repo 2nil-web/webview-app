@@ -28,35 +28,19 @@ async function help (obj) {
   });
 }
 
-async function helpRES () {
-  output.value+=await new Promise((resolve) => {
-    window.webapp_help().then(result => { resolve(result.replace(/\./g, ".\n")); console.log(result); });
-    //window.webapp_help("tab").then(result => { var res=""; Object.keys(result).forEach(key => { res+=key+": "+result[key]+"\n"; }); resolve(res); });
+
+async function ping (p) {
+  console.log("ping " +p);
+  output.innerHTML+=await new Promise((resolve) => {
+    window.echo(p).then(result => { resolve(result+"\n"); });
   });
 }
-
 
 async function unicode (p) {
   console.log("unicode " +p);
   output.innerHTML+=await new Promise((resolve) => {
-    window.utf(p).then(result => { resolve(result); });
+    window.utf(p).then(result => { resolve(result+"\n"); });
   });
-}
-
-function unicode_promise(func, param) {
-  if (typeof param === 'undefined') {
-    console.log(param);
-    this.unicode=param;
-  } else {
-    //console.log(this.httpget_res);
-    console.log(this.unicode);
-    // <= > jq -r '.results[].title'
-    output.value+=this.unicode+'\n';
-  }
-}
-
-function unicoderes() {
-  promise_run(utf, "", unicode_promise);
 }
 
 function dir(path=".", rec=false, dst_textarea=output) {
@@ -147,10 +131,10 @@ function dir(path=".", rec=false, dst_textarea=output) {
 
   function abs_promise (func, param) {
     if (typeof param !== 'undefined') {
-      console.log("target_path1 "+param);
+      //console.log("target_path1 "+param);
       this.abs_res=param;
     } else {
-      console.log("target_path2 "+this.abs_res);
+      //console.log("target_path2 "+this.abs_res);
       target_path=this.abs_res;
       if (rec) promise_run(lsr, this.abs_res, ls_promise);
       else promise_run(ls, this.abs_res, ls_promise);
