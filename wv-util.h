@@ -3,6 +3,7 @@
 #define UTIL_H
 
 #include <functional>
+#include <bitset>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -21,13 +22,14 @@ std::string ws2s(std::wstring ws);
 std::wstring s2ws(std::string s);
 
 // Convert non ascii characters of a wstring to html entities in the following decimal form &#[dec_value];
-std::string htent_dec(const std::wstring ws);
+std::string to_htent(const std::wstring ws, std::ios_base &(*base)(std::ios_base &)=std::dec);
 // Same as previous for string
-std::string htent_dec(const std::string s);
-// Convert non ascii characters of a wstring to html entities in the following hexadecimal form &#x[hex_value];
-std::string htent_hex(const std::wstring ws);
-// Same as previous for string
-std::string htent_hex(const std::string s);
+std::string to_htent(const std::string s, std::ios_base &(*base)(std::ios_base &)=std::dec);
+
+// Convert the html entities in hexa or decimal form contained in a string to their wchar_t value, return the obtained wstring
+std::wstring htent_to_ws(const std::string ws);
+// Same as previous but return a string
+std::string htent_to_s(const std::string s);
 
 // Convert an utf8 string into an url encoded hexadecimal one
 std::string h2s(const std::string s);

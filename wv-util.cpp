@@ -300,16 +300,24 @@ bool not_printable_ascii(wchar_t wc)
   return true;
 }
 
-// Convert non ascii characters of a wstring to html entities in the following decimal form &#[dec_value];
-std::string htent_dec(const std::wstring ws)
+// Convert non ascii characters of a wstring to html entities form &#[x]value;
+std::string to_htent(const std::wstring ws, std::ios_base &(*base)(std::ios_base &))
 {
   std::stringstream ss;
+
+  /* Silently default to std::dec if any other numeral system than decimal and hexa is passed (i.e. octal)
+  if (base == std::dec || base == std::hex) ;
+  else base=std::dec;
+
+  if (base != std::dec && base != std::hex) base=std::dec;*/
 
   for (auto wc : ws)
   {
     if (not_printable_ascii(wc))
     {
-      ss << "&#" << (unsigned int)wc << ';';
+      ss << "&#";
+      if (*base == *std::hex) ss << 'x';
+      ss << base << (unsigned int)wc << ';';
     }
     else
       ss << (char)wc;
@@ -319,30 +327,52 @@ std::string htent_dec(const std::wstring ws)
 }
 
 // Same as previous for string
-std::string htent_dec(const std::string s)
+std::string to_htent(const std::string s, std::ios_base &(*base)(std::ios_base &))
 {
-  return htent_dec(s2ws(s));
+  return to_htent(s2ws(s));
 }
 
-// Convert non ascii characters of a wstring to html entities in the following hexadecimal form &#x[hex_value];
-std::string htent_hex(const std::wstring ws)
-{
-  std::stringstream ss;
+std::string s2n(std::string s, size_t& i) {
+  std::string h="";
+  do { h+=s[i++]; } while (i < s.size() && s[i] != ';');
+  return h;
+}
 
-  for (auto wc : ws)
-  {
-    if (not_printable_ascii(wc))
-      ss << "&#x" << std::hex << (unsigned int)wc << ';';
-    else
-      ss << (char)wc;
+unsigned int stoh(std::string s) {
+  unsigned int x;   
+  std::stringstream ss;
+  ss << std::hex << s;
+  ss >> x;
+  return x;
+}
+
+// Convert the html entities in hexa or decimal form contained in a string to their wchar_t value, return the obtained string
+std::wstring htent_to_ws(const std::string s)
+{
+  // &#0;
+  if (s.empty() || s.size () < 4) return std::wstring();
+
+  std::wstring ws=L"";
+  std::string h;
+  for (size_t i=0; i < s.size()-4; i++) {
+    if (s.substr(i, 2) == "&#") {
+      i+=2;
+      ws+=(wchar_t)std::stoi(s2n(s, i));
+    } else if (s.substr(i, 3) == "&#x") {
+      i+=3;
+      ws+=(wchar_t)stoh(s2n(s, i));
+    } else {
+      ws+=(wchar_t)s[i];
+    }
   }
-  return ss.str();
+
+  return ws;
 }
 
 // Same as previous for string
-std::string htent_hex(const std::string s)
+std::string htent_to_s(const std::string s)
 {
-  return htent_hex(s2ws(s));
+  return ws2s(htent_to_ws(s));
 }
 
 #ifdef _WIN32
