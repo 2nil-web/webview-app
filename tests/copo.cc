@@ -113,7 +113,10 @@ void out_cp(std::wstring ws) {
 }
 
 int main(int argc, char *argv[]) {
+#ifdef _WIN32
   SetConsoleOutputCP(CP_UTF8);
+#endif
+
   out_cph("पार्सल् एक्स्प्रेस्");
   out_cph("A你ètotö要らない你");
   out_cp(L"पार्सल् एक्स्प्रेस्");
