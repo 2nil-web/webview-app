@@ -34,7 +34,6 @@ public:
   void bind_doc(const std::string &name, const std::string desc, binding_t fn, void *arg = nullptr, bool indoc = true);
 
   void resolve(const std::string &seq, int status, const std::string &result);
-  void resolve(const std::string &seq, int status, const std::wstring &result);
 
   void navigate(const std::string &url);
   void run();

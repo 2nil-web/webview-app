@@ -20,6 +20,15 @@ std::string ws2s(std::wstring ws);
 // Convert string to wstring
 std::wstring s2ws(std::string s);
 
+// Convert non ascii characters of a wstring to html entities in the following decimal form &#[dec_value];
+std::string htent_dec(const std::wstring ws);
+// Same as previous for string
+std::string htent_dec(const std::string s);
+// Convert non ascii characters of a wstring to html entities in the following hexadecimal form &#x[hex_value];
+std::string htent_hex(const std::wstring ws);
+// Same as previous for string
+std::string htent_hex(const std::string s);
+
 // Convert an utf8 string into an url encoded hexadecimal one
 std::string h2s(const std::string s);
 // Convert an url hexadecimal encoded string into an utf8 string

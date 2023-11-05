@@ -237,41 +237,41 @@ std::string tempfile(std::string tpath, std::string pfx)
 
 #ifdef _WIN32
 #ifdef _MSC_VER
-// Convert wstring (UTF16) to string (UTF8) in Window context
-std::string ws2s(const std::wstring s)
-{
-  std::string ret;
-  int cbn = WideCharToMultiByte(CP_UTF8, 0, s.c_str(), -1, NULL, 0, NULL, NULL);
+// Converts UTF-16/wstring to UTF-8/string
+std::string ws2s(const std::wstring ws) {
+  if (ws.empty()) return std::string();
 
-  if (cbn > 0)
-  {
-    char *utf8 = new char[cbn];
-    if (WideCharToMultiByte(CP_UTF8, 0, s.c_str(), -1, utf8, cbn, NULL, NULL) != 0)
-      ret = utf8;
-    delete[] utf8;
+  UINT cp=CP_UTF8;
+  DWORD flags=WC_ERR_INVALID_CHARS;
+  auto wc=ws.c_str();
+  auto wl=static_cast<int>(ws.size());
+  auto l=WideCharToMultiByte(cp, flags, wc, wl, nullptr, 0, nullptr, nullptr);
+
+  if (l > 0) {
+    std::string s(static_cast<std::size_t>(l), '\0');
+    if (WideCharToMultiByte(cp, flags, wc, wl, &s[0], l, nullptr, nullptr) > 0) return s;
   }
 
-  return ret;
+  return std::string();
 }
 
-// Convert string (UTF8) to wstring (UTF16) in Window context
-std::wstring s2ws(const std::string s)
-{
-  std::wstring ret;
-  int cchn = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
+// Converts UTF-8/string to UTF-16/wstring
+std::wstring s2ws(const std::string s) {
+  if (s.empty()) return std::wstring();
 
-  if (cchn > 0)
-  {
-    wchar_t *utf16 = new wchar_t[cchn];
-    if (MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, utf16, cchn) != 0)
-      ret = utf16;
-    delete[] utf16;
+  UINT cp=CP_UTF8;
+  DWORD flags=MB_ERR_INVALID_CHARS;
+  auto c=s.c_str();
+  auto l=static_cast<int>(s.size());
+  auto wl=MultiByteToWideChar(cp, flags, c, l, nullptr, 0);
+  if (wl > 0) {
+    std::wstring ws(static_cast<std::size_t>(wl), L'\0');
+    if (MultiByteToWideChar(cp, flags, c, l, &ws[0], wl) > 0) return ws;
   }
 
-  return ret;
+  return std::wstring();
 }
 #else
-
 std::string ws2s(std::wstring ws)
 {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -284,6 +284,47 @@ std::wstring s2ws(std::string s)
   return converter.from_bytes(s);
 }
 #endif
+
+// Return false if wide char is a printable ascii else true
+bool not_printable_ascii(wchar_t wc) {
+  if (wc > 31 && wc < 127) return false;
+  return true;
+}
+
+// Convert non ascii characters of a wstring to html entities in the following decimal form &#[dec_value];
+std::string htent_dec(const std::wstring ws) {
+  std::stringstream ss;
+
+  for (auto wc:ws) {
+    if (not_printable_ascii(wc)) {
+      ss << "&#" << (unsigned int)wc << ';';
+    } else ss << (char)wc;
+  }
+
+  return ss.str();
+}
+ 
+// Same as previous for string
+std::string htent_dec(const std::string s) {
+  return htent_dec(s2ws(s));
+}
+
+// Convert non ascii characters of a wstring to html entities in the following hexadecimal form &#x[hex_value];
+std::string htent_hex(const std::wstring ws) {
+  std::stringstream ss;
+
+  for (auto wc:ws) {
+    if (not_printable_ascii(wc)) ss << "&#x" << std::hex << (unsigned int)wc << ';';
+    else ss << (char)wc;
+  }
+  return ss.str();
+}
+ 
+// Same as previous for string
+std::string htent_hex(const std::string s) {
+  return htent_hex(s2ws(s));
+}
+
 
 // Convert an utf8 string into an url encoded hexadecimal one
 std::string s2h(const std::string s)

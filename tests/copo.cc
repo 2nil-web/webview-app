@@ -14,8 +14,9 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#endif
  
- 
+#ifdef _MSC_VER
 // Converts UTF-16/wstring to UTF-8/string
 std::string ws2s(const std::wstring ws) {
   if (ws.empty()) return std::string();
@@ -70,8 +71,8 @@ bool not_printable_ascii(wchar_t wc) {
   return true;
 }
 
-// Convert non ascii characters of a wstring to html entities in decimal &#dec;
-std::string htentd(const std::wstring ws) {
+// Convert non ascii characters of a wstring to html entities in the following decimal form &#[dec_value];
+std::string htent_dec(const std::wstring ws) {
   std::stringstream ss;
 
   for (auto wc:ws) {
@@ -84,12 +85,12 @@ std::string htentd(const std::wstring ws) {
 }
  
 // Same as previous for string
-std::string htentd(const std::string s) {
-  return htentd(s2ws(s));
+std::string htent_dec(const std::string s) {
+  return htent_dec(s2ws(s));
 }
 
-// Convert non ascii characters of a wstring to html entities in decimal &#xhex;
-std::string htenth(const std::wstring ws) {
+// Convert non ascii characters of a wstring to html entities in the following hexadecimal form &#x[hex_value];
+std::string htent_hex(const std::wstring ws) {
   std::stringstream ss;
 
   for (auto wc:ws) {
@@ -100,24 +101,24 @@ std::string htenth(const std::wstring ws) {
 }
  
 // Same as previous for string
-std::string htenth(const std::string s) {
-  return htenth(s2ws(s));
+std::string htent_hex(const std::string s) {
+  return htent_hex(s2ws(s));
 }
 
 void out_cph(std::string s) {
-  std::cout << s << std::endl << " ==> " << htenth(s2ws(s)) << std::endl;
+  std::cout << s << std::endl << " ==> " << htent_hex(s2ws(s)) << std::endl;
 }
 
 void out_cph(std::wstring ws) {
-  std::cout << ws2s(ws) << std::endl << " ==> " << htenth(ws) << std::endl;
+  std::cout << ws2s(ws) << std::endl << " ==> " << htent_hex(ws) << std::endl;
 }
 
 void out_cp(std::string s) {
-  std::cout << s << std::endl << " ==> " << htentd(s2ws(s)) << std::endl;
+  std::cout << s << std::endl << " ==> " << htent_dec(s2ws(s)) << std::endl;
 }
 
 void out_cp(std::wstring ws) {
-  std::cout << ws2s(ws) << std::endl << " ==> " << htentd(ws) << std::endl;
+  std::cout << ws2s(ws) << std::endl << " ==> " << htent_dec(ws) << std::endl;
 }
 
 int main(int argc, char *argv[]) {
