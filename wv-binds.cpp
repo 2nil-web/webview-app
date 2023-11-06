@@ -155,37 +155,36 @@ std::string skipWideChars(std::wstring ws)
   return s;
 }
 
+std::string setfile(std::filesystem::path path) {
+  std::string eps;
+  eps=to_htent(path.wstring());
+  replace_all(eps, "\\", "/");
+  eps="\"path\":\"" + eps + '"';
+  return "{" + eps + "},";
+}
+
 const std::string hexa_pfx="UTF_IN_HEXA_STRING";
 // Return a javascript array of strings corresponding to a directory list,
 // recursively or not
-std::string lsdir(std::string path, bool recursive=false)
+std::string lsdir(std::string spath, bool recursive=false)
 {
-  std::string res, res_line;
-  if (path.empty())
-    path=".";
-  // Pas de récursif, trop dangereux, ça plante le PC ...
-  for (const auto &e : std::filesystem::directory_iterator(path))
-  {
-    // Will return also a path_hexa field if path is not only made of ascii
-    // characters in order to workaround the utf8 Window$ shitty processing
-    std::string eps;
-    //#ifdef _MSC_VER
-    eps=to_htent(e.path().wstring());
-    //#else
-    //    eps=e.path().string();
-    //#endif
+  std::string res="", res_line;
+  std::filesystem::path path;
 
-    replace_all(eps, "\\", "/");
-    res_line="\"path\":\"" + eps + '"';
-    /*
-        if (isWideString(eps))
-        {
-          std::string hs=hexa_pfx + s_w2h(e.path().wstring());
-          res_line += ",\"path_hexa\":\"" + hs + '"';
-        }
-    */
-    // std::cout << res_line << std::endl;
-    res += "{" + res_line + "},";
+  if (spath.empty()) path=".";
+  else path=spath;
+
+  if (std::filesystem::is_directory(path)) {
+    // Pas de récursif, trop dangereux, ça plante le PC ...
+    for (const auto &e : std::filesystem::directory_iterator(path))
+    {
+      res += setfile(e);
+    }
+  } else {
+    if (std::filesystem::is_regular_file(path)) {
+      res += setfile(path.filename());
+    } else
+      res += setfile("not a directory or file '"+path.filename().string()+"'");
   }
 
   // Remove last comma
@@ -325,28 +324,12 @@ void fwrite(std::string fname, std::string s, std::ios_base::openmode omod=std::
 
 std::string do_fstat(std::string sp)
 {
-  std::filesystem::path p;
-  //  std::cout << "deb fstat " << sp << std::endl;
-  if (sp.starts_with(hexa_pfx))
-  {
-    auto sp2=sp.substr(hexa_pfx.size());
-    replace_all(sp2, "\\", "/");
-    p=s_h2w(sp2);
-#ifdef _MSC_VER
-    sp=Utf16ToUtf8(p.wstring());
-    // if (sp != p.string()) std::cout << "HEX " << sp << "\n  # " << p <<
-    // std::endl;
-#else
-    sp=skipWideChars(p.wstring());
-    // sp=p.string();
-#endif
-  }
-  else
-  {
-    p=sp;
-  }
-  replace_all(sp, "\\", "/");
-  //  std::cout << "mid fstat " << p << std::endl;
+  std::wstring ws=htent_to_ws(sp);
+  replace_all(ws, L"\\", L"/");
+  std::filesystem::path p=ws;
+//  std::cout << "do_fstat " << sp << "<=>";
+//  std::wcout << ws;
+//  std::cout << "<=>" << p.string() << std::endl;
 
   auto fs=std::filesystem::status(p);
   auto ft=fs.type();
@@ -386,11 +369,14 @@ void create_binds(webview_wrapper &w)
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
           auto sp=json_parse(req, "", 0);
-          std::cout << "param " << sp << std::endl;
-          std::string to_ht=to_htent(sp, std::hex);
-          std::cout << "to_htent " << to_ht << std::endl;
+          std::string to_ht=to_htent(sp);
+#ifdef _WIN32
+          SetConsoleOutputCP(CP_UTF8);
+#endif
+//          std::cout << "param " << sp << std::endl;
+//          std::cout << "to_htent " << to_ht << std::endl;
           std::string ht_to=htent_to_s(to_ht);
-          std::cout << "htent_to " << ht_to << std::endl;
+          std::cout << "htent_to " << htent_to_s(to_ht) << std::endl;
           w.resolve(seq, 0, '"' + to_ht + '"');
         }).detach();
       },

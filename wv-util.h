@@ -22,9 +22,9 @@ std::string ws2s(std::wstring ws);
 std::wstring s2ws(std::string s);
 
 // Convert non ascii characters of a wstring to html entities in the following decimal form &#[dec_value];
-std::string to_htent(const std::wstring ws, std::ios_base &(*base)(std::ios_base &)=std::dec);
+std::string to_htent(const std::wstring ws, bool dec_base=true);
 // Same as previous for string
-std::string to_htent(const std::string s, std::ios_base &(*base)(std::ios_base &)=std::dec);
+std::string to_htent(const std::string s, bool dec_base=true);
 
 // Convert the html entities in hexa or decimal form contained in a string to their wchar_t value, return the obtained wstring
 std::wstring htent_to_ws(const std::string ws);

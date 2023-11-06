@@ -300,24 +300,19 @@ bool not_printable_ascii(wchar_t wc)
   return true;
 }
 
-// Convert non ascii characters of a wstring to html entities form &#[x]value;
-std::string to_htent(const std::wstring ws, std::ios_base &(*base)(std::ios_base &))
+// Convert non ascii characters of a wstring to html entities form in decimal (default) or hexa &#[x]value;
+std::string to_htent(const std::wstring ws, bool dec_base)
 {
   std::stringstream ss;
-
-  /* Silently default to std::dec if any other numeral system than decimal and hexa is passed (i.e. octal)
-  if (base == std::dec || base == std::hex) ;
-  else base=std::dec;
-
-  if (base != std::dec && base != std::hex) base=std::dec;*/
 
   for (auto wc : ws)
   {
     if (not_printable_ascii(wc))
     {
       ss << "&#";
-      if (*base == *std::hex) ss << 'x';
-      ss << base << (unsigned int)wc << ';';
+      if (dec_base) ss << std::dec;
+      else ss << 'x' << std::hex;
+      ss << (unsigned int)wc << ';';
     }
     else
       ss << (char)wc;
@@ -327,9 +322,9 @@ std::string to_htent(const std::wstring ws, std::ios_base &(*base)(std::ios_base
 }
 
 // Same as previous for string
-std::string to_htent(const std::string s, std::ios_base &(*base)(std::ios_base &))
+std::string to_htent(const std::string s, bool dec_base)
 {
-  return to_htent(s2ws(s));
+  return to_htent(s2ws(s), dec_base);
 }
 
 std::string s2n(std::string s, size_t& i) {
@@ -350,17 +345,17 @@ unsigned int stoh(std::string s) {
 std::wstring htent_to_ws(const std::string s)
 {
   // &#0;
-  if (s.empty() || s.size () < 4) return std::wstring();
+  if (s.empty() || s.size () < 4) return s2ws(s);
 
   std::wstring ws=L"";
   std::string h;
-  for (size_t i=0; i < s.size()-4; i++) {
-    if (s.substr(i, 2) == "&#") {
+  for (size_t i=0; i < s.size(); i++) {
+    if (s.substr(i, 3) == "&#x") {
+      i+=2;
+      ws+=(wchar_t)stoh(s2n(s, i));
+    } else if (s.substr(i, 2) == "&#") {
       i+=2;
       ws+=(wchar_t)std::stoi(s2n(s, i));
-    } else if (s.substr(i, 3) == "&#x") {
-      i+=3;
-      ws+=(wchar_t)stoh(s2n(s, i));
     } else {
       ws+=(wchar_t)s[i];
     }
