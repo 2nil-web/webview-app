@@ -156,10 +156,15 @@ std::string skipWideChars(std::wstring ws)
 }
 
 std::string setfile(std::filesystem::path path) {
+	std::cout << path << std::endl;
   std::string eps;
+  std::cout << 0 <<std::endl;
   eps=to_htent(path.wstring());
+  std::cout << 1 <<std::endl;
   replace_all(eps, "\\", "/");
+  std::cout << 2 <<std::endl;
   eps="\"path\":\"" + eps + '"';
+  std::cout << 3 <<std::endl;
   return "{" + eps + "},";
 }
 
