@@ -461,7 +461,7 @@ const char *getcmda()
     return "C:\\Windows\\System32\\cmd.exe";
 }
 
-std::wstring SystemToString(const std::string cmd)
+std::string SystemToString(const std::string cmd)
 {
   std::wstring wcmd = s2ws("/C " + cmd);
   std::string tmpFile = tempfile();
@@ -488,18 +488,32 @@ std::wstring SystemToString(const std::string cmd)
   // FlushFileBuffers(GetStdHandle(STD_ERROR_HANDLE));
   // FlushFileBuffers(hFile);
 
-  std::wstring s = wfile2wstr(tmpFile);
+//  std::wstring s = wfile2wstr(tmpFile);
+  std::string s = file2str(tmpFile);
   CloseHandle(hFile);
-  DeleteFileW(wtmpFile.c_str());
+  DeleteFile(tmpFile.c_str());
   return s;
 }
 #endif
 
 std::string exec_cmd(std::string cmd)
 {
+  std::string s;
 
 #ifdef _WIN32
-  return to_htent(SystemToString(cmd));
+  s=SystemToString(cmd);
+#else
+  std::string tf = tempfile();
+  std::string fullcmd = cmd + " > " + tf;
+  std::system(fullcmd.c_str());
+  s = file2str(tf);
+  std::filesystem::remove(tf);
+#endif
+
+  return to_htent(s);
+#ifdef RESE
+#ifdef _WIN32
+  return to_htent(ws2s(SystemToString(cmd)));
 #else
   std::string tf = tempfile();
   std::string fullcmd = cmd + " > " + tf;
@@ -507,6 +521,7 @@ std::string exec_cmd(std::string cmd)
   std::string s = file2str(tf);
   std::filesystem::remove(tf);
   return to_htent(s);
+#endif
 #endif
 }
 
