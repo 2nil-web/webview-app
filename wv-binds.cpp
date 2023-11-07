@@ -158,7 +158,11 @@ std::string skipWideChars(std::wstring ws)
 std::string setfile(std::filesystem::path path) {
 	//std::cout << path << std::endl;
   std::string eps;
+#ifdef _WIN32
   eps=to_htent(path.wstring());
+#else
+  eps=to_htent(path.string());
+#endif
   replace_all(eps, "\\", "/");
   eps="\"path\":\"" + eps + '"';
   return "{" + eps + "},";
@@ -323,13 +327,14 @@ void fwrite(std::string fname, std::string s, std::ios_base::openmode omod=std::
 
 std::string do_fstat(std::string sp)
 {
+#ifdef _WIN32
   std::wstring ws=htent_to_ws(sp);
   replace_all(ws, L"\\", L"/");
+#else
+  std::string ws=htent_to_s(sp);
+  replace_all(ws, "\\", "/");
+#endif
   std::filesystem::path p=ws;
-//  std::cout << "do_fstat " << sp << "<=>";
-//  std::wcout << ws;
-//  std::cout << "<=>" << p.string() << std::endl;
-
   auto fs=std::filesystem::status(p);
   auto ft=fs.type();
   std::uintmax_t sz;
