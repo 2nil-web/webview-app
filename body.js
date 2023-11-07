@@ -38,7 +38,7 @@ function exec_cmd(cmd_value) {
     tout_warn.innerHTML='&nbsp;';
     setTimeout(exec_cmd_no_return, tout.value, cmd_value, tout.value);
     window.webapp_exec(cmd_value, true).then(result => {
-      output.value += result.value;//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+      output.innerHTML += result.value;//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
       end_cmd();
     });
 }

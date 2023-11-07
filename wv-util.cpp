@@ -497,16 +497,19 @@ std::wstring SystemToString(const std::string cmd)
 
 std::string exec_cmd(std::string cmd)
 {
+  std::wstring s;
+
 #ifdef _WIN32
-  return ws2s(SystemToString(cmd));
+  s=SystemToString(cmd);
 #else
   std::string tf = tempfile();
   std::string fullcmd = cmd + " > " + tf;
   std::system(fullcmd.c_str());
-  std::string s = file2str(tf);
+  s = s2ws(file2str(tf));
   std::filesystem::remove(tf);
-  return s;
 #endif
+
+  return to_htent(s);
 }
 
 std::string rep_bs(std::string &s)
