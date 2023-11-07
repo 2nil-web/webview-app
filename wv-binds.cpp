@@ -158,19 +158,13 @@ std::string skipWideChars(std::wstring ws)
 std::string setfile(std::filesystem::path path) {
 	std::cout << path << std::endl;
   std::string eps;
-  std::cout << 0 <<std::endl;
   eps=to_htent(path.wstring());
-  std::cout << 1 <<std::endl;
   replace_all(eps, "\\", "/");
-  std::cout << 2 <<std::endl;
   eps="\"path\":\"" + eps + '"';
-  std::cout << 3 <<std::endl;
   return "{" + eps + "},";
 }
 
-const std::string hexa_pfx="UTF_IN_HEXA_STRING";
 // Return a javascript array of strings corresponding to a directory list,
-// recursively or not
 std::string lsdir(std::string spath, bool recursive=false)
 {
   std::string res="", res_line;
