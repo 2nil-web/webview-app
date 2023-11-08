@@ -50,6 +50,20 @@ std::string file2str(std::string filename)
   return ss.str();
 }
 
+std::wstring file2wstr(std::string filename)
+{
+  std::wifstream wif(filename);
+#ifndef _MSC_VER
+  wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
+/*#else
+    wif.imbue(std::locale(std::locale(), new std::codecvt_utf8_utf16<wchar_t,
+   0x10FFFF, std::consume_header>));*/
+#endif
+  std::wstringstream wss;
+  wss << wif.rdbuf();
+  return wss.str();
+}
+
 #ifdef _WIN32
 void WinError(const char *fmt, ...)
 {
@@ -341,23 +355,23 @@ unsigned int stoh(std::string s) {
   return x;
 }
 
-// Convert the html entities in hexa or decimal form contained in a string to their wchar_t value, return the obtained string
-std::wstring htent_to_ws(const std::string s)
+// Convert the html entities in hexa or decimal form contained in the string htent to their wchar_t value, return the obtained string in ws
+std::wstring from_htent(const std::string htent, std::wstring& ws)
 {
   // &#0;
-  if (s.empty() || s.size () < 4) return s2ws(s);
-
-  std::wstring ws=L"";
-  std::string h;
-  for (size_t i=0; i < s.size(); i++) {
-    if (s.substr(i, 3) == "&#x") {
-      i+=2;
-      ws+=(wchar_t)stoh(s2n(s, i));
-    } else if (s.substr(i, 2) == "&#") {
-      i+=2;
-      ws+=(wchar_t)std::stoi(s2n(s, i));
-    } else {
-      ws+=(wchar_t)s[i];
+  if (htent.empty() || htent.size () < 4) ws=s2ws(htent);
+  else {
+    ws=L"";
+    for (size_t i=0; i < htent.size(); i++) {
+      if (htent.substr(i, 3) == "&#x") {
+        i+=2;
+        ws+=(wchar_t)stoh(s2n(htent, i));
+      } else if (htent.substr(i, 2) == "&#") {
+        i+=2;
+        ws+=(wchar_t)std::stoi(s2n(htent, i));
+      } else {
+        ws+=(wchar_t)htent[i];
+      }
     }
   }
 
@@ -365,84 +379,14 @@ std::wstring htent_to_ws(const std::string s)
 }
 
 // Same as previous for string
-std::string htent_to_s(const std::string s)
+std::string from_htent(const std::string htent, std::string& s)
 {
-  return ws2s(htent_to_ws(s));
+  std::wstring ws;
+  s=ws2s(from_htent(htent, ws));
+  return s;
 }
 
 #ifdef _WIN32
-// Convert an utf8 string into an url encoded hexadecimal one
-std::string s2h(const std::string s)
-{
-  std::string ret;
-  char hs[5];
-  for (const char *p = s.c_str(); *p; p++)
-  {
-    _snprintf_s(hs, sizeof(hs), sizeof(hs), "%%%2.2X", (unsigned char)*p);
-    ret.append(hs);
-  }
-
-  return ret;
-}
-
-// Convert an url hexadecimal encoded string into an utf8 string
-std::string h2s(const std::string s)
-{
-  std::string ret;
-  int ch;
-
-  for (const char *p = s.c_str(); *p;)
-  {
-    if (p[0] == '%' && isxdigit(p[1]) && isxdigit(p[2]))
-    {
-      ch = (isdigit(p[1]) ? p[1] - '0' : toupper(p[1]) - 'A' + 10) * 16 +
-           (isdigit(p[2]) ? p[2] - '0' : toupper(p[2]) - 'A' + 10);
-      ret.push_back((char)ch);
-      p += 3;
-    }
-    else if (p[0] == '%' && p[1] == '#' && isdigit(p[2]))
-    {
-      ch = atoi(p + 2);
-      ret.push_back((char)ch);
-      p += 2;
-      while (*p && isdigit(*p))
-        p++;
-      if (*p == ';')
-        p++;
-    }
-    else
-      ret.push_back(*p++);
-  }
-
-  return ret;
-}
-
-// Convert a wstring to into an url encoded hexadecimal string <=> to javascript
-std::string ws2u8h(const std::wstring s)
-{
-  return s2h(ws2s(s));
-}
-
-// Convert an url encoded hexadecimal string into a wstring
-std::wstring u8h2ws(const std::string s)
-{
-  return s2ws(h2s(s));
-}
-
-std::wstring wfile2wstr(std::string filename)
-{
-  std::wifstream wif(filename);
-#ifndef _MSC_VER
-  wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
-/*#else
-    wif.imbue(std::locale(std::locale(), new std::codecvt_utf8_utf16<wchar_t,
-   0x10FFFF, std::consume_header>));*/
-#endif
-  std::wstringstream wss;
-  wss << wif.rdbuf();
-  return wss.str();
-}
-
 const wchar_t *getcmdw()
 {
   static wchar_t cmd_path[MAX_PATH];
@@ -460,48 +404,36 @@ const char *getcmda()
   else
     return "C:\\Windows\\System32\\cmd.exe";
 }
+#endif
 
-std::string SystemToString(const std::string cmd)
+std::string exec_cmd(std::string cmd)
 {
+  std::string s;
+#ifdef _WIN32
   std::wstring wcmd = s2ws("/C " + cmd);
   std::string tmpFile = tempfile();
   std::wstring wtmpFile = s2ws(tmpFile);
-
   AllocConsole();
   ShowWindow(GetConsoleWindow(), SW_HIDE);
   SetConsoleOutputCP(65001);
-
   STARTUPINFOW si = {};
   si.cb = sizeof(STARTUPINFOW);
   PROCESS_INFORMATION pi = {};
   SECURITY_ATTRIBUTES se = {};
   se.nLength = sizeof(SECURITY_ATTRIBUTES);
-
   HANDLE hFile = CreateFileW(wtmpFile.c_str(), FILE_WRITE_DATA, FILE_SHARE_DELETE | FILE_SHARE_READ, &se, OPEN_ALWAYS,
                              FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_TEMPORARY, 0);
   SetStdHandle(STD_OUTPUT_HANDLE, hFile);
   SetStdHandle(STD_ERROR_HANDLE, hFile);
   CreateProcessW(getcmdw(), const_cast<wchar_t *>(wcmd.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
   WaitForSingleObject(pi.hProcess, INFINITE);
-
   // FlushFileBuffers(GetStdHandle(STD_OUTPUT_HANDLE));
   // FlushFileBuffers(GetStdHandle(STD_ERROR_HANDLE));
   // FlushFileBuffers(hFile);
 
-//  std::wstring s = wfile2wstr(tmpFile);
-  std::string s = file2str(tmpFile);
+  s = file2str(tmpFile);
   CloseHandle(hFile);
   DeleteFile(tmpFile.c_str());
-  return s;
-}
-#endif
-
-std::string exec_cmd(std::string cmd)
-{
-  std::string s;
-
-#ifdef _WIN32
-  s=SystemToString(cmd);
 #else
   std::string tf = tempfile();
   std::string fullcmd = cmd + " > " + tf;
@@ -509,20 +441,7 @@ std::string exec_cmd(std::string cmd)
   s = file2str(tf);
   std::filesystem::remove(tf);
 #endif
-
   return to_htent(s);
-#ifdef RESE
-#ifdef _WIN32
-  return to_htent(ws2s(SystemToString(cmd)));
-#else
-  std::string tf = tempfile();
-  std::string fullcmd = cmd + " > " + tf;
-  std::system(fullcmd.c_str());
-  std::string s = file2str(tf);
-  std::filesystem::remove(tf);
-  return to_htent(s);
-#endif
-#endif
 }
 
 std::string rep_bs(std::string &s)

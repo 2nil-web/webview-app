@@ -12,55 +12,14 @@
 #include <thread>
 
 #ifdef _WIN32
-#include "Utf8Conv.hpp"
 #include "wv-winapi.h"
-using Utf8Conv::Utf16ToUtf8;
-using Utf8Conv::Utf8ToUtf16;
-#include <windows.h>
 #endif
 
-#include "base64.hpp"
 #include "wv-curl.h"
 #include "wv-util.h"
 #include "wv-wrap.h"
 
 webview_wrapper w;
-
-// Convert a wstring to a string containing a suite of hexa numbers, separated
-// by space and representing the utf code of each characters of the wstring
-// i.e. the wstring "totö要らない" will result in a string "74 6f 74 f6 8981
-// 3089 306a 3044"
-std::string s_w2h(std::wstring ws)
-{
-  std::stringstream cnv;
-  for (auto e : ws)
-  {
-    // if (cnv.tellp() != 0)
-    if (!cnv.str().empty())
-      cnv << ' ';
-    cnv << std::hex << (unsigned int)e;
-  }
-
-  return cnv.str();
-}
-
-// Convert a string containing a suite of hexa numbers, separated by space and
-// representing utf code to a wstring i.e. the string "74 6f 74 f6 8981 3089
-// 306a 3044"  will give the wstring "totö要らない"
-std::wstring s_h2w(std::string hs)
-{
-  std::string hex_chars(hs);
-
-  std::istringstream hex_chars_stream(hex_chars);
-  std::wstring ws=L"";
-  unsigned int c;
-  while (hex_chars_stream >> std::hex >> c)
-  {
-    ws += (wchar_t)c;
-  }
-
-  return ws;
-}
 
 void write_cons(std::string s, std::ostream &out=std::cout)
 {
@@ -98,61 +57,6 @@ void write_cons(std::string s, std::ostream &out=std::cout)
 #endif
 
   w.eval("console.log('[[" + s + "]]');");
-}
-
-bool isWideString(const std::string s)
-{
-  for (auto &c : s)
-  {
-    // if(c & 0x80) return true;
-    if (c > 0xff)
-      return true;
-  }
-
-  return false;
-}
-
-bool isWideString(const std::wstring s)
-{
-  for (auto &c : s)
-  {
-    // if(c & 0x80) return true;
-    // if (c > 0xff)
-    if (c > 0x80)
-      return true;
-  }
-
-  return false;
-}
-
-std::string skipWideChars(std::string ws)
-{
-  std::string s;
-  for (auto &c : ws)
-  {
-    // if (c & 0x80) s+='_';
-    if (c > 0xff)
-      s += '_';
-    else
-      s += (char)c;
-  }
-
-  return s;
-}
-
-std::string skipWideChars(std::wstring ws)
-{
-  std::string s;
-  for (auto &c : ws)
-  {
-    // if(c & 0x80) s+='*';
-    if (c > 0xff)
-      s += '_';
-    else
-      s += (char)c;
-  }
-
-  return s;
 }
 
 std::string setfile(std::filesystem::path path) {
@@ -197,15 +101,7 @@ std::string lsdir(std::string spath, bool recursive=false)
   return res;
 }
 
-// Return a string that represents the number in hexadecimal form
-std::string to_js_hex(unsigned int number)
-{
-  std::ostringstream str;
-  str << std::hex << number;
-  return "0X" + str.str();
-}
-
-// Return a string that represents the number in octal form
+// Return a string that represents the number in octal form, useful for a command like chmod
 std::string to_js_oct(unsigned int number)
 {
   std::ostringstream str;
@@ -263,16 +159,6 @@ int forced_file_type(std::filesystem::file_type ft)
   }
 }
 
-std::string sec_wait(std::string ssec)
-{
-  auto msg=ssec + " second wait";
-  int sec=std::stoi(ssec);
-  //  std::cout << "Starting " << msg << std::endl;
-  std::this_thread::sleep_for(std::chrono::seconds(sec));
-  //  std::cout << "Ending   " << msg << std::endl;
-  return '"' + msg + " is over.\"";
-}
-
 template <typename TP> std::time_t to_time_t(TP tp)
 {
   namespace ch=std::chrono;
@@ -328,13 +214,15 @@ void fwrite(std::string fname, std::string s, std::ios_base::openmode omod=std::
 std::string do_fstat(std::string sp)
 {
 #ifdef _WIN32
-  std::wstring ws=htent_to_ws(sp);
+  std::wstring ws;
+  from_htent(sp, ws);
   replace_all(ws, L"\\", L"/");
 #else
-  std::string ws=htent_to_s(sp);
+  std::string ws;
+  from_htent(sp, ws);
   replace_all(ws, "\\", "/");
 #endif
-  std::filesystem::path p=ws;
+  std::filesystem::path p(ws);
   auto fs=std::filesystem::status(p);
   auto ft=fs.type();
   std::uintmax_t sz;
@@ -347,41 +235,41 @@ std::string do_fstat(std::string sp)
     lastwr=lastwrite(p);
   else
   {
-    std::cout << "NOT FOUND " << sp << std::endl;
+    std::cout << "NOT FOUND " << sp << '(' << p << ')' << std::endl;
   }
   std::string res="{\"file\":\"" + sp + "\"," + "\"type\":\"" + std::to_string(forced_file_type(ft)) + "\"," +
                     "\"perms\":\"" + to_js_oct((unsigned)fs.permissions()) + "\"," + "\"size\":\"" +
                     std::to_string(sz) + "\"," + "\"last_write\":\"" + lastwr + "\"}";
-  // std::cout << "end fstat:" << res << std::endl << std::flush;
   return res;
 }
 
-// Synchronous bind
-bool s2b(std::string s)
+// return if string == true/ok/yes/1 else false
+bool str2bool(std::string s)
 {
-  if (s == "true")
+  if (s == "true" || s == "ok" || s == "1" || s == "yes")
     return true;
   return false;
 }
 
 // console.log(webapp_help())
 static unsigned int nfs=0;
-void create_binds(webview_wrapper &w)
+void create_binds()
 {
   w.bind_doc(
       "echo", "echo the parameter.",
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
           auto sp=json_parse(req, "", 0);
-          std::string to_ht=to_htent(sp);
+          std::string htent=to_htent(sp);
 #ifdef _WIN32
           SetConsoleOutputCP(CP_UTF8);
 #endif
 //          std::cout << "param " << sp << std::endl;
-//          std::cout << "to_htent " << to_ht << std::endl;
-          std::string ht_to=htent_to_s(to_ht);
-          std::cout << "htent_to " << htent_to_s(to_ht) << std::endl;
-          w.resolve(seq, 0, '"' + to_ht + '"');
+//          std::cout << "to_htent " << htent << std::endl;
+          std::string ht_to;
+          from_htent(htent, ht_to);
+          std::cout << "from_htent " << ht_to << std::endl;
+          w.resolve(seq, 0, '"' + htent + '"');
         }).detach();
       },
       nullptr);
@@ -463,19 +351,6 @@ void create_binds(webview_wrapper &w)
     return "";
   });
 
-  w.bind_doc("wait_nothread", "wait in foreground",
-             [&](const std::string &req) -> std::string { return sec_wait(json_parse(req, "", 0)); });
-
-  w.bind_doc(
-      "wait_thread", "wait in background",
-      [&](const std::string &seq, const std::string &req, void * /*arg*/) {
-        std::thread([&, seq, req] {
-          auto result=sec_wait(json_parse(req, "", 0));
-          w.resolve(seq, 0, result);
-        }).detach();
-      },
-      nullptr);
-
   w.bind_doc(
       "absolute", "gives absolute path of a file path.",
       [&](const std::string &seq, const std::string &req, void *) {
@@ -500,9 +375,9 @@ void create_binds(webview_wrapper &w)
       [&](const std::string &seq, const std::string &req, void *) {
         std::thread([&, seq, req] {
           std::string url=json_parse(req, "", 0);
-          bool peer_check=s2b(json_parse(req, "", 1));
-          bool host_check=s2b(json_parse(req, "", 2));
-          bool verbose=s2b(json_parse(req, "", 3));
+          bool peer_check=str2bool(json_parse(req, "", 1));
+          bool host_check=str2bool(json_parse(req, "", 2));
+          bool verbose=str2bool(json_parse(req, "", 3));
           std::cout << "URL " << url << ", peer_check " << peer_check << ", host_check " << host_check << ", verbose "
                     << verbose << std::endl;
           auto res=httpget(url, peer_check, host_check, verbose);
@@ -669,7 +544,7 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
 
   w.create(devmode, (void *)wnd);
   w.set_size(width, height, hints);
-  create_binds(w);
+  create_binds();
 }
 
 void webview_run(std::string url, std::string title, std::string init_js)

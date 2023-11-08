@@ -27,14 +27,9 @@ std::string to_htent(const std::wstring ws, bool dec_base=true);
 std::string to_htent(const std::string s, bool dec_base=true);
 
 // Convert the html entities in hexa or decimal form contained in a string to their wchar_t value, return the obtained wstring
-std::wstring htent_to_ws(const std::string ws);
+std::wstring from_htent(const std::string htent, std::wstring& ws);
 // Same as previous but return a string
-std::string htent_to_s(const std::string s);
-
-// Convert an utf8 string into an url encoded hexadecimal one
-std::string h2s(const std::string s);
-// Convert an url hexadecimal encoded string into an utf8 string
-std::string s2h(const std::string s);
+std::string from_htent(const std::string htent, std::string& s);
 
 std::string file2str(std::string filename);
 

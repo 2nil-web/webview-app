@@ -9,12 +9,6 @@ if (typeof webapp_title === "function") {
 }
 
 
-function cons_or_notRES(res) {
-  hlp_msg=res.replace(/\./g, ".\n");
-  console.log(hlp_msg);
-  output.innerHTML+=hlp_msg;
-}
-
 function cons_or_not(res, obj) {
   var hlp_msg="";
   Object.keys(res).forEach(key => { hlp_msg+=key+": "+res[key]+"\n"; });
@@ -62,7 +56,7 @@ function dir(path=".", rec=false, dst_textarea=output) {
       //console.log("fs_prom1 "+param.file);
       this.elt=param;
     } else {
-      console.log("fs_prom2 LS "+list_size+", L "+full_list.length+', perm '+this.elt.perms+', v '+this.elt.file);
+      //console.log("fs_prom2 LS "+list_size+", L "+full_list.length+', perm '+this.elt.perms+', v '+this.elt.file);
       full_list.push(this.elt);
 
       if (full_list.length === list_size) {
@@ -108,11 +102,11 @@ function dir(path=".", rec=false, dst_textarea=output) {
   function ls_promise (func, param) {
     if (typeof param !== 'undefined') {
       this.ls_res=param;
-      console.log("A) ls_res2="+JSON.stringify(this.ls_res)+", len ls_res2 "+this.ls_res.result.length);
+      //console.log("A) ls_res2="+JSON.stringify(this.ls_res)+", len ls_res2 "+this.ls_res.result.length);
     } else {
       list_size=this.ls_res.result.length;
-      console.log("B) TGT "+target_path);
-      console.log("B) ls_res2="+JSON.stringify(this.ls_res)+", len ls_res2 "+this.ls_res.result.length);
+      //console.log("B) TGT "+target_path);
+      //console.log("B) ls_res2="+JSON.stringify(this.ls_res)+", len ls_res2 "+this.ls_res.result.length);
       this.ls_res.result.forEach((elt, idx, arr) => {
         elt.path=elt.path.replace(/\\/g, "\/");
         //console.log("TXT "+elt.path.replace(target_path+"\/",""));
@@ -145,7 +139,7 @@ function curl_promise(func, param) {
     this.httpget_res=param;
   } else {
     //console.log(this.httpget_res);
-    console.log(JSON.stringify(this.httpget_res));
+    //console.log(JSON.stringify(this.httpget_res));
     // <= > jq -r '.results[].title'
     this.httpget_res.results.forEach((el) => {
       output.value+=el.title+'\n';
