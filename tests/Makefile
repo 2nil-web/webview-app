@@ -80,10 +80,13 @@ DO_MSBUILD=0
 endif
 
 SRCS=$(wildcard *.cpp)
+SRCS:=$(filter-out TemplateApp.cpp, $(SRCS))
 EXES=${SRCS:.cpp=.exe}
 
 
 all : ${EXES}
+
+gcc : all
 
 strip :
 	strip *.exe | true
@@ -112,9 +115,12 @@ ifneq ($(MAKECMDGOALS),clean)
 	$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 %${EXEXT}: %.cpp
+ifeq ($(DO_MSBUILD),1)
+	@echo "Building $@ from $^ with msvc"
+	$(call genmsexe,$*,${ARCH},${CONF})
+else
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-ifneq ($(DO_MSBUILD),1)
 # Régles pour construire les fichier objet d'après les .rc
 %.o : %.rc
 	$(RC) $(CPPFLAGS) $< --include-dir . $(OUTPUT_OPTION)
