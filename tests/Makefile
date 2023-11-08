@@ -62,6 +62,19 @@ endif
 #MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
+
+ifeq ($(DO_MSBUILD),1)
+ARCH=x64
+CONF=Release
+define genmsexe
+	@sed 's/\<TemplateApp\>/$(1)/g' TemplateApp.sln >$1.sln
+	@sed 's/\<TemplateApp\.cpp\>/$(1).cpp/g;s/\<TemplateApp\>/$(1)/g' TemplateApp.vcxproj >$1.vcxproj
+	@${MSBUILD} $1.sln -p:Configuration=${CONF} >$1.mslog && mv ${ARCH}/${CONF}/$1.exe . && rm -f $1.mslog
+	@rm -f $1.sln $1.vcxproj*
+	@rm -rf ${ARCH}
+endef
+endif
+
 ifeq ($(MAKECMDGOALS),gcc)
 DO_MSBUILD=0
 endif
