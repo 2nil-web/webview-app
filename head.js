@@ -37,100 +37,76 @@ async function unicode (p) {
   });
 }
 
-function dir(path=".", rec=false, dst_textarea=output) {
-  //console.log("path "+path+", ta "+dst_textarea);
-  function grant_in_number (val, sing, plur) {
-      ret=val+' ';
-      if (val > 1) {
-        if (plur === "") ret+=sing+'s';
-        else ret+=plur;
-      } else ret+=sing;
-      return ret;
-  }
-
-  var target_path="";
-  var full_list=[];
-  var list_size=0;
-  function fstat_promise (func, param) {
-    if (typeof param !== 'undefined') {
-      //console.log("fs_prom1 "+param.file);
-      this.elt=param;
-    } else {
-      //console.log("fs_prom2 LS "+list_size+", L "+full_list.length+', perm '+this.elt.perms+', v '+this.elt.file);
-      full_list.push(this.elt);
-
-      if (full_list.length === list_size) {
-        var res_list=[];
-        var nfiles=0, ndirs=0, nothers=0;
-        var spc=10;
-        full_list.forEach((el, idx) => {
-          line=show_status(el)+' ';
-          if (el.type == file_type.regular) {
-            nfiles++;
-            if (el.size.toString().length < spc) {
-              rp=spc-el.size.toString().length;
-              line+=' '.repeat(rp)+el.size;
-            } else line+=' '.repeat(spc);
-          } else {
-            line+=' '.repeat(spc);
-            if (el.type == file_type.directory) ndirs++;
-            else nothers++;
-          }
-
-          line+=' '+el.last_write+' '+el.file.replace(target_path, "").replace(/^\//, "");
-          res_list.push(line);
-        });
-
-        dst_textarea.innerHTML+=target_path+"\n";
-        dst_textarea.innerHTML+=res_list.join("\n");
-        dst_textarea.innerHTML+="\n  "+grant_in_number(res_list.length, 'entry', 'entries');
-        if (nfiles > 0) dst_textarea.innerHTML+=', '+grant_in_number(nfiles, 'file', 'files');
-        if (ndirs > 0) dst_textarea.innerHTML+=', '+grant_in_number(ndirs, 'folder', 'folders');
-        if (nothers > 0) dst_textarea.innerHTML+=', '+grant_in_number(nothers, 'of other type', 'other type');
-        if (nfiles > 0) dst_textarea.innerHTML+="\n";
-
-        //console.log(dst_textarea.innerHTML);
-        dst_textarea.scrollTop=dst_textarea.scrollHeight;
-        target_path="";
-        full_list=[];
-        res_list=[];
-        list_size=0;
-      }
-    }
-  }
-
-  function ls_promise (func, param) {
-    if (typeof param !== 'undefined') {
-      this.ls_res=param;
-      //console.log("A) ls_res2="+JSON.stringify(this.ls_res)+", len ls_res2 "+this.ls_res.result.length);
-    } else {
-      list_size=this.ls_res.result.length;
-      //console.log("B) TGT "+target_path);
-      //console.log("B) ls_res2="+JSON.stringify(this.ls_res)+", len ls_res2 "+this.ls_res.result.length);
-      this.ls_res.result.forEach((elt, idx, arr) => {
-        elt.path=elt.path.replace(/\\/g, "\/");
-        //console.log("TXT "+elt.path.replace(target_path+"\/",""));
-        promise_run(fstat, elt.path, fstat_promise);
-      });
-      this.ls_res="";
-    }
-  }
-
-  function abs_promise (func, param) {
-    if (typeof param !== 'undefined') {
-      //console.log("target_path1 "+param);
-      this.abs_res=param;
-    } else {
-      //console.log("target_path2 "+this.abs_res);
-      target_path=this.abs_res;
-      if (rec) promise_run(lsr, this.abs_res, ls_promise);
-      else promise_run(ls, this.abs_res, ls_promise);
-    }
-  }
-
-  promise_run(absolute, path, abs_promise);
+function decodeHtml(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
 }
 
+function disp(msg, obj) {
+  if (obj instanceof HTMLElement) obj.innerHTML+=msg;
+  else console.log(msg);
+}
+
+function dir (path=".", obj=output) {
+  function grant_in_number (val, sing, plur) {
+    ret=val+' ';
+    if (val > 1) {
+      if (plur === "") ret+=sing+'s';
+      else ret+=plur;
+    } else ret+=sing;
+    return ret;
+  }
+
+  function disp_files(root_path, list, obj)  {
+    var res_list=[];
+    var nfiles=0, ndirs=0, nothers=0;
+    var spc=10;
+    list.forEach((el, idx) => {
+      line=show_status(el)+' ';
+      if (el.type == file_type.regular) {
+        nfiles++;
+        if (el.size.toString().length < spc) {
+          rp=spc-el.size.toString().length;
+          line+=' '.repeat(rp)+el.size;
+        } else line+=' '.repeat(spc);
+      } else {
+        line+=' '.repeat(spc);
+        if (el.type == file_type.directory) ndirs++;
+        else nothers++;
+      }
+
+      line+=' '+el.last_write+' '+el.file.replace(root_path, "").replace(/^\//, "");
+      res_list.push(line);
+      if (!obj) console.log(JSON.stringify(decodeHtml(line)));
+    });
+
+    if (obj) {
+      obj.innerHTML+=root_path+"\n";
+      obj.innerHTML+=res_list.join("\n");
+      obj.innerHTML+="\n  "+grant_in_number(res_list.length, 'entry', 'entries');
+      if (nfiles > 0) obj.innerHTML+=', '+grant_in_number(nfiles, 'file', 'files');
+      if (ndirs > 0) obj.innerHTML+=', '+grant_in_number(ndirs, 'folder', 'folders');
+      if (nothers > 0) obj.innerHTML+=', '+grant_in_number(nothers, 'of other type', 'other type');
+      if (nfiles > 0) obj.innerHTML+="\n";
+      obj.scrollTop=obj.scrollHeight;
+    }
+  }
+
+  var full_list=[];
+  return absolute(path).then((root_path) => {
+    return ls(root_path).then((files) => {
+      files.result.forEach((file, idx, arr) => {
+        //file.path=file.path.replace(/\\/g, "\/");
+        fstat(file.path).then((file_info) => {
+          full_list.push(file_info);
+          //console.log("Number of files "+files.result.length+", current file index "+full_list.length+", current file infos "+JSON.stringify(file_info));
+          if (full_list.length == files.result.length) disp_files(root_path, full_list, obj);
+        });
+      });
+    });
+  });
+}
 
 // XMLHttpRequest does not work on thales (TAS) local sites because of CORS restriction on them but works for sites outside because of edge proxy configuration.
 // Meanwhile curl request work on local sites but don't on external site because proxy not configured (although it could be done ...)
