@@ -3,7 +3,14 @@
 # Intégrer clang-format
 # js check + minify
 
-OS=$(shell uname -s)
+# Bug d'affichage avec uname sous clang64 ...
+ifeq (${MSYSTEM},CLANG64)
+	UNAME=/usr/bin/uname
+else
+	UNAME=uname
+endif
+
+OS=$(shell ${UNAME} -s)
 
 ifneq (${OS},Linux)
 ECHO=echo -e
@@ -47,6 +54,11 @@ LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.1 webkit2gtk-web-exten
 #LDFLAGS += -static
 PANDOC=pandoc
 else
+ifeq (${MSYSTEM},CLANG64)
+PATH:=/clang64/bin:$PATH
+CC=clang
+CXX=clang++
+endif
 EXEXT=.exe
 CPPFLAGS += --include=webview_mingw_support.h
 LDFLAGS += -mwindows
