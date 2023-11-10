@@ -87,9 +87,11 @@ function perm2s(p) {
 
 // Return file permissions in the form 'drwxrwxrwx'
 function show_status(fsta) {
-  function prm(op, p) { return fsta.perms & p ? op : '-'; }
+  function prm(op, p) { return fsta.perms && p ? op : '-'; }
   var ret="";
-  ret+=(fsta.type === file_type.directory) ? 'd':'-';
+  if (fsta.type == file_type.directory) ret='d';
+  else ret='-';
+
   ret+=prm('r', perms.owner_read);
   ret+=prm('w', perms.owner_write);
   ret+=prm('x', perms.owner_exec);
@@ -99,6 +101,9 @@ function show_status(fsta) {
   ret+=prm('r', perms.others_read);
   ret+=prm('w', perms.others_write);
   ret+=prm('x', perms.others_exec);
+
+  //console.log(JSON.stringify(fsta)+"="+fsta.perms+"<=>"+ret+"<=>"+perm2s(fsta.perms));
+
   return ret;
 }
 

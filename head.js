@@ -37,18 +37,19 @@ async function unicode (p) {
   });
 }
 
-function decodeHtml(html) {
+// Polyfills
+String.prototype.insert=function (str, pos) {
+  return this.substring(0, pos)+str+this.substring(pos)
+};
+
+
+function decodeEntities(html) {
     var txt = document.createElement("textarea");
     txt.innerHTML = html;
     return txt.value;
 }
 
-function disp(msg, obj) {
-  if (obj instanceof HTMLElement) obj.innerHTML+=msg;
-  else console.log(msg);
-}
-
-function dir (path=".", obj=output) {
+function dir (path=".", do_sort=false, obj=output) {
   function grant_in_number (val, sing, plur) {
     ret=val+' ';
     if (val > 1) {
@@ -58,50 +59,65 @@ function dir (path=".", obj=output) {
     return ret;
   }
 
-  function disp_files(root_path, list, obj)  {
-    var res_list=[];
-    var nfiles=0, ndirs=0, nothers=0;
-    var spc=10;
-    list.forEach((el, idx) => {
-      line=show_status(el)+' ';
-      if (el.type == file_type.regular) {
-        nfiles++;
-        if (el.size.toString().length < spc) {
-          rp=spc-el.size.toString().length;
-          line+=' '.repeat(rp)+el.size;
-        } else line+=' '.repeat(spc);
-      } else {
-        line+=' '.repeat(spc);
-        if (el.type == file_type.directory) ndirs++;
-        else nothers++;
-      }
+  var spacing=0;
+  var nfiles=0, ndirs=0, nothers=0;
+  function mkline (rt_path="", file_info) {
+    var line;
+    line=show_status(file_info)+' ';
 
-      line+=' '+el.last_write+' '+el.file.replace(root_path, "").replace(/^\//, "");
-      res_list.push(line);
-      if (!obj) console.log(JSON.stringify(decodeHtml(line)));
-    });
-
-    if (obj) {
-      obj.innerHTML+=root_path+"\n";
-      obj.innerHTML+=res_list.join("\n");
-      obj.innerHTML+="\n  "+grant_in_number(res_list.length, 'entry', 'entries');
-      if (nfiles > 0) obj.innerHTML+=', '+grant_in_number(nfiles, 'file', 'files');
-      if (ndirs > 0) obj.innerHTML+=', '+grant_in_number(ndirs, 'folder', 'folders');
-      if (nothers > 0) obj.innerHTML+=', '+grant_in_number(nothers, 'of other type', 'other type');
-      if (nfiles > 0) obj.innerHTML+="\n";
-      obj.scrollTop=obj.scrollHeight;
+    if (file_info.type == file_type.regular) {
+      nfiles++;
+      if (file_info.size.toString().length < spacing) {
+        rp=spacing-file_info.size.toString().length;
+        line+=' '.repeat(rp)+file_info.size;
+      } else line+=' '.repeat(spacing);
+    } else {
+      line+=' '.repeat(spacing);
+      if (file_info.type == file_type.directory) ndirs++;
+      else nothers++;
     }
+
+    line+=' '+file_info.last_write+' '+file_info.file.replace(rt_path, "").replace(/^\//, "");
+    //line=line.insert('#', 32);
+
+    return line;
   }
 
   var full_list=[];
+  var all_lines=[];
   return absolute(path).then((root_path) => {
     return ls(root_path).then((files) => {
       files.result.forEach((file, idx, arr) => {
-        //file.path=file.path.replace(/\\/g, "\/");
         fstat(file.path).then((file_info) => {
-          full_list.push(file_info);
-          //console.log("Number of files "+files.result.length+", current file index "+full_list.length+", current file infos "+JSON.stringify(file_info));
-          if (full_list.length == files.result.length) disp_files(root_path, full_list, obj);
+          //console.log("nFiles "+files.result.length+", fIdx "+full_list.length+", fInf "+JSON.stringify(file_info));
+          all_lines.push(mkline(root_path, file_info));
+          if (all_lines.length == files.result.length) {
+            if (do_sort) { // case insensitive sort on the file name
+              all_lines.sort(function(a, b) {
+                a1=a.substring(32).toLowerCase();
+                b1=b.substring(32).toLowerCase();
+                if (a1 > b1) return 1;
+                else if (a1 < b1) return -1;
+                return 0;
+              });
+            }
+
+            var txt=root_path+"\n";
+            txt+=all_lines.join("\n");
+            txt+="\n  "+grant_in_number(all_lines.length, 'entry', 'entries');
+            if (nfiles > 0) txt+=', '+grant_in_number(nfiles, 'file', 'files');
+            if (ndirs > 0) txt+=', '+grant_in_number(ndirs, 'folder', 'folders');
+            if (nothers > 0) txt+=', '+grant_in_number(nothers, 'of other type', 'other type');
+            if (nfiles > 0) txt+="\n";
+
+
+            if (obj) {
+              obj.value+=decodeEntities(txt);
+              obj.scrollTop=obj.scrollHeight;
+            } else {
+              console.log(txt);
+            }
+          }
         });
       });
     });

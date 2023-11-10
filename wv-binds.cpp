@@ -231,14 +231,13 @@ std::string do_fstat(std::string sp)
   else
     sz=static_cast<std::uintmax_t>(-1);
   std::string lastwr="****-**-**T**:**:**";
-  if (ft != std::filesystem::file_type::not_found)
-    lastwr=lastwrite(p);
-  else
-  {
-    std::cout << "NOT FOUND " << sp << '(' << p << ')' << std::endl;
-  }
+  if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
+  else std::cout << "NOT FOUND " << sp << '(' << p << ')' << std::endl;
+
+  unsigned int perms=(unsigned)fs.permissions();
+  std::cout << "PERM " << std::oct << perms << ", OCT PERM " << to_js_oct(perms) << std::endl;
   std::string res="{\"file\":\"" + sp + "\"," + "\"type\":\"" + std::to_string(forced_file_type(ft)) + "\"," +
-                    "\"perms\":\"" + to_js_oct((unsigned)fs.permissions()) + "\"," + "\"size\":\"" +
+                    "\"perms\":\"" + to_js_oct(perms) + "\"," + "\"size\":\"" +
                     std::to_string(sz) + "\"," + "\"last_write\":\"" + lastwr + "\"}";
   return res;
 }
