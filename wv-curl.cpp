@@ -21,6 +21,7 @@ std::string httpget(std::string url, bool peer_check, bool host_check, bool verb
   if (curl)
   {
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "webview-app/1.0");
 
     if (verbose)
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);

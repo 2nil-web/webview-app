@@ -380,8 +380,8 @@ void create_binds()
           std::cout << "URL " << url << ", peer_check " << peer_check << ", host_check " << host_check << ", verbose "
                     << verbose << std::endl;
           auto res=httpget(url, peer_check, host_check, verbose);
+          w.resolve(seq, 0, to_htent(res));
           std::cout << res << std::endl;
-          w.resolve(seq, 0, res);
         }).detach();
       },
       nullptr);

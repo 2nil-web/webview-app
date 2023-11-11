@@ -17,8 +17,15 @@ textarea {
 }
 
 #dv2 {
-  margin-top: 0.8em;
+  margin-top: 1em;
   height: 7%;
+}
+
+#dv2_1 {
+  border: 1px solid;
+  /* top right bottom left */
+  margin: 4px 4px 4px 10px;
+  padding: 4px 4px 4px 4px;
 }
 
 #dv3 {

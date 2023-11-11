@@ -124,53 +124,48 @@ function dir (path=".", do_sort=false, obj=output) {
   });
 }
 
-// XMLHttpRequest does not work on thales (TAS) local sites because of CORS restriction on them but works for sites outside because of edge proxy configuration.
-// Meanwhile curl request work on local sites but don't on external site because proxy not configured (although it could be done ...)
-function curl_promise(func, param) {
-  if (typeof param !== 'undefined') {
-    this.httpget_res=param;
+
+function scan(obj, elt, par="") {
+  if (obj instanceof Object) {
+    for (k in obj) {
+      if (obj.hasOwnProperty(k)) scan(obj[k], elt, par+'.'+k);
+    }
   } else {
-    //console.log(this.httpget_res);
-    //console.log(JSON.stringify(this.httpget_res));
-    // <= > jq -r '.results[].title'
-    this.httpget_res.results.forEach((el) => {
-      output.value+=el.title+'\n';
+    txt=decodeEntities(par+':'+obj+'\n');
+    if (elt) elt.value+=txt;
+    //else console.log(txt);
+  }
+}
+
+// https://docs.blague.xyz/
+// https://api.github.com/repos/octocat/Spoon-Knife/issues
+// https://api.github.com/users/2nil-web") {
+function curl(url="https://api.github.com/repos/octocat/Spoon-Knife/issues", par="octocat") {
+  httpget(url, false, false).then((res) => {
+    console.log(JSON.stringify(res));//.replace(/,/g, '\n').replace(/[\[{}\]]/g, '\n'));
+    scan(res, output, par);
+  });
+}
+
+// https://docs.blague.xyz/
+function blague() {
+  httpget("https://blague.xyz/api/joke/random").then((res) => {
+    output.value+=decodeEntities(res.joke.question+'\n'+res.joke.answer+'\n');
+  });
+}
+
+function vdm() {
+  httpget("https://blague.xyz/api/vdm/random").then((res) => {
+    //output.value+=JSON.stringify(res);
+    output.value+=decodeEntities(res.vdm.content+'\n');
+  });
+}
+
+function gh() {
+  httpget("https://api.github.com/users/2nil-web", false, false).then((res) => {
+    Object.keys(res).forEach(key => {
+      output.value+=decodeEntities(key+": "+res[key]+"\n");
     });
-  }
-}
-
-function curl() {
-  //promise_run(httpget, "https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-02&limit=1000", curl_promise);
-  promise_run(httpget, "https://api.github.com/users/2nil-web", curl_promise);
-}
-
-function process_http_res (jres) {
-  //console.log(JSON.stringify(jres));
-  //console.log(jres);
-  output.value += "login: "+jres.login;
-  output.value += '\n';
-  output.value += "url: "+jres.url;
-}
-
-function httpget_promise(func, param) {
-  if (typeof param !== 'undefined') {
-    this.httpget_res=param;
-  } else {
-    process_http_res(this.httget_res);
-  }
-}
-
-function reqListener() {
-  process_http_res(JSON.parse(this.responseText));
-}
-
-function http_query() {
-  const req = new XMLHttpRequest();
-
-  req.addEventListener("load", reqListener);
-  req.open("GET", "https://api.github.com/users/2nil-web");
-//  req.setRequestHeader("Access-Control-Allow-Origin", "*");
-//  req.setRequestHeader("Authorization", "Basic " + btoa("lalannd2:ocvdBum12$*3"));
-  req.send();
+  });
 }
 

@@ -2,8 +2,8 @@
   <head>
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-8">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="util.js"></script>
     <script type="text/javascript" src="time.js"></script>
-    <script type="text/javascript" src="promise.js"></script>
     <script type="text/javascript" src="filesystem.js"></script>
     <script type="text/javascript" src="head.js"></script>
   </head>
@@ -21,17 +21,19 @@
     <label>
       <input type="radio" id="as_sh" name="run_as" value="shell" />As shell
     </label>
-    <label style="float:right;">Shell running timeout:
-      <input type="number" id="tout" value="3000" min="0" style="width:54px" step="100" />
-      milliseconds
+    <span id="dv2_1">
+    <label>Shell running timeout:
+      <input type="number" id="tout" value="3000" min="0" style="width:50px; padding-right:0px; padding-left:0px;" step="100" />
+      ms
     </label>
+    </span>
+    <input  type="button" id="output_clear" value="Clean output" onclick="output.value=''; tout_warn.innerHTML='&nbsp;'" />
     </div>
 
     <div id="dv3">
       <textarea readonly id="output" placeholder="My name is output"></textarea>
       <span id="tout_warn">&nbsp;</span>
     </div>
-    <input type="button" id="output_clear" value="Clean output" onclick="output.value=''; tout_warn.innerHTML='&nbsp;'" />
     <br>
   </body>
     <script type="text/javascript" src="body.js"></script>

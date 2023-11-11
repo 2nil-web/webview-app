@@ -29,7 +29,7 @@ void demo_perms(std::filesystem::path f)
 int main()
 {
   //std::ofstream("test.txt"); // create file
-  //std::cout << "Created file with permissions: ";
+  std::cout << "Created file with permissions: ";
   demo_perms("test.txt");
   std::filesystem::permissions("test.txt", std::filesystem::perms::owner_all | std::filesystem::perms::group_all, std::filesystem::perm_options::add);
   std::cout << "After adding u+rwx and g+rwx:  ";

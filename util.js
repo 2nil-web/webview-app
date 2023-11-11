@@ -46,31 +46,3 @@ function getParams(prom_func) {
     return params;
 }
 
-function def_promise_end (prom_func, result) {
-  var pmsg= "promesse";
-  pmsg+=' ';
-
-  if (typeof result !== 'undefined') {
-    this.result=result;
-    pmsg+="résolue";
-    if (this.result !== "") pmsg+=" avec le résultat '"+this.result+"'";
-  } else {
-    pmsg+="terminée";
-    this.result="";
-  }
-
-  pmsg=gettime()+": "+pmsg+'.';
-  console.log(pmsg);
-}
-
-function promise_run (prom_func, param, promise_end=def_promise_end) {
-  let promise;
-  if (typeof param !== 'undefined') promise=prom_func(param);
-  else promise=prom_func();
-
-  if (typeof promise_end !== 'undefined') {
-    promise.then(result => promise_end(prom_func, result));
-    promise.finally(() => promise_end(prom_func));
-  }
-}
-
