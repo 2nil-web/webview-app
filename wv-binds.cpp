@@ -21,18 +21,18 @@
 
 webview_wrapper w;
 
-void write_cons(std::string s, std::ostream &out=std::cout)
+void write_cons(std::string s, std::ostream &out = std::cout)
 {
   if (s.empty())
     return;
 #ifdef _WIN32
   char title[256];
-  std::string tit="";
-  int gctres=GetConsoleTitle(title, 255);
+  std::string tit = "";
+  int gctres = GetConsoleTitle(title, 255);
   // out << gctres << std::endl;
   if (gctres > 0)
   {
-    tit=title;
+    tit = title;
     if (tit.find("invisible cygwin console") != std::string::npos)
     {
       out << s;
@@ -42,9 +42,9 @@ void write_cons(std::string s, std::ostream &out=std::cout)
     {
       HANDLE ho;
       if (&out == &std::cerr)
-        ho=GetStdHandle(STD_ERROR_HANDLE);
+        ho = GetStdHandle(STD_ERROR_HANDLE);
       else
-        ho=GetStdHandle(STD_OUTPUT_HANDLE);
+        ho = GetStdHandle(STD_OUTPUT_HANDLE);
       WriteConsole(ho, s.c_str(), (DWORD)s.size(), nullptr, nullptr);
     }
   }
@@ -59,45 +59,53 @@ void write_cons(std::string s, std::ostream &out=std::cout)
   w.eval("console.log('[[" + s + "]]');");
 }
 
-std::string setfile(std::filesystem::path path) {
-	//std::cout << path << std::endl;
+std::string setfile(std::filesystem::path path)
+{
+  // std::cout << path << std::endl;
   std::string eps;
 #ifdef _WIN32
-  eps=to_htent(path.wstring());
+  eps = to_htent(path.wstring());
 #else
-  eps=to_htent(path.string());
+  eps = to_htent(path.string());
 #endif
   replace_all(eps, "\\", "/");
-  eps="\"path\":\"" + eps + '"';
+  eps = "\"path\":\"" + eps + '"';
   return "{" + eps + "},";
 }
 
 // Return a javascript array of strings corresponding to a directory list,
-std::string lsdir(std::string spath, bool recursive=false)
+std::string lsdir(std::string spath, bool recursive = false)
 {
-  std::string res="", res_line;
+  std::string res = "", res_line;
   std::filesystem::path path;
 
-  if (spath.empty()) path=".";
-  else path=spath;
+  if (spath.empty())
+    path = ".";
+  else
+    path = spath;
 
-  if (std::filesystem::is_directory(path)) {
+  if (std::filesystem::is_directory(path))
+  {
     // Pas de récursif, trop dangereux, ça plante le PC ...
     for (const auto &e : std::filesystem::directory_iterator(path))
     {
       res += setfile(e);
     }
-  } else {
-    if (std::filesystem::is_regular_file(path)) {
+  }
+  else
+  {
+    if (std::filesystem::is_regular_file(path))
+    {
       res += setfile(path.filename());
-    } else
-      res += setfile("not a directory or file '"+path.filename().string()+"'");
+    }
+    else
+      res += setfile("not a directory or file '" + path.filename().string() + "'");
   }
 
   // Remove last comma
   res.pop_back();
 
-  res="{\"result\":[" + res + "]}";
+  res = "{\"result\":[" + res + "]}";
   return res;
 }
 
@@ -111,10 +119,10 @@ std::string to_js_oct(unsigned int number)
 
 void print_file_types()
 {
-  static int un=true;
+  static int un = true;
   if (un)
   {
-    un=false;
+    un = false;
     std::cout << "none      :" << (int)std::filesystem::file_type::none << std::endl;
     std::cout << "not_found :" << (int)std::filesystem::file_type::not_found << std::endl;
     std::cout << "regular   :" << (int)std::filesystem::file_type::regular << std::endl;
@@ -161,8 +169,8 @@ int forced_file_type(std::filesystem::file_type ft)
 
 template <typename TP> std::time_t to_time_t(TP tp)
 {
-  namespace ch=std::chrono;
-  auto sctp=ch::time_point_cast<ch::system_clock::duration>(tp - TP::clock::now() + ch::system_clock::now());
+  namespace ch = std::chrono;
+  auto sctp = ch::time_point_cast<ch::system_clock::duration>(tp - TP::clock::now() + ch::system_clock::now());
   return ch::system_clock::to_time_t(sctp);
 }
 
@@ -176,10 +184,10 @@ template <typename TP> std::time_t to_time_t(TP tp)
 
 // Convert a file time to a string, default format is ISO8601 and default time
 // zone is local
-std::string file_time_to_string(std::filesystem::file_time_type file_time, std::string fmt="%Y-%m-%d %H:%M:%S",
-                                bool gm=false)
+std::string file_time_to_string(std::filesystem::file_time_type file_time, std::string fmt = "%Y-%m-%d %H:%M:%S",
+                                bool gm = false)
 {
-  std::time_t tt=to_time_t(file_time);
+  std::time_t tt = to_time_t(file_time);
   std::tm tim;
   if (gm)
     my_gmtime(&tt, &tim);
@@ -187,7 +195,7 @@ std::string file_time_to_string(std::filesystem::file_time_type file_time, std::
     my_localtime(&tt, &tim);
   std::stringstream buffer;
   buffer << std::put_time(&tim, fmt.c_str());
-  std::string fmtime=buffer.str();
+  std::string fmtime = buffer.str();
 
   return fmtime;
 }
@@ -204,7 +212,7 @@ bool isBase64(const std::string s)
   return false;
 }
 
-void fwrite(std::string fname, std::string s, std::ios_base::openmode omod=std::ios::app)
+void fwrite(std::string fname, std::string s, std::ios_base::openmode omod = std::ios::app)
 {
   std::ofstream f(fname, omod);
   f << s;
@@ -223,22 +231,24 @@ std::string do_fstat(std::string sp)
   replace_all(ws, "\\", "/");
 #endif
   std::filesystem::path p(ws);
-  auto fs=std::filesystem::status(p);
-  auto ft=fs.type();
+  auto fs = std::filesystem::status(p);
+  auto ft = fs.type();
   std::uintmax_t sz;
   if (ft == std::filesystem::file_type::regular)
-    sz=std::filesystem::file_size(p);
+    sz = std::filesystem::file_size(p);
   else
-    sz=static_cast<std::uintmax_t>(-1);
-  std::string lastwr="****-**-**T**:**:**";
-  if (ft != std::filesystem::file_type::not_found) lastwr=lastwrite(p);
-  else std::cout << "NOT FOUND " << sp << '(' << p << ')' << std::endl;
+    sz = static_cast<std::uintmax_t>(-1);
+  std::string lastwr = "****-**-**T**:**:**";
+  if (ft != std::filesystem::file_type::not_found)
+    lastwr = lastwrite(p);
+  else
+    std::cout << "NOT FOUND " << sp << '(' << p << ')' << std::endl;
 
-  unsigned int perms=(unsigned)fs.permissions();
-  std::cout << "PERM " << std::oct << perms << ", OCT PERM " << to_js_oct(perms) << std::endl;
-  std::string res="{\"file\":\"" + sp + "\"," + "\"type\":\"" + std::to_string(forced_file_type(ft)) + "\"," +
-                    "\"perms\":\"" + to_js_oct(perms) + "\"," + "\"size\":\"" +
-                    std::to_string(sz) + "\"," + "\"last_write\":\"" + lastwr + "\"}";
+  unsigned int perms = (unsigned)fs.permissions();
+  // std::cout << "PERM " << std::oct << perms << ", OCT PERM " << to_js_oct(perms) << std::endl;
+  std::string res = "{\"file\":\"" + sp + "\"," + "\"type\":\"" + std::to_string(forced_file_type(ft)) + "\"," +
+                    "\"perms\":\"" + to_js_oct(perms) + "\"," + "\"size\":\"" + std::to_string(sz) + "\"," +
+                    "\"last_write\":\"" + lastwr + "\"}";
   return res;
 }
 
@@ -250,69 +260,113 @@ bool str2bool(std::string s)
   return false;
 }
 
+std::string disable_bs(std::string &s)
+{
+  std::string bs;
+  bs = (char)92;
+  replace_all(s, bs, "##BACKSLASH_CODE##");
+  rep_crlf(s);
+  replace_all(s, "##BACKSLASH_CODE##", bs + bs);
+
+  return s;
+}
+
+std::string neutralize(std::string &s)
+{
+  std::string bs;
+  bs = (char)92;
+  replace_all(s, bs, "##BACKSLASH_CODE##");
+  rep_crlf(s);
+  replace_all(s, "##BACKSLASH_CODE##", bs + bs);
+
+  return s;
+}
+
 // console.log(webapp_help())
-static unsigned int nfs=0;
+static unsigned int nfs = 0;
 void create_binds()
 {
-  w.bind_doc(
-      "echo", "echo the parameter.",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          auto sp=json_parse(req, "", 0);
-          std::string htent=to_htent(sp);
+  w.bind_doc("echo", "echo the parameter.", [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+      auto sp = json_parse(req, "", 0);
+      std::string htent = to_htent(sp);
 #ifdef _WIN32
-          SetConsoleOutputCP(CP_UTF8);
+      SetConsoleOutputCP(CP_UTF8);
 #endif
-//          std::cout << "param " << sp << std::endl;
-//          std::cout << "to_htent " << htent << std::endl;
-          std::string ht_to;
-          from_htent(htent, ht_to);
-          std::cout << "from_htent " << ht_to << std::endl;
-          w.resolve(seq, 0, '"' + htent + '"');
-        }).detach();
-      },
-      nullptr);
+      //          std::cout << "param " << sp << std::endl;
+      //          std::cout << "to_htent " << htent << std::endl;
+      std::string ht_to;
+      from_htent(htent, ht_to);
+      std::cout << "from_htent " << ht_to << std::endl;
+      w.resolve(seq, 0, '"' + htent + '"');
+    }).detach();
+  });
 
-  w.bind_doc(
-      "utf", "return a random utf string.",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          auto sp=json_parse(req, "", 0);
-          std::cout << "utf param " << sp << std::endl;
-          std::string s;
-          if (sp == "1")
-            s="totö要らない";
-          else if (sp == "2")
-            s="पार्सल् एक्स्प्रेस्";
-          else if (sp == "3")
-            s="123456788:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽž؀؁؂؃؄؅؆؇؈؉؊؋،؍؎؏ؘؙؚؐؑؒؓؔؕؖؗ؛؜؝؞؟ؠءآأؤإئابةتثجحخدذرزسشصضطظعغػؼؽؾؿـفقكلمنهوىيًٌٍَُِّْٕٖٜٟٓٔٗ٘ٙٚٛٝٞ٠";
-          else if (sp == "4")
-            s="123456788:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſƀƁƂƃƄƅƆƇƈƉƊƋƌƍƎƏƐƑƒƓƔƕƖƗƘƙƚƛƜƝƞƟƠơƢƣƤƥƦƧƨƩƪƫƬƭƮƯưƱƲƳƴƵƶƷƸƹƺƻƼƽƾƿǀǁǂǃǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǝǞǟǠǡǢǣǦǧǨǩǪǫǬǭǮǯǰǴǵǶǷǸǹǼǽǾǿȀȁȂȃȄȅȆȇȈȉȊȋȌȍȎȏȐȑȒȓȔȕȖȗȘșȚțȜȝȞȟȠȡȤȥȦȧȨȩȪȫȬȭȮȯȰȱȲȳȴȵȶȷȸȹȺȻȼȽȾȿɀɁɂɃɄɅɌɍɐɑɒɓɔɕɖɗɘəɚɛɜɝɞɟɠɡɢɣɤɥɦɧɨɩɪɫɬɭɮɯɰɱɲɳɴɵɶɷɸɹɺɻɼɽɾɿʀʁʂʃʄʅʆʇʈʉʊʋʌʍʎʏʐʑʒʓʔʕʖʗʘʙʚʛʜʝʞʟʠʡʢʣʤʥʦʧʨʩʪʫʬʭʮʯʰʱʲʳʴʵʶʷʸʹʺʻʼʽʾʿˀˁ˂˃˄˅ˆˇˈˉˌˍˎˏːˑ˒˓˔˕˖˗˘˙˚˛˜˝˞˟ˠˡˢˣˤ˥˦˧˨˩˪˫ˬ˭ˮ˯˰˱˲˳˴˵˶˷˸˹˺˻˼˽˾˿̴̵̶̷̸̡̢̧̨̛̖̗̘̙̜̝̞̟̠̣̤̥̦̩̪̫̬̭̮̯̰̱̲̳̹̺̻̼͇͈͉͍͎̀́̂̃̄̅̆̇̈̉̊̋̌̍̎̏̐̑̒̓̔̽̾̿̀́͂̓̈́͆͊͋͌̕̚ͅͰͱͲͳʹ͵Ͷͷͺͻͼͽ;Ϳ΄΅Ά·ΈΉΊΌΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψωϊϋόύώϏϐϑϒϓϔϕϖϗϘϙϚϛϜϝϞϟϠϡϢϣϤϥϦϧϨϩϪϫϬϭϮϯϰϱϲϳϴϵ϶ϷϸϹϺϻϼϽϾϿЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяѐёђѓєѕіїјљњћќѝўџѢѣѲѳҐґҒғҔҕҖҗҘҙҚқҢңҤҥҪҫҬҭҮүҰұҲҳӀӁӂӃӄӇӈӋӌӏӐӑӒӓӔӕӖӗӘәӚӛӜӝӞӟӠӡӢӣӤӥӦӧӨөӪӫӬӭӮӯӰӱӲӳӴӵӶӷӸӹԬԭԮԯ԰ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՒՓՔՕՖՙ՚՛՜՝՞՟աբգդեզէըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆև։֊֍֎֏־ֿ׀ׁׂ׃ׅׄ׆ׇ؀؁؂؃؄؅؆؇؈؉؊؋،؍؎؏ؘؙؚؐؑؒؓؔؕؖؗ؛؜؝؞؟ؠءآأؤإئابةتثجحخدذرزسشصضطظعغػؼؽؾؿـفقكلمنهوىيًٌٍَُِّْٕٖٜٟٓٔٗ٘ٙٚٛٝٞ٠";
-          else
-            s="toto12";
-          w.resolve(seq, 0, '"' + to_htent(s) + '"');
-        }).detach();
-      },
-      nullptr);
+  w.bind_doc("utf", "return a random utf string.", [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+      auto sp = json_parse(req, "", 0);
+      std::cout << "utf param " << sp << std::endl;
+      std::string s;
+      if (sp == "1")
+        s = "totö要らない";
+      else if (sp == "2")
+        s = "पार्सल् एक्स्प्रेस्";
+      else if (sp == "3")
+        s = "123456788:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+            "¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊ"
+            "ċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴ"
+            "ŵŶŷŸŹźŻżŽž؀؁؂؃؄؅؆؇؈؉؊؋،؍؎؏ؘؙؚؐؑؒؓؔؕؖؗ؛؜؝؞؟ؠءآأؤإئابةتثجحخدذرزسشصضطظعغػؼؽؾؿـفقكلمنهوىيًٌٍَُِّْٕٖٜٟٓٔٗ٘ٙٚٛٝٞ"
+            "٠";
+      else if (sp == "4")
+        s = "123456788:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+            "¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊ"
+            "ċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴ"
+            "ŵŶŷŸŹźŻżŽžſƀƁƂƃƄƅƆƇƈƉƊƋƌƍƎƏƐƑƒƓƔƕƖƗƘƙƚƛƜƝƞƟƠơƢƣƤƥƦƧƨƩƪƫƬƭƮƯưƱƲƳƴƵƶƷƸƹƺƻƼƽƾƿǀǁǂǃǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǝǞǟǠǡǢǣǦǧǨǩ"
+            "ǪǫǬǭǮǯǰǴǵǶǷǸǹǼǽǾǿȀȁȂȃȄȅȆȇȈȉȊȋȌȍȎȏȐȑȒȓȔȕȖȗȘșȚțȜȝȞȟȠȡȤȥȦȧȨȩȪȫȬȭȮȯȰȱȲȳȴȵȶȷȸȹȺȻȼȽȾȿɀɁɂɃɄɅɌɍɐɑɒɓɔɕɖɗɘəɚɛɜɝɞɟɠɡɢ"
+            "ɣɤɥɦɧɨɩɪɫɬɭɮɯɰɱɲɳɴɵɶɷɸɹɺɻɼɽɾɿʀʁʂʃʄʅʆʇʈʉʊʋʌʍʎʏʐʑʒʓʔʕʖʗʘʙʚʛʜʝʞʟʠʡʢʣʤʥʦʧʨʩʪʫʬʭʮʯʰʱʲʳʴʵʶʷʸʹʺʻʼʽʾʿˀˁ˂˃˄˅ˆˇˈˉˌˍˎ"
+            "ˏːˑ˒˓˔˕˖˗˘˙˚˛˜˝˞˟ˠˡˢˣˤ˥˦˧˨˩˪˫ˬ˭ˮ˯˰˱˲˳˴˵˶˷˸˹˺˻˼˽˾˿̴̵̶̷̸̡̢̧̨̛̖̗̘̙̜̝̞̟̠̣̤̥̦̩̪̫̬̭̮̯̰̱̲̳̹̺̻̼͇͈͉͍͎̀́̂̃̄̅̆̇̈̉̊̋̌̍̎̏̐̑̒̓̔̽̾̿̀́͂̓̈́͆͊͋͌̕̚ͅͰͱͲͳʹ͵Ͷͷͺͻͼͽ;Ϳ΄΅Ά·ΈΉΊΌΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΪΫάέήίΰ"
+            "αβγδεζηθικλμνξοπρςστυφχψωϊϋόύώϏϐϑϒϓϔϕϖϗϘϙϚϛϜϝϞϟϠϡϢϣϤϥϦϧϨϩϪϫϬϭϮϯϰϱϲϳϴϵ϶ϷϸϹϺϻϼϽϾϿЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙК"
+            "ЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяѐёђѓєѕіїјљњћќѝўџѢѣѲѳҐґҒғҔҕҖҗҘҙҚқҢңҤҥҪҫҬҭҮүҰұҲҳӀӁӂӃӄӇӈ"
+            "ӋӌӏӐӑӒӓӔӕӖӗӘәӚӛӜӝӞӟӠӡӢӣӤӥӦӧӨөӪӫӬӭӮӯӰӱӲӳӴӵӶӷӸӹԬԭԮԯ԰ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՒՓՔՕՖՙ՚՛՜՝՞՟աբգդեզ"
+            "էըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆև։֊֍֎֏־ֿ׀ׁׂ׃ׅׄ׆ׇ؀؁؂؃؄؅؆؇؈؉؊؋،؍؎؏ؘؙؚؐؑؒؓؔؕؖؗ؛؜؝؞؟ؠءآأؤإئابةتثجحخدذرزسشصضطظعغػؼؽؾؿـ"
+            "فقكلمنهوىيًٌٍَُِّْٕٖٜٟٓٔٗ٘ٙٚٛٝٞ٠";
+      else
+        s = "toto12";
+      w.resolve(seq, 0, '"' + to_htent(s) + '"');
+    }).detach();
+  });
 
-  w.bind_doc(
-      "fstat", "gives information details on a file.",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          auto sp=json_parse(req, "", 0);
-          w.resolve(seq, 0, do_fstat(sp));
-        }).detach();
-      },
-      nullptr);
+  w.bind_doc("fstat", "gives information details on a file.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto sp = json_parse(req, "", 0);
+                 w.resolve(seq, 0, do_fstat(sp));
+               }).detach();
+             });
+
+  w.bind_doc("fread", "read file with provided file name and return its content.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 std::cout << "req " << req << std::endl;
+                 auto filename = json_parse(req, "", 0);
+                 std::string s = "file does not exist.";
+                 std::cout << "filename " << filename << std::endl;
+                 s = wfile2str(filename);
+                 s = to_htent(s);
+                 // auto result="{\"value\": \"" + s + "\"}";
+                 std::cout << "file content " << std::endl << s << std::endl;
+                 w.resolve(seq, 0, '"' + s + '"');
+               }).detach();
+             });
 
   w.bind_doc("fwrite", "truncate and write to file with provided file name.",
              [&](const std::string &req) -> std::string {
                std::string fn, s;
-               int n=0;
-               fn=json_parse(req, "", n++);
+               int n = 0;
+               fn = json_parse(req, "", n++);
                for (;;)
                {
-                 s=json_parse(req, "", n++);
+                 s = json_parse(req, "", n++);
                  if (s.empty())
                    break;
                  if (n == 2)
@@ -330,11 +384,11 @@ void create_binds()
 
   w.bind_doc("fappend", "append to file with provided file name.", [&](const std::string &req) -> std::string {
     std::string fn, s;
-    int n=0;
-    fn=json_parse(req, "", n++);
+    int n = 0;
+    fn = json_parse(req, "", n++);
     for (;;)
     {
-      s=json_parse(req, "", n++);
+      s = json_parse(req, "", n++);
       if (s.empty())
         break;
       if (n == 2)
@@ -350,116 +404,105 @@ void create_binds()
     return "";
   });
 
-  w.bind_doc(
-      "absolute", "gives absolute path of a file path.",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          auto pth=json_parse(req, "", 0);
-          auto res=std::filesystem::absolute(pth).string();
-          replace_all(res, "\\", "/");
-          w.resolve(seq, 0, '"' + res + '"');
-        }).detach();
-      },
-      nullptr);
+  w.bind_doc("absolute", "gives absolute path of a file path.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto pth = json_parse(req, "", 0);
+                 auto res = std::filesystem::absolute(pth).string();
+                 replace_all(res, "\\", "/");
+                 w.resolve(seq, 0, '"' + res + '"');
+               }).detach();
+             });
 
   w.bind_doc("chdir", "change current directory.", [&](const std::string &req) -> std::string {
-    nfs=0;
-    auto pth=json_parse(req, "", 0);
+    nfs = 0;
+    auto pth = json_parse(req, "", 0);
     std::filesystem::current_path(pth);
     return "";
   });
 
-  w.bind_doc(
-      "httpget", "run an http get with the provided url.",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          std::string url=json_parse(req, "", 0);
-          bool peer_check=str2bool(json_parse(req, "", 1));
-          bool host_check=str2bool(json_parse(req, "", 2));
-          bool verbose=str2bool(json_parse(req, "", 3));
-          std::cout << "URL " << url << ", peer_check " << peer_check << ", host_check " << host_check << ", verbose "
-                    << verbose << std::endl;
-          auto res=httpget(url, peer_check, host_check, verbose);
-          w.resolve(seq, 0, to_htent(res));
-          std::cout << res << std::endl;
-        }).detach();
-      },
-      nullptr);
+  w.bind_doc("httpget", "run an http get with the provided url.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 std::string url = json_parse(req, "", 0);
+                 bool peer_check = str2bool(json_parse(req, "", 1));
+                 bool host_check = str2bool(json_parse(req, "", 2));
+                 bool verbose = str2bool(json_parse(req, "", 3));
+                 std::cout << "URL " << url << ", peer_check " << peer_check << ", host_check " << host_check
+                           << ", verbose " << verbose << std::endl;
+                 auto res = httpget(url, peer_check, host_check, verbose);
+                 w.resolve(seq, 0, to_htent(res));
+                 std::cout << res << std::endl;
+               }).detach();
+             });
 
   w.bind_doc("ls_attach", "list provided directory in foreground.", [&](const std::string &req) {
-    auto param=json_parse(req, "", 0);
-    auto res=lsdir(param);
+    auto param = json_parse(req, "", 0);
+    auto res = lsdir(param);
     // std::cout << res << std::endl;
     return res;
   });
 
-  w.bind_doc(
-      "ls", "list provided directory in background",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          auto param=json_parse(req, "", 0);
-          auto res=lsdir(param);
-          // std::wcout << res << std::endl;
-          w.resolve(seq, 0, res);
-        }).detach();
-      },
-      nullptr);
+  w.bind_doc("ls", "list provided directory in background",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto param = json_parse(req, "", 0);
+                 auto res = lsdir(param);
+                 // std::wcout << res << std::endl;
+                 w.resolve(seq, 0, res);
+               }).detach();
+             });
 
-  w.bind_doc(
-      "lsr",
-      "list provided directory recursively in background ==> very dangerous "
-      "may hangs the machine !",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] { w.resolve(seq, 0, lsdir(json_parse(req, "", 0), true)); }).detach();
-      },
-      nullptr);
+  w.bind_doc("lsr",
+             "list provided directory recursively in background ==> very dangerous "
+             "may hangs the machine !",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] { w.resolve(seq, 0, lsdir(json_parse(req, "", 0), true)); }).detach();
+             });
 
   w.bind_doc("webapp_get_title", "return webapp window title in foreground.",
              [&](const std::string &req) -> std::string {
-               std::string prev_title="";
+               std::string prev_title = "";
 #ifdef _WIN32
-               prev_title=GetWindowText((HWND)w.window());
+               prev_title = GetWindowText((HWND)w.window());
 #endif
-               return "{\"value\": \"" + prev_title + "\"}";
+               // return "{\"value\": \"" + prev_title + "\"}";
+               return '"' + prev_title + '"';
              });
 
-  w.bind_doc(
-      "webapp_get_title_bg", "return webapp window title in background.",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          std::string prev_title="";
+  w.bind_doc("webapp_get_title_bg", "return webapp window title in background.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 std::string prev_title = "";
 #ifdef _WIN32
-          prev_title=GetWindowText((HWND)w.window());
+                 prev_title = GetWindowText((HWND)w.window());
 #endif
-          auto result="{\"value\": \"" + prev_title + "\"}";
-          w.resolve(seq, 0, result);
-        }).detach();
-      },
-      nullptr);
+                 auto result = "{\"value\": \"" + prev_title + "\"}";
+                 w.resolve(seq, 0, result);
+               }).detach();
+             });
 
   // Change window title
-  w.bind_doc(
-      "webapp_title", "change webapp window title.",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          std::string prev_title="";
+  w.bind_doc("webapp_title", "change webapp window title.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 std::string prev_title = "";
 #ifdef _WIN32
-          prev_title=GetWindowText((HWND)w.window());
+                 prev_title = GetWindowText((HWND)w.window());
 #endif
-          auto title=json_parse(req, "", 0);
-          w.set_title(title);
-          auto result="{\"value\": \"" + prev_title + "\"}";
-          w.resolve(seq, 0, result);
-        }).detach();
-      },
-      nullptr);
+                 auto title = json_parse(req, "", 0);
+                 w.set_title(title);
+                 auto result = "{\"value\": \"" + prev_title + "\"}";
+                 w.resolve(seq, 0, result);
+               }).detach();
+             });
 
   // Change window dimension and sizing behaviour
   w.bind_doc("webapp_size", "set dimension and hint of webapp window.", [&](const std::string &req) -> std::string {
-    auto params=json_parse(req, "", 0);
-    auto l_width=std::stoi(json_parse(req, "", 0));
-    auto l_height=std::stoi(json_parse(req, "", 1));
-    auto l_hints=std::stoi(json_parse(req, "", 2));
+    auto params = json_parse(req, "", 0);
+    auto l_width = std::stoi(json_parse(req, "", 0));
+    auto l_height = std::stoi(json_parse(req, "", 1));
+    auto l_hints = std::stoi(json_parse(req, "", 2));
     w.set_size(l_width, l_height, l_hints);
     return "";
   });
@@ -471,58 +514,51 @@ void create_binds()
   });
 
   // Run a local command and return an eventual result at a later time.
-  w.bind_doc(
-      "webapp_exec", "run an external command.",
-      [&](const std::string &seq, const std::string &req, void *) {
-        std::thread([&, seq, req] {
-          auto cmd=json_parse(req, "", 0);
-          std::string res_cmd=exec_cmd(cmd);
-          // std::cout << res_cmd << std::endl;
-          std::string bs;
-          bs=(char)92;
-          replace_all(res_cmd, bs, "##BACKSLASH_CODE##");
-          rep_crlf(res_cmd);
-          replace_all(res_cmd, "##BACKSLASH_CODE##", bs + bs);
-          auto result="{\"value\": \"" + res_cmd + "\"}";
-          w.resolve(seq, 0, result);
-        }).detach();
-      },
-      nullptr);
+  w.bind_doc("webapp_exec", "run an external command.", [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+      auto cmd = json_parse(req, "", 0);
+      std::string res_cmd = exec_cmd(cmd);
+      // std::cout << res_cmd << std::endl;
+      disable_bs(res_cmd);
+      auto result = "{\"value\": \"" + res_cmd + "\"}";
+      w.resolve(seq, 0, result);
+    }).detach();
+  });
 
   w.bind_doc("write", "write a string to stdout.", [&](const std::string &req) -> std::string {
-    auto s=json_parse(req, "", 0);
+    auto s = json_parse(req, "", 0);
     write_cons(s);
     return "";
   });
 
   w.bind_doc("writeln", "write a string to stdout and add a carriage return.",
              [&](const std::string &req) -> std::string {
-               auto s=json_parse(req, "", 0);
+               auto s = json_parse(req, "", 0);
                write_cons(s);
                write_cons("\n");
                return "";
              });
 
   w.bind_doc("ewrite", "write a string to stderr.", [&](const std::string &req) -> std::string {
-    auto s=json_parse(req, "", 0);
+    auto s = json_parse(req, "", 0);
     write_cons(s, std::cerr);
     return "";
   });
 
   w.bind_doc("ewriteln", "write a string to stderr and add a carriage return.",
              [&](const std::string &req) -> std::string {
-               auto s=json_parse(req, "", 0);
+               auto s = json_parse(req, "", 0);
                write_cons(s, std::cerr);
                write_cons("\n", std::cerr);
                return "";
              });
 }
 
-bool run_and_exit=false;
+bool run_and_exit = false;
 void webview_set(bool devmode, int width, int height, int hints, bool _run_and_exit)
 {
-  void *wnd=nullptr;
-  run_and_exit=_run_and_exit;
+  void *wnd = nullptr;
+  run_and_exit = _run_and_exit;
 
 #ifdef _WIN32
   if (run_and_exit)
@@ -535,8 +571,8 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
     else
     {
       // GUI mode is not compatible with run_and_exit option
-      run_and_exit=false;
-      devmode=true;
+      run_and_exit = false;
+      devmode = true;
     }
   }
 #endif
@@ -576,7 +612,7 @@ void webview_run(std::string url, std::string title, std::string init_js)
     {
       if (!url.starts_with("http://") && !url.starts_with("https://"))
       {
-        url="file://" + url;
+        url = "file://" + url;
       }
       w.navigate(url);
     }
@@ -585,4 +621,3 @@ void webview_run(std::string url, std::string title, std::string init_js)
   // std::cout << init_js << std::endl;
   w.run();
 }
-

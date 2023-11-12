@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 
+#include "wv-util.h"
 #include "wv-wrap.h"
 #include <webview.h>
 
@@ -16,7 +17,7 @@ void webview_wrapper::create(bool debug, void *wnd)
     auto arg1 = json_parse(req, "", 0);
     std::string res, s = "";
 
-    if (arg1 == "tab")
+    if (arg1 == "json")
     {
       for (auto fh : func_help)
       {
@@ -31,9 +32,9 @@ void webview_wrapper::create(bool debug, void *wnd)
     {
       for (auto fh : func_help)
       {
-        s += fh.first + ':' + fh.second;
+        s += fh.first + ':' + fh.second + '\n';
       }
-      res = '"' + s + '"';
+      res = '"' + to_htent(s) + '"';
     }
 
     // std::cout << res << std::endl;

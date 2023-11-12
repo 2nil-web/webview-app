@@ -2,8 +2,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <functional>
 #include <bitset>
+#include <functional>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -22,16 +22,19 @@ std::string ws2s(std::wstring ws);
 std::wstring s2ws(std::string s);
 
 // Convert non ascii characters of a wstring to html entities in the following decimal form &#[dec_value];
-std::string to_htent(const std::wstring ws, bool dec_base=true);
+std::string to_htent(const std::wstring ws, bool dec_base = true);
 // Same as previous for string
-std::string to_htent(const std::string s, bool dec_base=true);
+std::string to_htent(const std::string s, bool dec_base = true);
 
-// Convert the html entities in hexa or decimal form contained in a string to their wchar_t value, return the obtained wstring
-std::wstring from_htent(const std::string htent, std::wstring& ws);
+// Convert the html entities in hexa or decimal form contained in a string to their wchar_t value, return the obtained
+// wstring
+std::wstring from_htent(const std::string htent, std::wstring &ws);
 // Same as previous but return a string
-std::string from_htent(const std::string htent, std::string& s);
+std::string from_htent(const std::string htent, std::string &s);
 
 std::string file2str(std::string filename);
+std::string wfile2str(std::wstring wfilename);
+std::string wfile2str(std::string filename);
 
 std::string trim(std::string &s);
 bool any_of_ctype(const std::string, std::function<int(int)>);

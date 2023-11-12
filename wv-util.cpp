@@ -50,6 +50,27 @@ std::string file2str(std::string filename)
   return ss.str();
 }
 
+std::string wfile2str(std::wstring wfilename)
+{
+#ifdef __GNUC__
+  if (wfilename != L"" && std::filesystem::exists(wfilename))
+  {
+    std::wifstream wif(wfilename);
+    std::wstringstream wss;
+    wss << wif.rdbuf();
+    return ws2s(wss.str());
+  }
+
+  return "";
+}
+
+std::string wfile2str(std::string filename)
+{
+  std::wstring wfilename;
+  from_htent(filename, wfilename);
+  return wfile2str(wfilename);
+}
+
 std::wstring file2wstr(std::string filename)
 {
   std::wifstream wif(filename);
@@ -307,11 +328,14 @@ std::wstring s2ws(std::string s)
 #endif
 
 // Return false if wide char is a printable ascii else true
-bool not_printable_ascii(wchar_t wc)
+bool must_convert_to_htent(wchar_t wc)
 {
-  if (wc > 31 && wc < 127)
-    return false;
-  return true;
+  if (wc == 92 || wc == 34 || wc < 32 || wc > 126)
+    return true;
+  return false;
+  //  if (wc > 31 && wc < 127) return false;
+  //  if (wc < 32 && wc > 126) return true;
+  //  return true;
 }
 
 // Convert non ascii characters of a wstring to html entities form in decimal (default) or hexa &#[x]value;
@@ -321,11 +345,13 @@ std::string to_htent(const std::wstring ws, bool dec_base)
 
   for (auto wc : ws)
   {
-    if (not_printable_ascii(wc))
+    if (must_convert_to_htent(wc))
     {
       ss << "&#";
-      if (dec_base) ss << std::dec;
-      else ss << 'x' << std::hex;
+      if (dec_base)
+        ss << std::dec;
+      else
+        ss << 'x' << std::hex;
       ss << (unsigned int)wc << ';';
     }
     else
@@ -341,36 +367,50 @@ std::string to_htent(const std::string s, bool dec_base)
   return to_htent(s2ws(s), dec_base);
 }
 
-std::string s2n(std::string s, size_t& i) {
-  std::string h="";
-  do { h+=s[i++]; } while (i < s.size() && s[i] != ';');
+std::string s2n(std::string s, size_t &i)
+{
+  std::string h = "";
+  do
+  {
+    h += s[i++];
+  } while (i < s.size() && s[i] != ';');
   return h;
 }
 
-unsigned int stoh(std::string s) {
-  unsigned int x;   
+unsigned int stoh(std::string s)
+{
+  unsigned int x;
   std::stringstream ss;
   ss << std::hex << s;
   ss >> x;
   return x;
 }
 
-// Convert the html entities in hexa or decimal form contained in the string htent to their wchar_t value, return the obtained string in ws
-std::wstring from_htent(const std::string htent, std::wstring& ws)
+// Convert the html entities in hexa or decimal form contained in the string htent to their wchar_t value, return the
+// obtained string in ws
+std::wstring from_htent(const std::string htent, std::wstring &ws)
 {
   // &#0;
-  if (htent.empty() || htent.size () < 4) ws=s2ws(htent);
-  else {
-    ws=L"";
-    for (size_t i=0; i < htent.size(); i++) {
-      if (htent.substr(i, 3) == "&#x") {
-        i+=2;
-        ws+=(wchar_t)stoh(s2n(htent, i));
-      } else if (htent.substr(i, 2) == "&#") {
-        i+=2;
-        ws+=(wchar_t)std::stoi(s2n(htent, i));
-      } else {
-        ws+=(wchar_t)htent[i];
+  if (htent.empty() || htent.size() < 4)
+    ws = s2ws(htent);
+  else
+  {
+    ws = L"";
+    for (size_t i = 0; i < htent.size(); i++)
+    {
+      if (htent.substr(i, 3) == "&#x")
+      {
+        i += 2;
+        ws += (wchar_t)stoh(s2n(htent, i));
+      }
+      else if (htent.substr(i, 2) == "&#")
+      {
+        i += 2;
+        ws += (wchar_t)std::stoi(s2n(htent, i));
+      }
+      else
+      {
+        ws += (wchar_t)htent[i];
       }
     }
   }
@@ -379,10 +419,10 @@ std::wstring from_htent(const std::string htent, std::wstring& ws)
 }
 
 // Same as previous for string
-std::string from_htent(const std::string htent, std::string& s)
+std::string from_htent(const std::string htent, std::string &s)
 {
   std::wstring ws;
-  s=ws2s(from_htent(htent, ws));
+  s = ws2s(from_htent(htent, ws));
   return s;
 }
 

@@ -5,7 +5,7 @@ if (typeof webapp_title === "function") {
   // Default and minimal size
   //webapp_size(640, 400, 0);
   webapp_size(640, 400, 1);
-//window.webapp_get_title().then(result => { console.log(result.value); });
+  //window.webapp_get_title().then(result => { console.log(result); });
 }
 
 
@@ -16,9 +16,23 @@ function cons_or_not(res, obj) {
   else console.log(hlp_msg);
 }
 
-async function help (obj) {
-  new Promise((resolve) => {
-    window.webapp_help("tab").then(result => { resolve(cons_or_not(result, obj)); });
+async function help (obj=output, fmt="") {
+  window.webapp_help(fmt).then(help_msg => {
+    if (fmt === "json") {
+      help_msg=decodeEntities(JSON.stringify(help_msg, null, 0).replace(/[{}"]/g, "").replace(/,/g,"\n"));
+    } else {
+      help_msg=decodeEntities(help_msg);
+    }
+    if (obj instanceof HTMLElement) obj.value+=help_msg;
+    console.log(help_msg);
+  });
+}
+
+async function readfile (filename, obj=output) {
+  window.fread(filename).then(txt => {
+    txt=decodeEntities(txt);
+    if (obj instanceof HTMLElement) obj.innerHTML+=txt;
+    console.log(txt);
   });
 }
 
@@ -128,7 +142,7 @@ function dir (path=".", do_sort=false, obj=output) {
 function scan(obj, elt, par="") {
   if (obj instanceof Object) {
     for (k in obj) {
-      if (obj.hasOwnProperty(k)) scan(obj[k], elt, par+'.'+k);
+      if (obj.hasOwnProperty(k)) scan(obj[k], elt, par+'['+k+']');
     }
   } else {
     txt=decodeEntities(par+':'+obj+'\n');
@@ -137,20 +151,17 @@ function scan(obj, elt, par="") {
   }
 }
 
-// https://docs.blague.xyz/
-// https://api.github.com/repos/octocat/Spoon-Knife/issues
-// https://api.github.com/users/2nil-web") {
-function curl(url="https://api.github.com/repos/octocat/Spoon-Knife/issues", par="octocat") {
+function curl(url="https://api.github.com/repos/octocat/Spoon-Knife/issues", name="octocat") {
   httpget(url, false, false).then((res) => {
-    console.log(JSON.stringify(res));//.replace(/,/g, '\n').replace(/[\[{}\]]/g, '\n'));
-    scan(res, output, par);
+    scan(res, output, name);
+    console.log(JSON.stringify(res, null, 1));
   });
 }
 
 // https://docs.blague.xyz/
 function blague() {
   httpget("https://blague.xyz/api/joke/random").then((res) => {
-    output.value+=decodeEntities(res.joke.question+'\n'+res.joke.answer+'\n');
+    output.value+=decodeEntities(res["joke"]["question"]+'\n'+res.joke.answer+'\n');
   });
 }
 
@@ -161,11 +172,8 @@ function vdm() {
   });
 }
 
-function gh() {
-  httpget("https://api.github.com/users/2nil-web", false, false).then((res) => {
-    Object.keys(res).forEach(key => {
-      output.value+=decodeEntities(key+": "+res[key]+"\n");
-    });
-  });
+function github() {
+  //curl("https://api.github.com/users/2nil-web")
+  curl("https://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@api.github.com/user/repos", "MyRepos")
 }
 
