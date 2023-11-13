@@ -40,7 +40,6 @@ std::string wfile2str(std::string filename);
 std::string fread(std::string filename);
 std::string fread(std::wstring wfilename);
 
-
 std::string trim(std::string &s);
 bool any_of_ctype(const std::string, std::function<int(int)>);
 bool all_of_ctype(const std::string, std::function<int(int)>);
