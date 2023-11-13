@@ -42,48 +42,63 @@ std::string trim(std::string &s)
   return s;
 }
 
-std::string file2str(std::string filename)
-{
-  std::ifstream ifs(filename);
+
+std::string stream2str(std::ifstream& ifs) {
   std::stringstream ss;
   ss << ifs.rdbuf();
   return ss.str();
 }
 
-std::string wfile2str(std::wstring wfilename)
+
+std::string file2str(std::string filename)
 {
-#ifdef __GNUC__
-  if (wfilename != L"" && std::filesystem::exists(wfilename))
-  {
-    std::wifstream wif(wfilename);
-    std::wstringstream wss;
-    wss << wif.rdbuf();
-    return ws2s(wss.str());
+  // Silently test if the file exists
+  if (filename != "" && std::filesystem::exists(filename)) {
+    std::ifstream ifs(filename);
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    return ss.str();
   }
 
   return "";
 }
 
-std::string wfile2str(std::string filename)
+std::wstring wstream2wstr(std::wifstream& wifs)
 {
-  std::wstring wfilename;
-  from_htent(filename, wfilename);
-  return wfile2str(wfilename);
-}
-
-std::wstring file2wstr(std::string filename)
-{
-  std::wifstream wif(filename);
-#ifndef _MSC_VER
-  wif.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
-/*#else
-    wif.imbue(std::locale(std::locale(), new std::codecvt_utf8_utf16<wchar_t,
-   0x10FFFF, std::consume_header>));*/
-#endif
   std::wstringstream wss;
-  wss << wif.rdbuf();
+  wss << wifs.rdbuf();
   return wss.str();
 }
+
+std::string wfile2str(std::string filename)
+{
+  // Silently test if the file exists
+  if (filename != "" && std::filesystem::exists(filename)) {
+    std::wifstream wifs(filename);
+    return ws2s(wstream2wstr(wifs));
+  }
+
+  return "";
+}
+
+#ifdef __GNUC__
+std::string wfile2str(std::wstring wfilename)
+{
+  return wfile2str(ws2s(wfilename));
+}
+#else
+std::string wfile2str(std::wstring wfilename)
+{
+  // Silently test if the file exists
+  if (wfilename != L"" && std::filesystem::exists(wfilename))
+  {
+    std::wifstream wifs(wfilename);
+    return ws2s(wstream2wstr(wifs));
+  }
+
+  return "";
+}
+#endif
 
 #ifdef _WIN32
 void WinError(const char *fmt, ...)
