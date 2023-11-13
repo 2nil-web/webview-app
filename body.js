@@ -9,7 +9,11 @@ file_status("NotFound");
 file_status("wv-runopt.o");
 */
 if (cmd.value === "") {
-  cmd.innerHTML='readfile("wv-binds.cpp");';
+  //cmd.innerHTML ='readfile("content_and_name_ascii.txt");';
+  cmd.innerHTML='readfile("content_and_name_unicode_çابتث背备本鼻.txt");';
+  //cmd.innerHTML='readfile("content_ascii_and_name_unicode_éهوي调丁.txt");';
+  //cmd.innerHTML='readfile("content_unicode_and_name_ascii.txt");';
+  
   //cmd.innerHTML='readfile("version.h");';
   //cmd.innerHTML='help();';
   //cmd.innerHTML='curl();';
@@ -59,5 +63,4 @@ run_cmd.addEventListener( "click", (event) => { // Sur click "Run" on execute la
 
   cmd.focus();
 });
-
 

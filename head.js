@@ -30,7 +30,7 @@ async function help (obj=output, fmt="") {
 
 async function readfile (filename, obj=output) {
   window.fread(filename).then(txt => {
-    txt=decodeEntities(txt);
+    //txt=decodeEntities(txt);
     if (obj instanceof HTMLElement) obj.innerHTML+=txt;
     console.log(txt);
   });

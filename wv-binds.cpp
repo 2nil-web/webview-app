@@ -347,15 +347,8 @@ void create_binds()
   w.bind_doc("fread", "read file with provided file name and return its content.",
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
-                 std::cout << "req " << req << std::endl;
                  auto filename = json_parse(req, "", 0);
-                 std::string s = "file does not exist.";
-                 std::cout << "filename " << filename << std::endl;
-                 s = wfile2str(filename);
-                 s = to_htent(s);
-                 // auto result="{\"value\": \"" + s + "\"}";
-                 std::cout << "file content " << std::endl << s << std::endl;
-                 w.resolve(seq, 0, '"' + s + '"');
+                 w.resolve(seq, 0, '"' + fread(filename) + '"');
                }).detach();
              });
 

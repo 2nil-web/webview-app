@@ -33,8 +33,13 @@ std::wstring from_htent(const std::string htent, std::wstring &ws);
 std::string from_htent(const std::string htent, std::string &s);
 
 std::string file2str(std::string filename);
+std::string file2str(std::wstring wfilename);
 std::string wfile2str(std::wstring wfilename);
 std::string wfile2str(std::string filename);
+
+std::string fread(std::string filename);
+std::string fread(std::wstring wfilename);
+
 
 std::string trim(std::string &s);
 bool any_of_ctype(const std::string, std::function<int(int)>);

@@ -46,59 +46,59 @@ std::string trim(std::string &s)
 std::string stream2str(std::ifstream& ifs) {
   std::stringstream ss;
   ss << ifs.rdbuf();
+  //std::cout << "stream2str " << ss.str() << std::endl;
   return ss.str();
 }
 
 
+std::string path2str(std::filesystem::path p)
+{
+  if (!std::filesystem::exists(p)) return "File "+p.string()+"does not exists";
+  //std::cout << "p " << p << std::endl;
+
+  std::ifstream ifs(p);
+  return stream2str(ifs);
+}
+
 std::string file2str(std::string filename)
 {
-  // Silently test if the file exists
-  if (filename != "" && std::filesystem::exists(filename)) {
-    std::ifstream ifs(filename);
-    std::stringstream ss;
-    ss << ifs.rdbuf();
-    return ss.str();
-  }
+  if (filename == "") return "File name cannot be empty";
+  return path2str(std::filesystem::path(filename));
+}
 
-  return "";
+std::string file2str(std::wstring wfilename)
+{
+  if (wfilename == L"") return "File name cannot be empty";
+  return path2str(std::filesystem::path(wfilename));
+}
+
+
+std::string fread(std::string filename) {
+  return to_htent(file2str(s2ws(filename)));
+}
+
+std::string fread(std::wstring wfilename) {
+  return to_htent(file2str(wfilename));
 }
 
 std::wstring wstream2wstr(std::wifstream& wifs)
 {
   std::wstringstream wss;
   wss << wifs.rdbuf();
+  //std::wcout << L"wstream2wstr " << wss.str() << std::endl;
   return wss.str();
 }
 
 std::string wfile2str(std::string filename)
 {
-  // Silently test if the file exists
-  if (filename != "" && std::filesystem::exists(filename)) {
-    std::wifstream wifs(filename);
-    return ws2s(wstream2wstr(wifs));
-  }
+  if (filename == "") return "File name cannot be empty";
+  if (!std::filesystem::exists(filename)) return "File "+filename+"does not exists";
+  //std::cout << "wfile2str_s " << filename << std::endl;
 
-  return "";
+  std::wifstream wifs(filename);
+  return ws2s(wstream2wstr(wifs));
 }
 
-#ifdef __GNUC__
-std::string wfile2str(std::wstring wfilename)
-{
-  return wfile2str(ws2s(wfilename));
-}
-#else
-std::string wfile2str(std::wstring wfilename)
-{
-  // Silently test if the file exists
-  if (wfilename != L"" && std::filesystem::exists(wfilename))
-  {
-    std::wifstream wifs(wfilename);
-    return ws2s(wstream2wstr(wifs));
-  }
-
-  return "";
-}
-#endif
 
 #ifdef _WIN32
 void WinError(const char *fmt, ...)
