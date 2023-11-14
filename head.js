@@ -8,11 +8,22 @@ if (typeof webapp_title === "function") {
   //window.webapp_get_title().then(result => { console.log(result); });
 }
 
+// Polyfills
+String.prototype.insert=function (str, pos) {
+  return this.substring(0, pos)+str+this.substring(pos)
+};
+
+
+function decodeEntities(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
 
 function cons_or_not(res, obj) {
   var hlp_msg="";
   Object.keys(res).forEach(key => { hlp_msg+=key+": "+res[key]+"\n"; });
-  if (obj instanceof HTMLElement) obj.innerHTML+=hlp_msg;
+  if (obj instanceof HTMLElement) obj.value+=decodeEntities(hlp_msg);
   else console.log(hlp_msg);
 }
 
@@ -30,8 +41,8 @@ async function help (obj=output, fmt="") {
 
 async function readfile (filename, obj=output) {
   window.fread(filename).then(txt => {
-    //txt=decodeEntities(txt);
-    if (obj instanceof HTMLElement) obj.innerHTML+=txt;
+    txt=decodeEntities(txt);
+    if (obj instanceof HTMLElement) obj.value+=txt;
     console.log(txt);
   });
 }
@@ -39,28 +50,16 @@ async function readfile (filename, obj=output) {
 
 async function ping (p) {
   console.log("ping " +p);
-  output.innerHTML+=await new Promise((resolve) => {
+  output.value+=await new Promise((resolve) => {
     window.echo(p).then(result => { resolve(result+"\n"); });
   });
 }
 
 async function unicode (p) {
   console.log("unicode " +p);
-  output.innerHTML+=await new Promise((resolve) => {
+  output.value+=await new Promise((resolve) => {
     window.utf(p).then(result => { resolve(result+"\n"); });
   });
-}
-
-// Polyfills
-String.prototype.insert=function (str, pos) {
-  return this.substring(0, pos)+str+this.substring(pos)
-};
-
-
-function decodeEntities(html) {
-    var txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
 }
 
 function dir (path=".", do_sort=false, obj=output) {
@@ -91,7 +90,7 @@ function dir (path=".", do_sort=false, obj=output) {
       else nothers++;
     }
 
-    line+=' '+file_info.last_write+' '+file_info.file.replace(rt_path, "").replace(/^\//, "");
+    line+=' '+file_info.last_write+' '+file_info.file.replace(rt_path, "").replace(/^\//, "").replace(/^\\/, "");
     //line=line.insert('#', 32);
 
     return line;
