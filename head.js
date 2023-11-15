@@ -151,7 +151,16 @@ function scan(obj, elt, par="") {
 }
 
 function curl(url="https://api.github.com/repos/octocat/Spoon-Knife/issues", name="octocat") {
-  httpget(url, false, false).then((res) => {
+  httpget(url).then((res) => {
+    //scan(res, output, name);
+    console.log(res);
+    //console.log(JSON.stringify(res, null, 1));
+  });
+}
+
+function curl_auth(url="https://api.github.com/user/repos", name="MyRepos", id="TestGHPerso 5e72ff515d8878dd456cea28d972521a8b44dfc3", pass="") {
+  httpcred(id, pass);
+  httpget(url).then((res) => {
     scan(res, output, name);
     console.log(JSON.stringify(res, null, 1));
   });
@@ -166,7 +175,7 @@ function blague() {
 
 function vdm() {
   httpget("https://blague.xyz/api/vdm/random").then((res) => {
-    //output.value+=JSON.stringify(res);
+    console.log(JSON.stringify(res));
     output.value+=decodeEntities(res.vdm.content+'\n');
   });
 }

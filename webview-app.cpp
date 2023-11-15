@@ -1,6 +1,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include "wv-winapi.h"
 #endif
 
 #include <chrono>

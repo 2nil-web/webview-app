@@ -5,6 +5,17 @@
 #include <string>
 #include <windows.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+void WinError(const char *fmt, ...);
+#ifdef UNICODE
+#define CommandLineToArgv CommandLineToArgvW
+#else
+PCHAR *CommandLineToArgvA(PCHAR CmdLine, int *_argc);
+#define CommandLineToArgv CommandLineToArgvA
+#endif
+#endif
+
 int MessageBox(HWND hWnd, LPCWSTR text, LPCWSTR caption, UINT uType = MB_OK);
 int MessageBox(LPCWSTR text, LPCWSTR caption, UINT uType = MB_OK);
 int MessageBox(HWND hWnd, const std::string text, const std::string caption, UINT uType = MB_OK);

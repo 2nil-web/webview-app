@@ -5,17 +5,6 @@
 #include <bitset>
 #include <functional>
 
-#ifdef _WIN32
-#include <Windows.h>
-void WinError(const char *fmt, ...);
-#ifdef UNICODE
-#define CommandLineToArgv CommandLineToArgvW
-#else
-PCHAR *CommandLineToArgvA(PCHAR CmdLine, int *_argc);
-#define CommandLineToArgv CommandLineToArgvA
-#endif
-#endif
-
 // Convert wstring to string
 std::string ws2s(std::wstring ws);
 // Convert string to wstring

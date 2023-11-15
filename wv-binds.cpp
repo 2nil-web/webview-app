@@ -21,6 +21,7 @@
 
 webview_wrapper w;
 
+
 void write_cons(std::string s, std::ostream &out = std::cout)
 {
   if (s.empty())
@@ -433,16 +434,38 @@ void create_binds()
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
                  std::string url = json_parse(req, "", 0);
-                 bool peer_check = str2bool(json_parse(req, "", 1));
-                 bool host_check = str2bool(json_parse(req, "", 2));
-                 bool verbose = str2bool(json_parse(req, "", 3));
-                 std::cout << "URL " << url << ", peer_check " << peer_check << ", host_check " << host_check
-                           << ", verbose " << verbose << std::endl;
-                 auto res = httpget(url, peer_check, host_check, verbose);
-                 w.resolve(seq, 0, to_htent(res));
-                 std::cout << res << std::endl;
+                 std::cout << "httpget " << url << std::endl;
+                 auto res = httpget(url);
+                 w.resolve(seq, 0, res);
+                 std::cout << res << std::endl << std::flush;
                }).detach();
              });
+
+  // Set http credential
+  w.bind_doc("httpcred", "set authentication parameters for http query (might a token or a pair id/password).",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto id = json_parse(req, "", 0);
+                 auto pass = json_parse(req, "", 1);
+                 httpcred(id, pass);
+                 w.resolve(seq, 0, "");
+               }).detach();
+             });
+
+  /* Set http options
+  w.bind_doc("httpopt", "set various parameter to http query.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto opt = json_parse(req, "", 0);
+                 auto param = json_parse(req, "", 1);
+
+                 std::string res = "{\"value\": \"";
+                 if (httpcred(id, pass)) res+="true";
+                 else res+="false";
+                 res+="\"}";
+                 w.resolve(seq, 0, res);
+               }).detach();
+             });*/
 
   w.bind_doc("ls_attach", "list provided directory in foreground.", [&](const std::string &req) {
     auto param = json_parse(req, "", 0);

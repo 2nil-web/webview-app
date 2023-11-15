@@ -5,6 +5,113 @@
 
 #include "wv-winapi.h"
 
+void WinError(const char *fmt, ...)
+{
+  CHAR *lpMsgBuf;
+  char title[1024];
+  DWORD len;
+  va_list ap;
+
+  va_start(ap, fmt);
+  vsnprintf(title, 1024, fmt, ap);
+  va_end(ap);
+
+  len = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
+                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
+  lpMsgBuf[len - 2] = '\0';
+  MessageBox(NULL, lpMsgBuf, title, MB_OK | MB_ICONERROR);
+  LocalFree(lpMsgBuf);
+}
+
+#ifndef UNICODE
+PCHAR *CommandLineToArgvA(PCHAR CmdLine, int *_argc)
+{
+  PCHAR *argv;
+  PCHAR _argv;
+  ULONG len;
+  ULONG argc;
+  CHAR a;
+  ULONG i, j;
+
+  BOOLEAN in_QM;
+  BOOLEAN in_TEXT;
+  BOOLEAN in_SPACE;
+
+  len = (ULONG)strlen(CmdLine);
+  i = ((len + 2) / 2) * sizeof(PVOID) + sizeof(PVOID);
+  argv = (PCHAR *)GlobalAlloc(GMEM_FIXED, i + (len + 2) * sizeof(CHAR));
+  _argv = (PCHAR)(((PUCHAR)argv) + i);
+  argc = 0;
+  argv[argc] = _argv;
+  in_QM = FALSE;
+  in_TEXT = FALSE;
+  in_SPACE = TRUE;
+  i = 0;
+  j = 0;
+
+  while ((a = CmdLine[i]))
+  {
+    if (in_QM)
+    {
+      if (a == '\"')
+      {
+        in_QM = FALSE;
+      }
+      else
+      {
+        _argv[j] = a;
+        j++;
+      }
+    }
+    else
+    {
+      switch (a)
+      {
+      case '\"':
+        in_QM = TRUE;
+        in_TEXT = TRUE;
+        if (in_SPACE)
+        {
+          argv[argc] = _argv + j;
+          argc++;
+        }
+        in_SPACE = FALSE;
+        break;
+      case ' ':
+      case '\t':
+      case '\n':
+      case '\r':
+        if (in_TEXT)
+        {
+          _argv[j] = '\0';
+          j++;
+        }
+        in_TEXT = FALSE;
+        in_SPACE = TRUE;
+        break;
+      default:
+        in_TEXT = TRUE;
+        if (in_SPACE)
+        {
+          argv[argc] = _argv + j;
+          argc++;
+        }
+        _argv[j] = a;
+        j++;
+        in_SPACE = FALSE;
+        break;
+      }
+    }
+    i++;
+  }
+  _argv[j] = '\0';
+  argv[argc] = nullptr;
+
+  (*_argc) = argc;
+  return argv;
+}
+#endif
+
 int MessageBox(LPCSTR text, LPCSTR caption, UINT type)
 {
   return MessageBox(NULL, text, caption, type);

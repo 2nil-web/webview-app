@@ -9,8 +9,9 @@ file_status("NotFound");
 file_status("wv-runopt.o");
 */
 if (cmd.value === "") {
+  cmd.value='curl_auth();';
   //cmd.value ='readfile("content_and_name_ascii.txt");';
-  cmd.value='readfile("content_and_name_unicode_çابتث背备本鼻.txt");';
+  //cmd.value='readfile("content_and_name_unicode_çابتث背备本鼻.txt");';
   //cmd.value='readfile("content_ascii_and_name_unicode_éهوي调丁.txt");';
   //cmd.value='readfile("content_unicode_and_name_ascii.txt");';
   
