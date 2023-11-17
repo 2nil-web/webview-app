@@ -48,10 +48,24 @@ async function readfile (filename, obj=output) {
 }
 
 
-async function ping (p) {
-  console.log("ping " +p);
+async function raw_echo (p) {
+  console.log("InParam " +p);
   output.value+=await new Promise((resolve) => {
-    window.echo(p).then(result => { resolve(result+"\n"); });
+    window.echo(p).then(result => {
+      console.log("OutResult " +result);
+      resolve(result+"\n");
+    });
+  });
+}
+
+async function ht_echo (p) {
+  console.log("InParam " +p);
+  output.value+=await new Promise((resolve) => {
+    window.hecho(p).then(result => {
+      ht_res=decodeEntities(result);
+      console.log("OutResult " +result);
+      resolve(ht_res+"\n");
+    });
   });
 }
 
@@ -152,9 +166,9 @@ function scan(obj, elt, par="") {
 
 function curl(url="https://api.github.com/repos/octocat/Spoon-Knife/issues", name="octocat") {
   httpget(url).then((res) => {
-    //scan(res, output, name);
+    scan(res, output, name);
     console.log(res);
-    //console.log(JSON.stringify(res, null, 1));
+    console.log(JSON.stringify(res, null, 1));
   });
 }
 
@@ -184,4 +198,8 @@ function github() {
   //curl("https://api.github.com/users/2nil-web")
   curl("https://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@api.github.com/user/repos", "MyRepos")
 }
+
+
+
+//https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-31&limit=1000
 

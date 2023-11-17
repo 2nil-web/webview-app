@@ -292,6 +292,14 @@ void create_binds()
 {
   w.bind_doc("echo", "echo the parameter.", [&](const std::string &seq, const std::string &req, void *) {
     std::thread([&, seq, req] {
+      auto s = json_parse(req, "", 0);
+      std::cout << s << std::endl;
+      w.resolve(seq, 0, '"' + s + '"');
+    }).detach();
+  });
+
+  w.bind_doc("hecho", "echo the parameter decoding from and encoding to html entities.", [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
       auto sp = json_parse(req, "", 0);
       std::string htent = to_htent(sp);
 #ifdef _WIN32
@@ -441,7 +449,7 @@ void create_binds()
                }).detach();
              });
 
-  // Set http credential
+  /* Set http credential
   w.bind_doc("httpcred", "set authentication parameters for http query (might a token or a pair id/password).",
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
@@ -450,7 +458,7 @@ void create_binds()
                  httpcred(id, pass);
                  w.resolve(seq, 0, "");
                }).detach();
-             });
+             });*/
 
   /* Set http options
   w.bind_doc("httpopt", "set various parameter to http query.",
