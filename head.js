@@ -194,12 +194,100 @@ function vdm() {
   });
 }
 
+async function vdm2() {
+  const response = await fetch("https://blague.xyz/api/vdm/random");
+  const data = await response.json();
+  console.log(data);
+}
+
+async function mygithub() {
+  const response = await fetch("https://api.github.com/users/2nil-web", { mode: "cors" });
+  const data = await response.json();
+  console.log(data);
+}
+
 function github() {
   //curl("https://api.github.com/users/2nil-web")
   curl("https://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@api.github.com/user/repos", "MyRepos")
 }
 
+function reqListener() {
+  console.log(JSON.parse(this.responseText));
+}
+
+function http_query(url="https://api.github.com/users/2nil-web") {
+  const req = new XMLHttpRequest();
+
+  req.addEventListener("load", reqListener);
+  req.open("GET", url);
+//  req.setRequestHeader("Access-Control-Allow-Origin", "*");
+//  req.setRequestHeader("Authorization", "Basic " + btoa("lalannd2:ocvdBum12$*3"));
+  req.send();
+}
 
 
 //https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-31&limit=1000
 
+
+// Example POST method implementation:
+async function postData(url = "", data = {}) {
+  // Default options are marked with *
+  const response = await fetch(url, {
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    //mode: "*cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    //credentials: "same-origin", // include, *same-origin, omit
+    /*headers: {
+      "Content-Type": "application/json",
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },*/
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    //body: JSON.stringify(data), // body data type must match "Content-Type" header
+  });
+  return response.json(); // parses JSON response into native JavaScript objects
+}
+
+/*
+postData("https://api.github.com/users/2nil-web", { answer: 42 }).then((data) => {
+  console.log(data); // JSON data parsed by `data.json()` call
+});
+*/
+
+function hdat(data) {
+  console.log(data);
+}
+
+function jpfetch(url) {
+  var scs = document.createElement("script");
+  scs.setAttribute("id", "dynUrl");
+  scs.setAttribute("src", url);
+  scs.setAttribute('defer', '');
+  scs.onload = function handleScriptLoaded(data) {
+    console.log('script has loaded '+document.getElementById("dynUrl").crossOrigin);
+    console.log(JSON.stringify(document.getElementById("dynUrl").value));
+    //document.getElementById('box').textContent = 'Script loaded successfully';
+  };
+
+  scs.onerror = function handleScriptError() {
+    console.log('error loading script');
+  };
+  document.head.appendChild(scs);
+}
+
+
+jpfetch("https://blague.xyz/api/vdm/random");
+
+/*
+const targetUrl = 'https://blague.xyz/api/vdm/random';
+const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+
+fetch(proxyUrl + targetUrl)
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));
+
+  const response = await fetch("https://blague.xyz/api/vdm/random");
+  const data = await response.json();
+  console.log(data);
+*/
