@@ -9,8 +9,10 @@ file_status("NotFound");
 file_status("wv-runopt.o");
 */
 if (cmd.value === "") {
-  cmd.value='vdm2();';
+  cmd.value='hello("Denis")';
+  //cmd.value='vdm()';
   //cmd.value='vdm();';
+  //cmd.value+='ht_echo("! #$%&*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ")';
   //cmd.value+='raw_echo("! #$%&*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ")';
   //cmd.value+='raw_echo("toto")';
   //cmd.value='curl_auth();';

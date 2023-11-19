@@ -24,6 +24,7 @@ std::string httpget(std::string url, bool peer_check, bool host_check, bool verb
 
     if (verbose)
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, "webview-app/1.0");
 
     // Does or does not check remote host certificate
     if (!peer_check)

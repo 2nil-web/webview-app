@@ -256,7 +256,7 @@ std::string to_htent(const std::wstring ws, bool dec_base)
 
   for (auto wc : ws)
   {
-    if (must_convert_to_htent(wc))
+    if (!isascii(wc))
     {
       ss << "&#";
       if (dec_base)

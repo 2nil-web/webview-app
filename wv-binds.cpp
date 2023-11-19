@@ -364,7 +364,9 @@ void create_binds()
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
                  auto sp = json_parse(req, "", 0);
-                 w.resolve(seq, 0, do_fstat(sp));
+                 auto s_stat=do_fstat(sp);
+                 std::cout << s_stat << std::endl;
+                 w.resolve(seq, 0, s_stat);
                }).detach();
              });
 
@@ -442,8 +444,10 @@ void create_binds()
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
                  std::string url = json_parse(req, "", 0);
-                 std::cout << "httpget " << url << std::endl;
                  auto res = httpget(url);
+                 //std::cout << "httpget " << url << ":\n" << res << std::endl;
+                 replace_all(res, "\\", "");
+                 res=to_htent(res);
                  w.resolve(seq, 0, res);
                  std::cout << res << std::endl << std::flush;
                }).detach();

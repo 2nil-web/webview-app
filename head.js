@@ -164,18 +164,92 @@ function scan(obj, elt, par="") {
   }
 }
 
-function curl(url="https://api.github.com/repos/octocat/Spoon-Knife/issues", name="octocat") {
+function isJson(item) {
+  let value = typeof item !== "string" ? JSON.stringify(item) : item;
+  try {
+    value = JSON.parse(value);
+  } catch (e) {
+    return false;
+  }
+
+  return typeof value === "object" && value !== null;
+}
+
+function curl(url="https://home.dplalanne.fr/free/index.php?hello&name=Denis&json") {
   httpget(url).then((res) => {
-    scan(res, output, name);
-    console.log(res);
-    console.log(JSON.stringify(res, null, 1));
+    if (isJson(res)) {
+      console.log("Is JSON response: "+JSON.stringify(res, null, 1));
+      output.value="JSON answer gives: "+decodeEntities(JSON.stringify(res, null, 0)).replace(/[{}"]/g, "");
+    } else {
+      console.log("Is NOT JSON response: "+res);
+      output.value="Tex answer gives: "+decodeEntities(res);
+    }
   });
+}
+
+/* Given the following php script named 'index.php' behind a web server
+<?php
+parse_str($_SERVER['QUERY_STRING'], $qstr);
+if (count($qstr) > 0) {
+  $func=array_keys($qstr)[0];
+  $func();
+}
+
+// Not implemented
+if (!isset($func)) http_response_code(501);
+
+// curl  -s "https://home.dplalanne.fr/free/index.php?hello"
+function hello() {
+  global $qstr;
+  $response='';
+  $your_name='';
+  if (isset($qstr['name'])) $your_name=$qstr['name'];
+  $my_name=gethostname();
+
+  if (isset($qstr['json'])) {
+    $response.='{';
+      if ($your_name !== "") $response.='"your_name": "'.$your_name.'", ';
+      $response.='"my_name": "'.$my_name.'"';
+    $response.='}';
+  } else {
+    $response.='"Hello';
+    if ($your_name !== "") $response.=' '.$your_name;
+    $response.=', my name is '.$my_name.'"';
+  }
+
+  echo $response;
+}
+
+?>
+The function that follows may query it that way
+*/
+function hello(name="", json=false) {
+  url="https://home.dplalanne.fr/free";
+  qry="index.php?hello";
+  console.log("QUERY "+url+'/'+qry);
+
+  if (name !== "") qry+='&name='+name;
+
+  if (json) {
+    qry+='&json';
+    httpget(url+'/'+qry).then((res) => {
+      output.value+='Json answer gives: your name is '+decodeEntities(res.your_name)+' and my name is '+res.my_name;
+      console.log(decodeEntities(JSON.stringify(res, null, 1)));
+    });
+  } else {
+    httpget(url+'/'+qry).then((res) => {
+      output.value+=decodeEntities(res)+'\n';
+      console.log(decodeEntities(res));
+    });
+  }
+
 }
 
 function curl_auth(url="https://api.github.com/user/repos", name="MyRepos", id="TestGHPerso 5e72ff515d8878dd456cea28d972521a8b44dfc3", pass="") {
   httpcred(id, pass);
   httpget(url).then((res) => {
-    scan(res, output, name);
+    //scan(res, output, name);
+    output.value=JSON.stringify(res, null, 1);
     console.log(JSON.stringify(res, null, 1));
   });
 }
@@ -184,20 +258,15 @@ function curl_auth(url="https://api.github.com/user/repos", name="MyRepos", id="
 function blague() {
   httpget("https://blague.xyz/api/joke/random").then((res) => {
     output.value+=decodeEntities(res["joke"]["question"]+'\n'+res.joke.answer+'\n');
+    console.log(decodeEntities(JSON.stringify(res, null, 1)));
   });
 }
 
 function vdm() {
   httpget("https://blague.xyz/api/vdm/random").then((res) => {
-    console.log(JSON.stringify(res));
-    output.value+=decodeEntities(res.vdm.content+'\n');
+    output.value+=decodeEntities(res.vdm.content)+'\n';
+    console.log(decodeEntities(JSON.stringify(res, null, 1)));
   });
-}
-
-async function vdm2() {
-  const response = await fetch("https://blague.xyz/api/vdm/random");
-  const data = await response.json();
-  console.log(data);
 }
 
 async function mygithub() {
@@ -276,7 +345,7 @@ function jpfetch(url) {
 }
 
 
-jpfetch("https://blague.xyz/api/vdm/random");
+//jpfetch("https://blague.xyz/api/vdm/random");
 
 /*
 const targetUrl = 'https://blague.xyz/api/vdm/random';
