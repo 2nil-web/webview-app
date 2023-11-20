@@ -221,14 +221,32 @@ function hello() {
 }
 
 ?>
+Or given the following bash script behind a cgi server
+#!/bin/bash
+# Header
+echo "Content-Type: text/html"
+# Status
+echo "Status: 410 Gone"
+# End of header
+echo
+# Body
+IFS='=&'
+parm=($QUERY_STRING)
+resp="Hi there, this is $(id -nu) user answering from $(hostname)"
+if [ "X${parm[2]}" != "X" ]
+then
+resp="$resp to ${parm[2]}"
+fi
+echo "\"$resp\""
+
 The function that follows may query it that way
 */
 function hello(name="", json=false) {
-  url="https://home.dplalanne.fr/free";
-  qry="index.php?hello";
-  console.log("QUERY "+url+'/'+qry);
+  url="http://tlpalcorr01.aes.alcatel.fr/cgi-bin";
+  qry="rapi.sh?hello";
 
   if (name !== "") qry+='&name='+name;
+  console.log("QUERY "+url+'/'+qry);
 
   if (json) {
     qry+='&json';
