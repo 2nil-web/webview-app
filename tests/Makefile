@@ -106,6 +106,9 @@ strip :
 upx : strip
 	upx *.exe | true
 
+format :
+	@clang-format -style="{ BasedOnStyle: Microsoft, IndentWidth: 2 }" --sort-includes -i ${SRCS}
+
 clean :
 	rm -f ${EXES} *.mslog
 

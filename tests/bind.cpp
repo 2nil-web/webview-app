@@ -29,11 +29,12 @@ constexpr const auto html =
 </script>)html";
 
 //#ifdef _WIN32
-//int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
+// int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
 //                   LPSTR /*lpCmdLine*/, int /*nCmdShow*/) {
 //#else
-int main() {
-//#endif
+int main()
+{
+  //#endif
   unsigned int count = 0;
   webview::webview w(false, nullptr);
   w.set_title("Bind Example");

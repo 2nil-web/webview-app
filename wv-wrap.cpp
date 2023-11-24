@@ -6,7 +6,6 @@
 #include "wv-wrap.h"
 #include <webview.h>
 
-
 #define WP ((webview::webview *)w)
 
 void webview_wrapper::create(bool debug, void *wnd)

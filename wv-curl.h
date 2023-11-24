@@ -4,20 +4,21 @@
 
 #include <curl/curl.h>
 
-std::string httpget(std::string url, bool peer_check=false, bool host_check=false, bool verbose=false);
-//void httpcred(std::string id, std::string pass="");
+std::string httpget(std::string url, bool peer_check = false, bool host_check = false, bool verbose = false);
+// void httpcred(std::string id, std::string pass="");
 
 #ifdef CURLEASY_CLASS
-class CurlEasy {
-  public:
-  CurlEasy(bool defaultSetup=true);
+class CurlEasy
+{
+public:
+  CurlEasy(bool defaultSetup = true);
   ~CurlEasy();
   bool SetOpt(CURLoption, ...);
   std::string Perform(std::string url);
-  bool SetCredential(std::string id_or_token, std::string password="");
+  bool SetCredential(std::string id_or_token, std::string password = "");
   std::string LastErrorMsg();
 
-  private:
+private:
   CURL *handle;
   CURLcode ret_code;
   std::string buffer, _LastErrorMsg;

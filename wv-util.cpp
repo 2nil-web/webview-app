@@ -104,7 +104,6 @@ std::string wfile2str(std::string filename)
   return ws2s(wstream2wstr(wifs));
 }
 
-
 void replace_all(std::string &s, std::string srch, std::string repl)
 {
   size_t pos = 0;
