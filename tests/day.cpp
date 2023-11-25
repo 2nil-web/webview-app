@@ -71,6 +71,7 @@ int days_count(int year)
 
 bool isLeap(int year)
 {
+  return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);/*
   if (year % 4 == 0)
   {
     if (year % 100 == 0 && year % 400 != 0)
@@ -79,7 +80,7 @@ bool isLeap(int year)
       return true;
   }
 
-  return false;
+  return false;*/
 }
 
 void yearWeekDay(tm TM, int &year, int &nweek, int &wday,
@@ -124,12 +125,12 @@ int main(int argc, char **argv)
 
   // Par défaut on prend le timestamp actuel.
   time_t now = std::time(nullptr);
-  tm *tm;
+  tm tm;
 
   // Si un ou 2 arguments sont passé alors ils vont servir à changer la valeur de now, pour la date mais pas l'heure.
   if (argc > 1)
   {
-    tm = gmtime(&now);
+    gmtime_s(&tm, &now);
 
     // 2 arguments: annéee et numéro du jour dans l'année.
     if (argc > 2)
@@ -140,7 +141,7 @@ int main(int argc, char **argv)
     else
     {
       // Un seul argument: numéro du jour dans l'année courante.
-      year = 1900 + tm->tm_year;
+      year = 1900 + tm.tm_year;
       yday = atoi(argv[1]);
     }
 
@@ -150,13 +151,16 @@ int main(int argc, char **argv)
       return EXIT_FAILURE;
     }
 
-    now = date_time_to_time_t(year, 1, 1) + (yday - 1) * 86400 + tm->tm_hour * 3600 + tm->tm_min * 60 + tm->tm_sec;
+    now = date_time_to_time_t(year, 1, 1) + (yday - 1) * 86400 + tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec;
   }
 
-  tm = localtime(&now);
+  localtime_s(&tm, &now);
 
-  yearWeekDay(*tm, year, nweek, wday, yday);
-  std::cout << asctime(tm);
+  yearWeekDay(tm, year, nweek, wday, yday);
+  char str[26];
+  asctime_s(str, sizeof str, &tm);
+  std::cout << str;
+
   // Les jours d'une année se compte de 1 à 365 ou 366 pour les années bissextiles
   // Les jours d'une semaine se compte de 0 pour dimanche à 6 pour samedi
   // A titre d'exemple, le lundi 30 et le mardi 31 décembre 2024 font bien parti de la 1ére semaine de 2025 ...

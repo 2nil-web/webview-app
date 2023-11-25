@@ -74,6 +74,9 @@ endif
 #MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
+ifeq ($(MAKECMDGOALS),gcc)
+DO_MSBUILD=0
+endif
 
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64
@@ -85,10 +88,6 @@ define genmsexe
 	@rm -f $1.sln $1.vcxproj*
 	@rm -rf ${ARCH}
 endef
-endif
-
-ifeq ($(MAKECMDGOALS),gcc)
-DO_MSBUILD=0
 endif
 
 SRCS=$(wildcard *.cpp)
