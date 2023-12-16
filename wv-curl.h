@@ -5,7 +5,7 @@
 #include <curl/curl.h>
 
 std::string httpget(std::string url, bool peer_check = false, bool host_check = false, bool verbose = false);
-std::string httpget_cred(std::string id, std::string pass, std::string url, bool peer_check, bool host_check, bool verbose);
+std::string httpget_cred(std::string id, std::string pass, std::string url, bool peer_check=false, bool host_check=false, bool verbose=false);
 
 #ifdef CURLEASY_CLASS
 class CurlEasy
