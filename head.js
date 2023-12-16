@@ -242,7 +242,7 @@ echo "\"$resp\""
 The function that follows may query it that way
 */
 function hello(name="", json=false) {
-  url="http://tlpalcorr01.aes.alcatel.fr/cgi-bin";
+  url="http://tlpalcorr01.aes.alcatel.fr:9094/cgi-bin";
   qry="rapi.sh?hello";
 
   if (name !== "") qry+='&name='+name;
@@ -263,7 +263,15 @@ function hello(name="", json=false) {
 
 }
 
-function curl_auth(url="https://api.github.com/user/repos", name="MyRepos", id="TestGHPerso 5e72ff515d8878dd456cea28d972521a8b44dfc3", pass="") {
+function curl_auth(id, pass, url) {
+  httpcred(id, pass, url).then((res) => {
+    //scan(res, output, name);
+    output.value=JSON.stringify(res, null, 1);
+    console.log(JSON.stringify(res, null, 1));
+  });
+}
+
+function githun_auth(url="https://api.github.com/user/repos", name="MyRepos", id="TestGHPerso 5e72ff515d8878dd456cea28d972521a8b44dfc3", pass="") {
   httpcred(id, pass);
   httpget(url).then((res) => {
     //scan(res, output, name);

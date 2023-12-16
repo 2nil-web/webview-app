@@ -3,6 +3,7 @@
 
 bool verbose = false, peer_check = false, host_check = false;
 
+//curl -sku lalannd2:ocvdBum12$*4 https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-11-07&limit=1000
 //'https://lalannd2:ocvdBum12$*3@wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-10-02&limit=1000'
 void check_opts(std::string opt)
 {
@@ -25,14 +26,15 @@ void check_opts(std::string opt)
 
 int main(int argc, char **argv)
 {
-  std::string url;
-  if (argc >= 2)
-    url = argv[1];
-  else
-    url = "https://wiki.space.thales/rest/api/content?limit=1";
-  for (int i = 2; i < argc; i++)
-    check_opts(argv[i]);
-  if (verbose)
-    std::cout << "RESULT IS:" << std::endl;
-  std::cout << httpget(url, peer_check, host_check, verbose);
+  if (argc >= 4) {
+    std::string id, pass, url;
+
+    id=argv[1];
+    pass=argv[2];
+    url = argv[3];
+
+    for (int i = 4; i < argc; i++) check_opts(argv[i]);
+    if (verbose) std::cout << "RESULT IS:" << std::endl;
+    std::cout << httpget_cred(id, pass, url, peer_check, host_check, verbose);
+  } else std::cerr << "Missing mandatory parameters id, password and url" << std::endl;
 }

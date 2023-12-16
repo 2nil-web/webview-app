@@ -457,16 +457,17 @@ void create_binds()
                }).detach();
              });
 
-  /* Set http credential
-  w.bind_doc("httpcred", "set authentication parameters for http query (might a token or a pair id/password).",
+  // Set http credential
+  w.bind_doc("httpcred", "run an http get with the provided credential (id/password) and url.",
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
                  auto id = json_parse(req, "", 0);
                  auto pass = json_parse(req, "", 1);
-                 httpcred(id, pass);
-                 w.resolve(seq, 0, "");
+                 auto url = json_parse(req, "", 2);
+                 auto ret=httpget_cred(id, pass, url);
+                 w.resolve(seq, 0, ret);
                }).detach();
-             });*/
+             });
 
   /* Set http options
   w.bind_doc("httpopt", "set various parameter to http query.",
