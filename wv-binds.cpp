@@ -465,7 +465,17 @@ void create_binds()
                  auto pass = json_parse(req, "", 1);
                  auto url = json_parse(req, "", 2);
                  auto ret=httpget_cred(id, pass, url);
+                 std::cout << ret << std::endl;
                  w.resolve(seq, 0, ret);
+               }).detach();
+             });
+
+  // Set http credential
+  w.bind_doc("wiki", "run an http get against the wiki.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 wiki_curl();
+                 w.resolve(seq, 0, "");
                }).detach();
              });
 

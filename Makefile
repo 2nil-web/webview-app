@@ -36,7 +36,6 @@ CPPFLAGS+=-DCURL_STATICLIB
 
 CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
-LDLIBS += -lcurl
 LDFLAGS += -g
 
 ifeq (${OS},Linux)
@@ -54,8 +53,9 @@ LDFLAGS += -static
 LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 
 #pacman -S mingw-w64-x86_64-curl-gnutls
-LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
-LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+LDLIBS += -Wl,-Bdynamic -lcurl -Wl,-Bstatic
+#LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
+#LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
 endif
 
 #MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
@@ -93,8 +93,12 @@ ${ARCH}/${CONF}/${TARGET} : ${PREFIX}.ico ${SRCS} ${RES_SRC}
 else
 DEFAULT_TARGET=version_check.txt version.h ${TARGET}
 
+
 ${TARGET} : ${OBJS}
 	$(LINK.cc) ${OBJS} $(LOADLIBES) $(LDLIBS) -o $@
+
+DLLDEPS=$(shell ldd ${TARGET} | sed "/WINDOWS/d;s/.*=> //;s/ .0x.*//" | sort -u | tr '\n' ' ')
+
 endif
 
 all : ${DEFAULT_TARGET}
@@ -110,6 +114,12 @@ strip : $(TARGET)
 
 upx : strip
 	$(UPX) $(TARGET) | true
+
+deliv :
+ifneq ($(DLLDEPS),)
+	@echo "Bringing DLL dependencies."
+	@cp ${DLLDEPS} .
+endif
 
 ALL_SRCS=$(wildcard *.cpp) $(wildcard *.hpp) $(wildcard *.h)
 format :

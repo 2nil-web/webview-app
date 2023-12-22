@@ -44,7 +44,6 @@ CPPFLAGS+=-DCURL_STATICLIB
 
 CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
-LDLIBS += -lcurl
 LDFLAGS += -g
 
 ifeq (${OS},Linux)
@@ -64,11 +63,15 @@ CPPFLAGS += --include=webview_mingw_support.h
 LDFLAGS += -mwindows
 LDFLAGS += -static
 
-LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
+LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion #-lws2_32 -liconv -lunistring
 
 #pacman -S mingw-w64-x86_64-curl-gnutls
-LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
-LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+
+LDLIBS += -Wl,-Bdynamic -lcurl -Wl,-Bstatic
+LDLIBS +=  #-lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lwldap32 -lzstd -lbrotlidec -lz -lbrotlicommon -lidn2
+
+#LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
+#LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
 endif
 
 #MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
