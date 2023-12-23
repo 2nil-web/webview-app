@@ -37,13 +37,13 @@ DECORATION=Nawak-Bidon
 
 WVDIR=../webview
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
+CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include
-
 CPPFLAGS+=-DCURL_STATICLIB
-
 
 CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
+CXXFLAGS += -Wno-unknown-pragmas
 LDFLAGS += -g
 
 ifeq (${OS},Linux)
@@ -74,7 +74,6 @@ LDLIBS +=  #-lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lwldap32 -lzstd -lbrotli
 #LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
 endif
 
-#MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
 MSBUILD=/c/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe
 DO_MSBUILD=$(shell test -f $(MSBUILD) && echo 1 || echo 0)
 ifeq ($(MAKECMDGOALS),gcc)
@@ -111,8 +110,13 @@ upx : strip
 format :
 	@clang-format -style="{ BasedOnStyle: Microsoft, IndentWidth: 2 }" --sort-includes -i ${SRCS}
 
+lst :
+
 clean :
-	rm -f ${EXES} *.mslog
+	@rm -f ${EXES} *.mslog
+	@rm $(filter-out TemplateApp.sln,$(wildcard *.sln))
+	@rm $(filter-out TemplateApp.vcxproj,$(wildcard *.vcxproj))
+	@rm -rf x64 .vs
 
 # Ces régles implicites ne sont pas utiles quand on fait 'make clean'
 ifneq ($(MAKECMDGOALS),clean)
