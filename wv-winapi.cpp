@@ -1,9 +1,12 @@
 
-#include <filesystem>
-#include <iostream>
+#include <winsock2.h>
 #include <windows.h>
 
 #include "wv-winapi.h"
+
+#include <filesystem>
+#include <iostream>
+
 
 void WinError(const char *fmt, ...)
 {

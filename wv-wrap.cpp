@@ -2,9 +2,12 @@
 #include <iostream>
 #include <string>
 
+#include <webview.h>
+
 #include "wv-util.h"
 #include "wv-wrap.h"
-#include <webview.h>
+#include "wv-winapi.h"
+
 
 #define WP ((webview::webview *)w)
 

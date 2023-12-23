@@ -3,6 +3,7 @@
 #define CURLEASY_H
 
 #include <curl/curl.h>
+#include <string>
 
 class CurlEasy
 {
