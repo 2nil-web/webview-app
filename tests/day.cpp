@@ -71,16 +71,16 @@ int days_count(int year)
 
 bool isLeap(int year)
 {
-  return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);/*
-  if (year % 4 == 0)
-  {
-    if (year % 100 == 0 && year % 400 != 0)
-      return false;
-    else
-      return true;
-  }
+  return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0); /*
+   if (year % 4 == 0)
+   {
+     if (year % 100 == 0 && year % 400 != 0)
+       return false;
+     else
+       return true;
+   }
 
-  return false;*/
+   return false;*/
 }
 
 void yearWeekDay(tm TM, int &year, int &nweek, int &wday,

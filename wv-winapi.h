@@ -4,9 +4,9 @@
 
 #include <string>
 #include <windows.h>
+#include <winsock2.h>
 
 #ifdef _WIN32
-#include <Windows.h>
 void WinError(const char *fmt, ...);
 #ifdef UNICODE
 #define CommandLineToArgv CommandLineToArgvW

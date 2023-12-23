@@ -29,13 +29,14 @@ DECORATION=Nawak-Bidon
 
 WVDIR=webview
 WV2DIR=Microsoft.Web.WebView2.1.0.1150.38
+CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include
-
 CPPFLAGS+=-DCURL_STATICLIB
 
 
 CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
+CXXFLAGS += -Wno-unknown-pragmas
 LDFLAGS += -g
 
 ifeq (${OS},Linux)

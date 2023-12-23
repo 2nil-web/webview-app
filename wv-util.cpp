@@ -2,6 +2,7 @@
 #ifdef _WIN32
 #include <tchar.h>
 #include <windows.h>
+#include <winsock2.h>
 #else
 #include <string.h>
 #include <unistd.h>
