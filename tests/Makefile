@@ -112,10 +112,11 @@ format :
 
 lst :
 
+ifeq ($(MAKECMDGOALS),clean)
+TORM=$(filter-out TemplateApp.sln,$(wildcard *.sln)) $(filter-out TemplateApp.vcxproj,$(wildcard *.vcxproj)) $(filter-out TemplateApp.vcxproj.user,$(wildcard *.vcxproj.user))
+endif
 clean :
-	@rm -f ${EXES} *.mslog
-	@rm $(filter-out TemplateApp.sln,$(wildcard *.sln))
-	@rm $(filter-out TemplateApp.vcxproj,$(wildcard *.vcxproj))
+	rm -f ${EXES} *.mslog $(TORM)
 	@rm -rf x64 .vs
 
 # Ces régles implicites ne sont pas utiles quand on fait 'make clean'
