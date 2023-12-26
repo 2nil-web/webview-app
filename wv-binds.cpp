@@ -255,36 +255,6 @@ std::string do_fstat(std::string sp)
   return res;
 }
 
-// return if string == true/ok/yes/1 else false
-bool str2bool(std::string s)
-{
-  if (s == "true" || s == "ok" || s == "1" || s == "yes")
-    return true;
-  return false;
-}
-
-std::string disable_bs(std::string &s)
-{
-  std::string bs;
-  bs = (char)92;
-  replace_all(s, bs, "##BACKSLASH_CODE##");
-  rep_crlf(s);
-  replace_all(s, "##BACKSLASH_CODE##", bs + bs);
-
-  return s;
-}
-
-std::string neutralize(std::string &s)
-{
-  std::string bs;
-  bs = (char)92;
-  replace_all(s, bs, "##BACKSLASH_CODE##");
-  rep_crlf(s);
-  replace_all(s, "##BACKSLASH_CODE##", bs + bs);
-
-  return s;
-}
-
 // console.log(webapp_help())
 static unsigned int nfs = 0;
 void create_binds()
@@ -427,15 +397,48 @@ void create_binds()
     return "";
   });
 
-  w.bind_doc("absolute", "gives absolute path of a file path.",
-             [&](const std::string &seq, const std::string &req, void *) {
-               std::thread([&, seq, req] {
-                 auto pth = json_parse(req, "", 0);
-                 auto res = std::filesystem::absolute(pth).string();
-                 replace_all(res, "\\", "/");
-                 w.resolve(seq, 0, '"' + res + '"');
-               }).detach();
-             });
+  w.bind_doc("absolute", "gives absolute path of a file path.", [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+      auto pth = json_parse(req, "", 0);
+      auto res = std::filesystem::absolute(pth).string();
+      replace_all(res, "\\", "/");
+      w.resolve(seq, 0, '"' + res + '"');
+   }).detach();
+ });
+
+  w.bind_doc("getenv", "Return value of environment variable.", [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+      auto var = json_parse(req, "", 0);
+      std::string res = std::getenv(var.c_str());
+      replace_all(res, "\\", "/");
+      w.resolve(seq, 0, '"' + res + '"');
+    }).detach();
+ });
+
+#ifdef _WIN32
+#define Putenv _putenv
+#define PATHSEP ';'
+#else
+#define PATHSEP ':'
+#define Putenv putenv
+#endif
+
+  w.bind_doc("addpth", "Add program path to the PATH env variable if is not yet added.", [&](const std::string &req) -> std::string {
+    std::string pth=std::getenv("PATH");
+    std::string currpth=std::filesystem::current_path().string();
+    auto vpth=split(pth, PATHSEP);
+    bool do_add=true;
+    for (auto p:vpth) {
+      if (p == currpth) do_add=false;
+    }
+
+    if (do_add) {
+      //pth=(std::string("PATH=")+pth+':'+std::filesystem::current_path().string());
+      pth="PATH="+pth+PATHSEP+std::filesystem::current_path().string();
+      Putenv(pth.c_str());
+    }
+    return "";
+  });
 
   w.bind_doc("chdir", "change current directory.", [&](const std::string &req) -> std::string {
     nfs = 0;
@@ -575,10 +578,12 @@ void create_binds()
   w.bind_doc("webapp_exec", "run an external command.", [&](const std::string &seq, const std::string &req, void *) {
     std::thread([&, seq, req] {
       auto cmd = json_parse(req, "", 0);
+      std::cout << "cmd: " << cmd << std::endl;
       std::string res_cmd = exec_cmd(cmd);
-      // std::cout << res_cmd << std::endl;
-      disable_bs(res_cmd);
+      std::cout << "res_cmd: " << res_cmd << std::endl;
+      rep_bs(res_cmd);
       auto result = "{\"value\": \"" + res_cmd + "\"}";
+      std::cout << "result: "  << result << std::endl;
       w.resolve(seq, 0, result);
     }).detach();
   });

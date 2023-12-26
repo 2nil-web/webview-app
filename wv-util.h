@@ -4,6 +4,8 @@
 
 #include <bitset>
 #include <functional>
+#include <string>
+#include <vector>
 
 // Convert wstring to string
 std::string ws2s(std::wstring ws);
@@ -20,6 +22,11 @@ std::string to_htent(const std::string s, bool dec_base = true);
 std::wstring from_htent(const std::string htent, std::wstring &ws);
 // Same as previous but return a string
 std::string from_htent(const std::string htent, std::string &s);
+
+// Split string into vector of string using delim to split
+std::vector<std::string> split(const std::string& str, char delim);
+
+bool str2bool(std::string s);
 
 std::string file2str(std::string filename);
 std::string file2str(std::wstring wfilename);

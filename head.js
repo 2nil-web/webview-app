@@ -241,6 +241,24 @@ echo "\"$resp\""
 
 The function that follows may query it that way
 */
+function setpth() {
+  addpth().then((res) => {
+    getenv("PATH").then((pth) => {
+      pth2=pth.replace(/;/g, '\n');
+      output.value+=pth2+'\n';
+      console.log(pth2);
+    });
+  });
+}
+
+function env_val(vname) {
+  getenv(vname).then((val) => {
+    output.value+=val+'\n';
+    console.log(val);
+  });
+}
+
+//curl http://tlpalcorr01.aes.alcatel.fr:9094/cgi-bin/rapi.sh?hello"
 function hello(name="", json=false) {
   url="http://tlpalcorr01.aes.alcatel.fr:9094/cgi-bin";
   qry="rapi.sh?hello";

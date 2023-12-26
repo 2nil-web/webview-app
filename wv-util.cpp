@@ -25,6 +25,14 @@
 
 #include "wv-util.h"
 
+// return if string == true/ok/yes/1 else false
+bool str2bool(std::string s)
+{
+  if (s == "true" || s == "ok" || s == "1" || s == "yes")
+    return true;
+  return false;
+}
+
 bool any_of_ctype(const std::string s, std::function<int(int)> istype)
 {
   return std::any_of(s.begin(), s.end(), [istype](char c) { return istype(c); });
@@ -34,6 +42,18 @@ bool all_of_ctype(const std::string s, std::function<int(int)> istype)
 {
   return std::all_of(s.begin(), s.end(), [istype](char c) { return istype(c); });
 }
+
+std::vector<std::string> split(const std::string& str, char delim) {
+    std::vector<std::string> strings;
+    size_t start;
+    size_t end = 0;
+    while ((start = str.find_first_not_of(delim, end)) != std::string::npos) {
+        end = str.find(delim, start);
+        strings.push_back(str.substr(start, end - start));
+    }
+    return strings;
+}
+
 
 std::string trim(std::string &s)
 {
@@ -106,25 +126,23 @@ std::string wfile2str(std::string filename)
 
 void replace_all(std::string &s, std::string srch, std::string repl)
 {
-  size_t pos = 0;
-  while (pos += repl.length())
-  {
-    pos = s.find(srch, pos);
-    if (pos == std::string::npos)
-      break;
-    s.replace(pos, srch.length(), repl);
+  size_t pos = 0, retpos;
+  for(;;) {
+    retpos = s.find(srch, pos);
+    if (retpos == std::string::npos) break;
+    s.replace(retpos, srch.length(), repl);
+    pos = retpos+repl.length();
   }
 }
 
 void replace_all(std::wstring &s, std::wstring srch, std::wstring repl)
 {
-  size_t pos = 0;
-  while (pos += repl.length())
-  {
-    pos = s.find(srch, pos);
-    if (pos == std::string::npos)
-      break;
-    s.replace(pos, srch.length(), repl);
+  size_t pos = 0, retpos;
+  for(;;) {
+    retpos = s.find(srch, pos);
+    if (retpos == std::string::npos) break;
+    s.replace(retpos, srch.length(), repl);
+    pos = retpos+repl.length();
   }
 }
 
@@ -356,11 +374,44 @@ const char *getcmda()
 }
 #endif
 
+std::string wpipe2s(const std::wstring command)
+{
+    FILE* fp = wpopen(command.c_str(), L"r");
+
+    if (fp) {
+        std::wostringstream oss;
+        constexpr std::size_t MAX_LINE_SZ = 1024;
+        char line[MAX_LINE_SZ];
+        while(fgetws((wchar_t *)line, MAX_LINE_SZ, fp)) oss << (wchar_t *)line;
+        pclose(fp);
+        return to_htent(oss.str());
+    }
+
+    return "";
+}
+
+std::string pipe2s(const std::string command)
+{
+    FILE* fp = popen(command.c_str(), "r");
+
+    if (fp) {
+        std::ostringstream oss;
+        constexpr std::size_t MAX_LINE_SZ = 1024;
+        char line[MAX_LINE_SZ];
+        while(fgets(line, MAX_LINE_SZ, fp)) oss << line;
+        pclose(fp);
+        return to_htent(oss.str());
+    }
+
+    return "";
+}
+
 std::string exec_cmd(std::string cmd)
 {
   std::string s;
 #ifdef _WIN32
   std::wstring wcmd = s2ws("/C " + cmd);
+  //std::wstring wcmd = s2ws(cmd);
   std::string tmpFile = tempfile();
   std::wstring wtmpFile = s2ws(tmpFile);
   AllocConsole();
