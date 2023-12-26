@@ -57,8 +57,8 @@ std::string httpget(std::string url, bool peer_check, bool host_check, bool verb
   return buf;
 }
 
-
-std::string httpget_cred(std::string id, std::string pass, std::string url, bool peer_check, bool host_check, bool verbose)
+std::string httpget_cred(std::string id, std::string pass, std::string url, bool peer_check, bool host_check,
+                         bool verbose)
 {
   CURL *curl;
   CURLcode res;
@@ -84,7 +84,7 @@ std::string httpget_cred(std::string id, std::string pass, std::string url, bool
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   /* cache the CA cert bundle in memory for a week */
-  //curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 604800L);
+  // curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 604800L);
 
   // Send result of command into a string buffer
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
@@ -94,7 +94,8 @@ std::string httpget_cred(std::string id, std::string pass, std::string url, bool
   /* Check for errors */
   // if (res != CURLE_OK) std::cerr << "curl_easy_perform() failed: " <<
   // curl_easy_strerror(res) << std::endl;
-  if (res != CURLE_OK) {
+  if (res != CURLE_OK)
+  {
     std::cout << "id : " << id << std::endl;
     std::cout << "pass : " << pass << std::endl;
     std::cout << "url : " << url << std::endl;
@@ -103,7 +104,7 @@ std::string httpget_cred(std::string id, std::string pass, std::string url, bool
 
   /* always cleanup */
   curl_easy_cleanup(curl);
-  curl=NULL;
+  curl = NULL;
 
   curl_global_cleanup();
 
@@ -115,7 +116,12 @@ int wiki_curl()
   CURLcode ret;
   CURL *curl;
 
-  std::string id="lalannd2", psw="ocvdBum12$*4", url="https://wiki.space.thales/rest/api/content/search\?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-11-07&limit=1000", buf;
+  std::string id = "lalannd2", psw = "ocvdBum12$*4",
+              url = "https://wiki.space.thales/rest/api/content/"
+                    "search\?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,"
+                    "lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+"
+                    "lastmodified+=+2023-11-07&limit=1000",
+              buf;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl = curl_easy_init();
@@ -127,7 +133,6 @@ int wiki_curl()
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/8.5.0");
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-
 
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf);

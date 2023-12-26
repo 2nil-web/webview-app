@@ -154,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="getopt_vs\getopt.h" />
     <ClInclude Include="webview\webview.h" />
+    <ClInclude Include="wv-curleasy.h" />
     <ClInclude Include="wv-wrap.h" />
     <ClInclude Include="wv-opts.h" />
     <ClInclude Include="wv-curl.h" />
@@ -166,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="getopt_vs\getopt.cpp" />
+    <ClCompile Include="wv-curleasy.cpp" />
     <ClCompile Include="wv-wrap.cpp" />
     <ClCompile Include="wv-opts.cpp" />
     <ClCompile Include="wv-curl.cpp" />

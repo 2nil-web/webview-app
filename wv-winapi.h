@@ -2,11 +2,11 @@
 #ifndef WINAPI_PP_H
 #define WINAPI_PP_H
 
-#include <string>
+#include <winsock2.h>
 #include <windows.h>
+#include <string>
 
 #ifdef _WIN32
-#include <Windows.h>
 void WinError(const char *fmt, ...);
 #ifdef UNICODE
 #define CommandLineToArgv CommandLineToArgvW

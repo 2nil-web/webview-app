@@ -7,11 +7,12 @@
 #define MAX_PATH PATH_MAX
 #endif
 #elif defined(_WIN32) || defined(WIN32)
+#include <winsock2.h>
+#include <windows.h>
 #include <io.h>
 #include <shlobj.h>
 #include <stdio.h>
 #include <tchar.h>
-#include <windows.h>
 #endif
 
 #include <cstdlib>
