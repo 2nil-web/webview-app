@@ -84,12 +84,11 @@ ifeq ($(DO_MSBUILD),1)
 ARCH=x64
 CONF=Release
 define genmsexe
-	@sed 's/\<TemplateApp\>/$(1)/g' TemplateApp.sln >$1.sln
-	@sed 's/\<TemplateApp\.cpp\>/$(1).cpp/g;s/\<TemplateApp\>/$(1)/g' TemplateApp.vcxproj >$1.vcxproj
-	@${MSBUILD} $1.sln -p:Configuration=${CONF} >$1.mslog && mv ${ARCH}/${CONF}/$1.exe . && rm -f $1.mslog
-	@rm -f $1.sln $1.vcxproj*
-	@rm -rf ${ARCH}
+	rm -rf ${ARCH}; \
+	[ -f $1 ] || ( sed 's/\<TemplateApp\>/$(1)/g' TemplateApp.sln >${1}.sln;  sed 's/\<TemplateApp\.cpp\>/$(1).cpp/g;s/\<TemplateApp\>/$(1)/g' TemplateApp.vcxproj >${1}.vcxproj ); \
+	${MSBUILD} $1.sln -p:Configuration=${CONF} >${1}.mslog && mv ${ARCH}/${CONF}/${1}.exe . && rm -f ${1}.mslog
 endef
+#	[ -f $1 ] && ( rm -f ${1}.sln ${1}.vcxproj*; rm -rf ${ARCH} )
 endif
 
 SRCS=$(wildcard *.cpp)
@@ -139,7 +138,7 @@ ifneq ($(MAKECMDGOALS),clean)
 %${EXEXT}: %.cpp
 ifeq ($(DO_MSBUILD),1)
 	@echo "Building $@ from $^ with msvc"
-	$(call genmsexe,$*,${ARCH},${CONF})
+	$(call genmsexe,$*)
 else
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
