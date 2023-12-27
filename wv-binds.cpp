@@ -19,6 +19,20 @@
 #include "wv-util.h"
 #include "wv-wrap.h"
 
+std::string my_getenv(const std::string vname)
+{
+#ifdef _MSC_VER
+    char *pValue;
+   size_t len;
+   errno_t err = _dupenv_s( &pValue, &len, vname.c_str());
+   if (err) return "";
+   return pValue;
+#else
+  return std::getenv(vname.c_str());
+#endif
+}
+
+
 webview_wrapper w;
 
 void write_cons(std::string s, std::ostream &out = std::cout)
@@ -413,7 +427,7 @@ void create_binds()
   w.bind_doc("getenv", "Return value of environment variable.", [&](const std::string &seq, const std::string &req, void *) {
     std::thread([&, seq, req] {
       auto var = json_parse(req, "", 0);
-      std::string res = std::getenv(var.c_str());
+      std::string res = my_getenv(var);
       replace_all(res, "\\", "/");
       w.resolve(seq, 0, '"' + res + '"');
     }).detach();
@@ -428,11 +442,11 @@ void create_binds()
 #endif
 
   w.bind_doc("addpth", "Add program path to the PATH env variable if is not yet added.", [&](const std::string &req) -> std::string {
-    std::string pth=std::getenv("PATH");
+    std::string pth=my_getenv("PATH");
     std::string currpth=std::filesystem::current_path().string();
     auto vpth=split(pth, PATHSEP);
     bool do_add=true;
-    for (auto p:vpth) {
+    for (std::string p:vpth) {
       if (p == currpth) do_add=false;
     }
 

@@ -377,14 +377,14 @@ const char *getcmda()
 
 std::string wpipe2s(const std::wstring command)
 {
-    FILE* fp = wpopen(command.c_str(), L"r");
+    FILE* fp = _wpopen(command.c_str(), L"r");
 
     if (fp) {
         std::wostringstream oss;
         constexpr std::size_t MAX_LINE_SZ = 1024;
         char line[MAX_LINE_SZ];
         while(fgetws((wchar_t *)line, MAX_LINE_SZ, fp)) oss << (wchar_t *)line;
-        pclose(fp);
+        _pclose(fp);
         return to_htent(oss.str());
     }
 
@@ -393,14 +393,14 @@ std::string wpipe2s(const std::wstring command)
 
 std::string pipe2s(const std::string command)
 {
-    FILE* fp = popen(command.c_str(), "r");
+    FILE* fp = _popen(command.c_str(), "r");
 
     if (fp) {
         std::ostringstream oss;
         constexpr std::size_t MAX_LINE_SZ = 1024;
         char line[MAX_LINE_SZ];
         while(fgets(line, MAX_LINE_SZ, fp)) oss << line;
-        pclose(fp);
+        _pclose(fp);
         return to_htent(oss.str());
     }
 
