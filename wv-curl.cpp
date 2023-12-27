@@ -64,15 +64,15 @@ std::string httpget_cred(std::string id, std::string pass, std::string url, bool
   CURLcode res;
   std::string buf = "";
 
-  //  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_DEFAULT);
 
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
   if (verbose)
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
 
-  // curl_easy_setopt(curl, CURLOPT_USERAGENT, "webview-app/1.0");
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "webview-app/1.0");
   curl_easy_setopt(curl, CURLOPT_USERNAME, id.c_str());
   curl_easy_setopt(curl, CURLOPT_PASSWORD, pass.c_str());
   // Does or does not check remote host certificate
@@ -106,7 +106,7 @@ std::string httpget_cred(std::string id, std::string pass, std::string url, bool
   curl_easy_cleanup(curl);
   curl = NULL;
 
-  //  curl_global_cleanup();
+  curl_global_cleanup();
 
   return buf;
 }
@@ -126,9 +126,10 @@ int wiki_curl()
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-  //    curl_easy_setopt(curl, CURLOPT_USERNAME, id.c_str());
-  //    curl_easy_setopt(curl, CURLOPT_PASSWORD, psw.c_str());
-  curl_easy_setopt(curl, CURLOPT_USERPWD, (id + ':' + psw).c_str());
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+//    curl_easy_setopt(curl, CURLOPT_USERNAME, id.c_str());
+//    curl_easy_setopt(curl, CURLOPT_PASSWORD, psw.c_str());
+  curl_easy_setopt(curl, CURLOPT_USERPWD, (id+':'+psw).c_str());
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/8.5.0");
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
