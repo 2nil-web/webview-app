@@ -93,8 +93,10 @@ DEFAULT_TARGET=version_check.txt version.h ${PREFIX}.ico ${TARGET} README.docx
 ${TARGET} : ${ARCH}/${CONF}/${TARGET}
 	cp ${ARCH}/${CONF}/${TARGET} .
 
+# These 2 environment variables (precisely in upper case) cause troubles to the Visual Studio build (don't ask ...)
+unexport TMP TEMP tmp temp
 ${ARCH}/${CONF}/${TARGET} : ${PREFIX}.ico ${SRCS} ${RES_SRC}
-	${MSBUILD} webview-app.sln -p:Configuration=${CONF}
+	echo "TMP=${TMP}, TEMP=${TEMP}, tmp=${tmp}, temp=${temp}" && ${MSBUILD} webview-app.sln -p:Configuration=${CONF}
 else
 DEFAULT_TARGET=version_check.txt version.h ${TARGET}
 

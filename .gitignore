@@ -2,6 +2,16 @@ webview-app
 webview
 .vs
 *.vcxproj.user
+# ignore all .sln except webview-app.sln and tests/TemplateApp.sln
+*.sln
+!webview-app.sln
+!tests/TemplateApp.sln
+
+# ignore all .sln except webview-app.sln and tests/TemplateApp.sln
+*.vcxproj
+!webview-app.vcxproj
+!tests/TemplateApp.vcxproj
+
 x64
 webview-gcc
 webview-vs
@@ -41,3 +51,4 @@ version.json
 README.docx
 
 *.dll
+*.old

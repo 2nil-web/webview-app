@@ -83,14 +83,16 @@ DO_MSBUILD=0
 endif
 
 ifeq ($(DO_MSBUILD),1)
+# These 2 environment variables (precisely in upper case) cause troubles to the Visual Studio build (don't ask ...)
+unexport TMP TEMP tmp temp
 ARCH=x64
 CONF=Release
 define genmsexe
 	rm -rf ${ARCH}; \
 	[ -f $1 ] || ( sed 's/\<TemplateApp\>/$(1)/g' TemplateApp.sln >${1}.sln;  sed 's/\<TemplateApp\.cpp\>/$(1).cpp/g;s/\<TemplateApp\>/$(1)/g' TemplateApp.vcxproj >${1}.vcxproj ); \
-	${MSBUILD} $1.sln -p:Configuration=${CONF} >${1}.mslog && mv ${ARCH}/${CONF}/${1}.exe . && rm -f ${1}.mslog
+	${MSBUILD} $1.sln -p:Configuration=${CONF} >${1}.mslog && mv ${ARCH}/${CONF}/${1}.exe . && rm -f ${1}.mslog; \
+	[ -f ${1}.exe ] && ( rm -f ${1}.sln ${1}.vcxproj*; rm -rf ${ARCH} )
 endef
-#	[ -f $1 ] && ( rm -f ${1}.sln ${1}.vcxproj*; rm -rf ${ARCH} )
 endif
 
 SRCS=$(wildcard *.cpp)
