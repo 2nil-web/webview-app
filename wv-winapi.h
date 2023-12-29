@@ -2,9 +2,9 @@
 #ifndef WINAPI_PP_H
 #define WINAPI_PP_H
 
-#include <winsock2.h>
-#include <windows.h>
 #include <string>
+#include <windows.h>
+#include <winsock2.h>
 
 #ifdef _WIN32
 void WinError(const char *fmt, ...);

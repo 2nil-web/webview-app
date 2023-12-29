@@ -24,7 +24,7 @@ std::wstring from_htent(const std::string htent, std::wstring &ws);
 std::string from_htent(const std::string htent, std::string &s);
 
 // Split string into vector of string using delim to split
-std::vector<std::string> split(const std::string& str, char delim);
+std::vector<std::string> split(const std::string &str, char delim);
 
 bool str2bool(std::string s);
 
