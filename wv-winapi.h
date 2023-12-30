@@ -4,7 +4,6 @@
 
 #include <string>
 #include <windows.h>
-#include <winsock2.h>
 
 #ifdef _WIN32
 void WinError(const char *fmt, ...);

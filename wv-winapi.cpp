@@ -1,6 +1,5 @@
 
 #include <windows.h>
-#include <winsock2.h>
 
 #include "wv-winapi.h"
 

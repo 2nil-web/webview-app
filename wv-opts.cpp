@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <windows.h>
-#include <winsock2.h>
 #endif
 
 #include <cstdlib>

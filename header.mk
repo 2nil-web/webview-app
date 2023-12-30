@@ -80,7 +80,7 @@ DO_MSBUILD=0
 endif
 
 ifeq ($(DO_MSBUILD),1)
-# These 2 environment variables (precisely in upper case) cause troubles to the Visual Studio build (don't ask ...)
-unexport TMP TEMP tmp temp
+# These 2 environment variables cause troubles to the Visual Studio build
+unexport TMP TEMP
 endif
 

@@ -64,30 +64,5 @@ ifeq ($(DO_MSBUILD),1)
 	rm -rf ${ARCH} README.docx
 endif
 
-# Génération du version.h intégré dans l'appli
-version.h : version_check.txt
-	@${ECHO} "Building C++ header $@"
-	@${ECHO} "std::string name=\"${PREFIX}\", version=\"${VERSION}\", decoration=\"${DECORATION}\", commit=\"${COMMIT}\", created_at=\"${ISO8601}\";" >$@
-
-# Génération du version.json intégré dans le paquetage
-version.json : version_check.txt
-	@${ECHO} "Building json file $@"
-	@${ECHO} '{ "name":"${PREFIX}", "version":"${VERSION}", "decoration":"${DECORATION}", "commit":"${COMMIT}","created_at":"${ISO8601}" }' >$@
-
-# Pour regénérer version.h et version.json dès qu'un des champs version ou decoration ou commit, est modifié.
-version_check.txt : FORCE
-	@${ECHO} "Version:${VERSION}, decoration:${DECORATION}, commit:${COMMIT}" >new_$@
-	@if diff new_$@ $@ >/dev/null 2>&1; then rm -f new_$@; else mv -f new_$@ $@; rm -f ${PREFIX}.iss ${PREFIX}-standalone.iss; fi
-
-cfg :
-	@echo "root_dir ${root_dir}"
-	@echo "PGF ${PGF}"
-	@echo "PGF86 ${PGF86}"
-	@echo "PATH"
-	@echo "${PATH}" | sed 's/:/\n/g'
-	@echo "END PATH"
-	@which inkscape.exe
-	@echo "DO_MSBUILD [${DO_MSBUILD}]"
-
 include rules.mk
 

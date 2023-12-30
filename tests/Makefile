@@ -18,9 +18,6 @@ strip :
 upx : strip
 	upx *.exe | true
 
-cfg :
-	@echo "root_dir ${root_dir}"
-
 ifeq ($(MAKECMDGOALS),clean)
 TORM=$(filter-out TemplateApp.sln,$(wildcard *.sln)) $(filter-out TemplateApp.vcxproj,$(wildcard *.vcxproj)) $(filter-out TemplateApp.vcxproj.user,$(wildcard *.vcxproj.user))
 endif
