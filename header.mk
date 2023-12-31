@@ -34,7 +34,7 @@ COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo 'Unknown_commit')
 DECORATION=Nawak-Bidon
 
 ifeq (${root_dir},)
-	root_dir=$(realpath .)
+	root_dir=.
 endif
 
 WVDIR=${root_dir}/webview

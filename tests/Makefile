@@ -1,5 +1,5 @@
 
-root_dir=$(realpath ..)
+root_dir=..
 
 include ${root_dir}/header.mk
 
