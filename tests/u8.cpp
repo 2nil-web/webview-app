@@ -27,8 +27,9 @@ int main()
   // Post-LWG2676 uses new fstream constructors
 
   // Native string representation can be used with OS-specific APIs
+  std::FILE *f;
 #ifdef _WIN32
-  if (std::FILE *f = _wfopen(p.c_str(), L"r"))
+  if (_wfopen_s(&f, p.c_str(), L"r") == 0)
 #else
   if (std::FILE *f = std::fopen(p.c_str(), "r"))
 #endif

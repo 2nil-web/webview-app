@@ -32,12 +32,14 @@ LRESULT CALLBACK fnWndProc(HWND hWnd, unsigned int msg, WPARAM wParam, LPARAM lP
   return (DefWindowProc(hWnd, msg, wParam, lParam));
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevIns, LPSTR lpszArgument, int iShow)
+//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevIns, LPSTR lpszArgument, int iShow)
+int main(int argc, char **argv)
 {
   wchar_t szClassName[] = L"Form1";
   WNDCLASSEX wc;
   MSG messages;
   HWND hWnd;
+  HINSTANCE hInstance = GetModuleHandle(NULL);
 
   memset(&wc, 0, sizeof(WNDCLASSEX));
   HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 222)); // Create a non-standard color HBRUSH for main window
@@ -51,7 +53,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevIns, LPSTR lpszArgument, 
   hWnd = CreateWindowEx(0, szClassName, szClassName, WS_OVERLAPPEDWINDOW, 200, 175, 320, 200, HWND_DESKTOP, 0,
                         hInstance, 0);
   SetWindowLongPtr(hWnd, 0 * sizeof(void *), (LONG_PTR)hBrush); // Store HBRUSH as part of Window Class Structure
-  ShowWindow(hWnd, iShow);
+  ShowWindow(hWnd, SW_NORMAL);
   while (GetMessage(&messages, NULL, 0, 0))
   {
     TranslateMessage(&messages);
@@ -59,5 +61,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevIns, LPSTR lpszArgument, 
   }
   DeleteObject(hBrush); // Delete dynamically allocated GDI resource
 
-  return messages.wParam;
+  return (int)messages.wParam;
 }

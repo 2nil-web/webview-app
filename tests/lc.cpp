@@ -9,9 +9,13 @@
 #ifdef _WIN32
 #include <fcntl.h>
 #include <io.h>
+#define my_gmtime(a, b) gmtime_s(b, a)
+#define my_localtime(a, b) localtime_s(b, a)
 #else
 #include <clocale>
 #include <locale>
+#define my_gmtime(a, b) gmtime_r(a, b)
+#define my_localtime(a, b) localtime_r(a, b)
 #endif
 #include <filesystem>
 #include <fstream>
@@ -28,13 +32,13 @@ std::string file_time_to_string(std::filesystem::file_time_type file_time, std::
                                 bool gm = false)
 {
   std::time_t tt = to_time_t(file_time);
-  std::tm *tim;
+  std::tm tim;
   if (gm)
-    tim = std::gmtime(&tt);
+    my_gmtime(&tt, &tim);
   else
-    tim = std::localtime(&tt);
+    my_localtime(&tt, &tim);
   std::stringstream buffer;
-  buffer << std::put_time(tim, fmt.c_str());
+  buffer << std::put_time(&tim, fmt.c_str());
   std::string fmtime = buffer.str();
 
   return fmtime;

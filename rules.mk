@@ -63,7 +63,7 @@ endif
 
 %${EXEXT}: %.cpp
 ifeq ($(DO_MSBUILD),1)
-	@echo "Building $@ from $^ with msvc"
+	@echo "Building $@ for ${ARCH} ${CONF} from $^ with msvc"
 	@$(call genmsexe,$*)
 else
 	@echo "Building $@ from $^ with g++"
