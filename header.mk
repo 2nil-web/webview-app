@@ -38,9 +38,9 @@ ifeq (${root_dir},)
 endif
 
 WVDIR=${root_dir}/webview
-WV2DIR=${root_dir}/Microsoft.Web.WebView2.1.0.1150.38
+WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -DWIN32_LEAN_AND_MEAN
-CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2DIR}/build/native/include
+CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
 CPPFLAGS+=-DCURL_STATICLIB
 
 CXXFLAGS += -std=c++20 -g
