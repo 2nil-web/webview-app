@@ -13,6 +13,22 @@ String.prototype.insert=function (str, pos) {
   return this.substring(0, pos)+str+this.substring(pos)
 };
 
+function about () {
+  info="";
+  app_info().then((ainf) => {
+    info=ainf.replace(/,/g,"\n")+"\nIncludes\n";
+    webview_ver().then((wvver) => {
+      info+=" WebView version: "+wvver+"\n";
+      console.log("webview_ver="+wvver);
+      libcurl_ver().then((lcver) => {
+        info+=" LibCurl version: "+lcver;
+        console.log("libcurl_ver="+lcver);
+        window.alert(info);
+      });
+    });
+  });
+  
+}
 
 function decodeEntities(html) {
     var txt = document.createElement("textarea");

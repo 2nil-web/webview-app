@@ -2,7 +2,7 @@
 # Génération du version.h intégré dans l'appli
 version.h : version_check.txt
 	@${ECHO} "Building C++ header $@"
-	@${ECHO} "std::string name=\"${PREFIX}\", version=\"${VERSION}\", decoration=\"${DECORATION}\", commit=\"${COMMIT}\", created_at=\"${ISO8601}\";" >$@
+	@${ECHO} "#ifndef VERSION_H\n#define VERSION_H\nnamespace app_info { std::string name=\"${PREFIX}\", version=\"${VERSION}\", decoration=\"${DECORATION}\", commit=\"${COMMIT}\", created_at=\"${ISO8601}\"; }\n#endif" >$@
 
 # Génération du version.json intégré dans le paquetage
 version.json : version_check.txt

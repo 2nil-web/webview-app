@@ -32,6 +32,7 @@ struct run_opt
 };
 
 bool interp();
+std::string appInfo();
 std::string usage(std::ostream &out = std::cout);
 void getopt_init(int argc, char **argv, std::vector<run_opt> pOptions,
                  const std::string pIntro = "Some introductory help message", const std::string pVersion = "1.0.0",

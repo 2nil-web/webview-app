@@ -139,3 +139,9 @@ void webview_wrapper::bind_noprom(const std::string &name, sync_binding_t fn)
 {
   WP->bind(name, fn);
 }
+
+std::string webview_wrapper::version()
+{
+  return std::string(webview_version()->version_number) + std::string(webview_version()->pre_release) +
+         std::string(webview_version()->build_metadata);
+}

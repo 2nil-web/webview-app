@@ -19,7 +19,7 @@ TARGET=${PREFIX}${EXEXT}
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64
 CONF=Release
-DEFAULT_TARGET=version_check.txt version.h ${PREFIX}.ico ${TARGET} README.docx
+all: version_check.txt version.h ${PREFIX}.ico ${TARGET} README.docx
 
 ${TARGET} : ${ARCH}/${CONF}/${TARGET}
 	cp ${ARCH}/${CONF}/${TARGET} .
@@ -27,14 +27,14 @@ ${TARGET} : ${ARCH}/${CONF}/${TARGET}
 ${ARCH}/${CONF}/${TARGET} : ${PREFIX}.ico ${SRCS} ${RES_SRC}
 	${MSBUILD} webview-app.sln -p:Configuration=${CONF}
 else
-DEFAULT_TARGET=version_check.txt version.h ${TARGET}
+all: version_check.txt version.h ${TARGET}
 
 ${TARGET} : ${OBJS}
 	$(LINK.cc) ${OBJS} $(LOADLIBES) $(LDLIBS) -o $@
 endif
 
-all : ${DEFAULT_TARGET}
-	@echo "All done ${DEFAULT_TARGET}"
+#all : ${DEFAULT_TARGET}
+#	@echo "All done ${DEFAULT_TARGET}"
 
 gcc : all
 

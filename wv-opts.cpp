@@ -270,20 +270,39 @@ void getUsage(char, std::string, std::string)
 
 bool already_v = false;
 
-void getVersion(char = '\0', std::string = "", std::string = "")
+std::string appInfo()
 {
-  if (!already_v)
-    already_v = true;
   std::string ppath = progpath;
   if (ppath.size() > 0)
     ppath[0] = toupper(ppath[0]);
 
-  if (commit != "")
-    version += '+' + commit;
-  std::cout << ppath << ' ' << version << ", build for " << getBuild();
-  if (copyright.size() > 0)
-    std::cout << ", " << copyright << std::endl;
+  std::string aInf = ppath + ' ' + app_info::version;
+  if (app_info::commit != "")
+    aInf += '-' + app_info::commit;
+  std::string metadata = "";
+  if (app_info::decoration != "")
+    metadata += app_info::decoration;
+  if (app_info::created_at != "")
+  {
+    if (metadata != "")
+      metadata += ", ";
+    metadata += "created at:" + app_info::created_at;
+  }
 
+  if (metadata != "")
+    aInf += '+' + metadata;
+
+  aInf += ", build for " + getBuild();
+  if (copyright.size() > 0)
+    aInf += ", " + copyright;
+  return aInf;
+}
+
+void getVersion(char = '\0', std::string = "", std::string = "")
+{
+  if (!already_v)
+    already_v = true;
+  std::cout << appInfo() << std::endl;
   if (!interp_on)
     exit(EXIT_SUCCESS);
 }
@@ -445,7 +464,7 @@ void getopt_init(int argc, char **argv, std::vector<run_opt> pOptions, const std
   progpath = std::filesystem::path(argv[0]).stem().string();
   intro = pIntro;
   if (pVersion != "")
-    version = pVersion;
+    app_info::version = pVersion;
   copyright = pCopyright;
   for (auto vo : pOptions)
   {

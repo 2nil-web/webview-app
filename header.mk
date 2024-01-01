@@ -32,6 +32,7 @@ UPX=upx
 VERSION=$(shell git describe --abbrev=0 --tags 2>/dev/null || echo 'Unknown_version')
 COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo 'Unknown_commit')
 DECORATION=Nawak-Bidon
+ISO8601 := $(shell date +%Y-%m-%dT%H:%M:%SZ)
 
 ifeq (${root_dir},)
 	root_dir=.

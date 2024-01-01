@@ -47,6 +47,7 @@ public:
   void set_html(const std::string &);
   void init(const std::string &);
   void eval(const std::string &);
+  std::string version();
 
 private:
   void *w = nullptr;
