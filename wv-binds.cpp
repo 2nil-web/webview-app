@@ -467,7 +467,7 @@ void create_binds()
                {
                  // pth=(std::string("PATH=")+pth+':'+std::filesystem::current_path().string());
                  pth = "PATH=" + pth + PATHSEP + std::filesystem::current_path().string();
-                 Putenv(pth.c_str());
+                 Putenv((char *)pth.c_str());
                }
                return "";
              });

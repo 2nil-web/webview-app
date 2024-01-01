@@ -29,7 +29,6 @@ ${ARCH}/${CONF}/${TARGET} : ${PREFIX}.ico ${SRCS} ${RES_SRC}
 else
 DEFAULT_TARGET=version_check.txt version.h ${TARGET}
 
-
 ${TARGET} : ${OBJS}
 	$(LINK.cc) ${OBJS} $(LOADLIBES) $(LDLIBS) -o $@
 endif

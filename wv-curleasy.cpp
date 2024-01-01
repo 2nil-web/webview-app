@@ -1,4 +1,6 @@
 
+#include <stdarg.h>
+
 #include "wv-curleasy.h"
 #include <cstdio>
 #include <iostream>

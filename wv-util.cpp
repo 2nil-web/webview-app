@@ -379,6 +379,9 @@ const char *getcmda()
 }
 #endif
 
+#ifdef _WIN32
+#define my_popen _popen
+#define my_pclose _pclose
 std::string wpipe2s(const std::wstring command)
 {
   FILE *fp = _wpopen(command.c_str(), L"r");
@@ -390,16 +393,19 @@ std::string wpipe2s(const std::wstring command)
     char line[MAX_LINE_SZ];
     while (fgetws((wchar_t *)line, MAX_LINE_SZ, fp))
       oss << (wchar_t *)line;
-    _pclose(fp);
+    my_pclose(fp);
     return to_htent(oss.str());
   }
 
   return "";
 }
-
+#else
+#define my_popen popen
+#define my_pclose pclose
+#endif
 std::string pipe2s(const std::string command)
 {
-  FILE *fp = _popen(command.c_str(), "r");
+  FILE *fp = my_popen(command.c_str(), "r");
 
   if (fp)
   {
@@ -408,7 +414,7 @@ std::string pipe2s(const std::string command)
     char line[MAX_LINE_SZ];
     while (fgets(line, MAX_LINE_SZ, fp))
       oss << line;
-    _pclose(fp);
+    my_pclose(fp);
     return to_htent(oss.str());
   }
 

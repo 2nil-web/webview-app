@@ -5,7 +5,9 @@
 #include <webview.h>
 
 #include "wv-util.h"
+#ifdef _WIN32
 #include "wv-winapi.h"
+#endif
 #include "wv-wrap.h"
 
 #define WP ((webview::webview *)w)
