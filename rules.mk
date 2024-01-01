@@ -21,7 +21,7 @@ cfg :
 	@echo "PATH"
 	@echo "${PATH}" | sed 's/:/\n/g'
 	@echo "END PATH"
-	@which inkscape.exe
+	@which inkscape
 	@echo "DO_MSBUILD [${DO_MSBUILD}]"
 	@echo "TMP ${TMP}"
 	@echo "TEMP ${TEMP}"

@@ -5,8 +5,8 @@ include ${root_dir}/header.mk
 
 SRCS=$(wildcard *.cpp)
 SRCS:=$(filter-out TemplateApp.cpp, $(SRCS))
-EXES=${SRCS:.cpp=.exe}
 
+EXES=${SRCS:.cpp=${EXEXT}}
 
 all : ${EXES}
 
