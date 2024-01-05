@@ -47,6 +47,8 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_USERNAME, id.c_str());
     curl_easy_setopt(curl, CURLOPT_PASSWORD, psw.c_str());
   }
+  curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+
   //  curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/8.5.0");
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);

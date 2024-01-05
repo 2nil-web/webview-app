@@ -4,8 +4,12 @@
 # Bug d'affichage avec uname sous clang64 ...
 ifeq (${MSYSTEM},CLANG64)
 	UNAME=/usr/bin/uname
+	CC=clang
+	CXX=clang++
 else
 	UNAME=uname
+	CC=gcc
+	CXX=g++
 endif
 
 OS=$(shell ${UNAME} -s)
@@ -41,8 +45,13 @@ endif
 WVDIR=${root_dir}/webview
 WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -DWIN32_LEAN_AND_MEAN
+
+STATIC_CURL=1
+
+ifeq ($(STATIC_CURL),1)
+CPPFLAGS += -DCURL_STATICLIB
+endif
 CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
-CPPFLAGS+=-DCURL_STATICLIB
 
 CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
@@ -59,17 +68,21 @@ else
 EXEXT=.exe
 CPPFLAGS += --include=webview_mingw_support.h
 LDFLAGS += -mwindows
-ifeq ($(STATIC_CURL),)
+ifeq ($(STATIC_CURL),1)
 LDFLAGS += -static
-LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
+LDLIBS += -lcurl -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lwldap32 -lzstd -lbrotlidec -lz -lws2_32 -lbrotlicommon -lidn2 -liconv -lunistring -lole32 -lshell32 -lshlwapi -luser32 -lversion
+#LDLIBS += -lidn2 -lssh2 -lpsl -lbcrypt -lcrypt32 -lbcrypt -lwldap32 -lzstd -lz -lws2_32 -lidn2 -liconv -lunistring -lbrotlidec -lbrotlicommon -lcurl #.dll
+#LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 #pacman -S mingw-w64-x86_64-curl-gnutls
-LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
-LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+#LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
+#LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+#LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
 else
-LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
-LDLIBS += -Wl,-Bdynamic -lcurl #-Wl,-Bstatic
-LDLIBS += -lssh2 -lpsl -lbcrypt -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
-LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+LDLIBS += -lcurl.dll -lidn2 -lssh2 -lpsl -lbcrypt -lcrypt32 -lwldap32 -lzstd -lz -lws2_32 -liconv -lunistring -lbrotlidec -lbrotlicommon -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion	
+#LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
+#LDLIBS += -Wl,-Bdynamic -lcurl #-Wl,-Bstatic
+#LDLIBS += -lssh2 -lpsl -lbcrypt -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
+#LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
 endif
 endif
 

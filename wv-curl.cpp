@@ -35,7 +35,7 @@ std::string httpget(std::string url, bool peer_check, bool host_check, bool verb
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
     /* cache the CA cert bundle in memory for a week */
-    curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 604800L);
+    //curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 604800L);
 
     // Send result of command into a string buffer
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
@@ -64,7 +64,7 @@ std::string httpget_cred(std::string id, std::string pass, std::string url, bool
   CURLcode res;
   std::string buf = "";
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+//  curl_global_init(CURL_GLOBAL_DEFAULT);
 
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -106,7 +106,7 @@ std::string httpget_cred(std::string id, std::string pass, std::string url, bool
   curl_easy_cleanup(curl);
   curl = NULL;
 
-  curl_global_cleanup();
+//  curl_global_cleanup();
 
   return buf;
 }

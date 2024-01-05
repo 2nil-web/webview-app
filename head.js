@@ -16,6 +16,7 @@ String.prototype.insert=function (str, pos) {
 function about () {
   info="";
   app_info().then((ainf) => {
+    console.log("app info="+ainf);
     info=ainf.replace(/,/g,"\n")+"\nIncludes\n";
     webview_ver().then((wvver) => {
       info+=" WebView version: "+wvver+"\n";
@@ -331,6 +332,27 @@ function vdm() {
 
 async function mygithub() {
   const response = await fetch("https://api.github.com/users/2nil-web", { mode: "cors" });
+  const data = await response.json();
+  console.log(data);
+}
+
+async function mywiki() {
+  const response = await fetch("https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-12-07&limit=1000", { headers: new Headers({ "Authorization": 'lalannd2:ocvdBum12$*4' }),});
+//    "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
+  const data = await response.json();
+  console.log(data);
+  output.value += JSON.stringify(data);
+}
+
+async function mywikiNOCRED() {
+  const response = await fetch("https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-12-07&limit=1000");
+  const data = await response.json();
+  console.log(data);
+  output.value += JSON.stringify(data);
+}
+
+async function mywikiRES() {
+  const response = await fetch("https://wiki.space.thales/rest/api/content?limit=2", { credentials: 'include', });
   const data = await response.json();
   console.log(data);
 }
