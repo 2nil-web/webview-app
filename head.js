@@ -336,6 +336,7 @@ async function mygithub() {
   console.log(data);
 }
 
+// See there : https://observablehq.com/@mbostock/fetch-with-basic-auth
 async function mywiki() {
   const response = await fetch("https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-12-07&limit=1000", { headers: new Headers({ "Authorization": 'lalannd2:ocvdBum12$*4' }),});
 //    "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
