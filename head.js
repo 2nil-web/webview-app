@@ -18,18 +18,24 @@ function about () {
   app_info().then((ainf) => {
     console.log("app info="+ainf);
     info=ainf.replace(/,/g,"\n")+"\nIncludes\n";
+
     webview_ver().then((wvver) => {
       info+=" WebView version: "+wvver+"\n";
       console.log("webview_ver="+wvver);
-      libcurl_ver().then((lcver) => {
-        info+=" LibCurl version: "+lcver;
-        console.log("libcurl_ver="+lcver);
-        window.alert(info);
-      });
+
+      // May not include libcurl
+      if (typeof libcurl_ver !== "undefined") { 
+        libcurl_ver().then((lcver) => {
+          info+=" LibCurl version: "+lcver;
+          console.log("libcurl_ver="+lcver);
+          window.alert(info);
+        });
+      } else window.alert(info);
     });
   });
   
 }
+
 
 function decodeEntities(html) {
     var txt = document.createElement("textarea");
