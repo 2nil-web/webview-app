@@ -15,7 +15,10 @@
 #include "wv-winapi.h"
 #endif
 
+#ifdef WITH_CURL
 #include "wv-curl.h"
+#endif
+
 #include "wv-opts.h"
 #include "wv-util.h"
 #include "wv-wrap.h"
@@ -274,6 +277,7 @@ std::string do_fstat(std::string sp)
 static unsigned int nfs = 0;
 void create_binds()
 {
+#ifdef WITH_CURL
   w.bind_doc("libcurl_ver", "Return a string indicating the libcurl version.",
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
@@ -283,6 +287,56 @@ void create_binds()
                }).detach();
              });
 
+  // Set http credential
+  w.bind_doc("wiki", "run an http get against the wiki.", [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+      wiki_curl();
+      w.resolve(seq, 0, "");
+    }).detach();
+  });
+
+
+  w.bind_doc("httpget", "run an http get with the provided url.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 std::string url = json_parse(req, "", 0);
+                 auto res = httpget(url);
+                 // std::cout << "httpget " << url << ":\n" << res << std::endl;
+                 replace_all(res, "\\", "");
+                 res = to_htent(res);
+                 w.resolve(seq, 0, res);
+                 std::cout << res << std::endl << std::flush;
+               }).detach();
+             });
+
+  // Set http credential
+  w.bind_doc("httpcred", "run an http get with the provided credential (id/password) and url.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto id = json_parse(req, "", 0);
+                 auto pass = json_parse(req, "", 1);
+                 auto url = json_parse(req, "", 2);
+                 auto ret = httpget_cred(id, pass, url);
+                 std::cout << ret << std::endl;
+                 w.resolve(seq, 0, ret);
+               }).detach();
+             });
+
+  /* Set http options
+  w.bind_doc("httpopt", "set various parameter to http query.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto opt = json_parse(req, "", 0);
+                 auto param = json_parse(req, "", 1);
+
+                 std::string res = "{\"value\": \"";
+                 if (httpcred(id, pass)) res+="true";
+                 else res+="false";
+                 res+="\"}";
+                 w.resolve(seq, 0, res);
+               }).detach();
+             });*/
+#endif
   w.bind_doc("webview_ver", "Return a string indicating the webview version.",
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
@@ -510,55 +564,6 @@ void create_binds()
     std::filesystem::current_path(pth);
     return "";
   });
-
-  w.bind_doc("httpget", "run an http get with the provided url.",
-             [&](const std::string &seq, const std::string &req, void *) {
-               std::thread([&, seq, req] {
-                 std::string url = json_parse(req, "", 0);
-                 auto res = httpget(url);
-                 // std::cout << "httpget " << url << ":\n" << res << std::endl;
-                 replace_all(res, "\\", "");
-                 res = to_htent(res);
-                 w.resolve(seq, 0, res);
-                 std::cout << res << std::endl << std::flush;
-               }).detach();
-             });
-
-  // Set http credential
-  w.bind_doc("httpcred", "run an http get with the provided credential (id/password) and url.",
-             [&](const std::string &seq, const std::string &req, void *) {
-               std::thread([&, seq, req] {
-                 auto id = json_parse(req, "", 0);
-                 auto pass = json_parse(req, "", 1);
-                 auto url = json_parse(req, "", 2);
-                 auto ret = httpget_cred(id, pass, url);
-                 std::cout << ret << std::endl;
-                 w.resolve(seq, 0, ret);
-               }).detach();
-             });
-
-  // Set http credential
-  w.bind_doc("wiki", "run an http get against the wiki.", [&](const std::string &seq, const std::string &req, void *) {
-    std::thread([&, seq, req] {
-      wiki_curl();
-      w.resolve(seq, 0, "");
-    }).detach();
-  });
-
-  /* Set http options
-  w.bind_doc("httpopt", "set various parameter to http query.",
-             [&](const std::string &seq, const std::string &req, void *) {
-               std::thread([&, seq, req] {
-                 auto opt = json_parse(req, "", 0);
-                 auto param = json_parse(req, "", 1);
-
-                 std::string res = "{\"value\": \"";
-                 if (httpcred(id, pass)) res+="true";
-                 else res+="false";
-                 res+="\"}";
-                 w.resolve(seq, 0, res);
-               }).detach();
-             });*/
 
   w.bind_doc("ls_attach", "list provided directory in foreground.", [&](const std::string &req) {
     auto param = json_parse(req, "", 0);

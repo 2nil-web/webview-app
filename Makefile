@@ -1,8 +1,13 @@
 
+#WITH_CURL=1
 include header.mk
 
 PREFIX=webview-app
 SRCS=$(wildcard *.cpp)
+
+ifeq (${WITH_CURL},)
+SRCS:=$(filter-out wv-curl.cpp wv-curleasy.cpp,${SRCS})
+endif
 
 ifeq (${OS},Linux)
 SRCS:=$(filter-out wv-winapi.cpp,${SRCS})
@@ -19,6 +24,12 @@ TARGET=${PREFIX}${EXEXT}
 ifeq ($(DO_MSBUILD),1)
 ARCH=x64
 CONF=Release
+ifeq (${WITH_CURL},)
+MSVC_SLN=webview-app.sln
+else
+MSVC_SLN=webview-app_curl.sln
+endif
+
 all: version_check.txt version.h ${PREFIX}.ico ${TARGET} README.docx
 
 ${TARGET} : ${ARCH}/${CONF}/${TARGET}
@@ -41,11 +52,11 @@ gcc : all
 ${PREFIX}_res.o : ${PREFIX}.ico
 
 
-strip : $(TARGET)
-	$(STRIP) $(TARGET) | true
+strip : ${TARGET}
+	$(STRIP) ${TARGET} | true
 
 upx : strip
-	$(UPX) $(TARGET) | true
+	$(UPX) ${TARGET} | true
 
 ifeq ($(MAKECMDGOALS),deliv)
 DLLDEPS=$(shell ldd ${TARGET} | sed "/WINDOWS/d;s/.*=> //;s/ .0x.*//" | sort -u | tr '\n' ' ')

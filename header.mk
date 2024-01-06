@@ -12,6 +12,16 @@ else
 	CXX=g++
 endif
 
+ifneq (${WITH_CURL},)
+ifeq (${MSYSTEM},UCRTW64)
+	STATIC_CURL=0
+else
+	STATIC_CURL=1
+endif
+
+STATIC_CURL=0
+endif
+
 OS=$(shell ${UNAME} -s)
 
 ifneq (${OS},Linux)
@@ -46,10 +56,12 @@ WVDIR=${root_dir}/webview
 WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 
-STATIC_CURL=1
 
+ifneq (${WITH_CURL},)
+CPPFLAGS += -DWITH_CURL
 ifeq ($(STATIC_CURL),1)
 CPPFLAGS += -DCURL_STATICLIB
+endif
 endif
 CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
 
@@ -61,29 +73,28 @@ LDFLAGS += -g
 ifeq (${OS},Linux)
 CXXFLAGS += $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-4.1)
 LDFLAGS +=-L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1 -L/usr/lib/x86_64-linux-gnu/cmake/harfbuzz -L/usr/lib/python3/dist-packages/cairo -L/usr/lib/x86_64-linux-gnu/glib-2.0 -L/usr/lib/x86_64-linux-gnu/glib-2.0
-LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.1 webkit2gtk-web-extension-4.1 libcurl)
+LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.1 webkit2gtk-web-extension-4.1)
+ifneq (${WITH_CURL},)
+LDLIBS += $(shell pkg-config --libs libcurl)
+endif
 #LDFLAGS += -static
 PANDOC=pandoc
 else
 EXEXT=.exe
 CPPFLAGS += --include=webview_mingw_support.h
 LDFLAGS += -mwindows
-ifeq ($(STATIC_CURL),1)
 LDFLAGS += -static
-LDLIBS += -lcurl -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lwldap32 -lzstd -lbrotlidec -lz -lws2_32 -lbrotlicommon -lidn2 -liconv -lunistring -lole32 -lshell32 -lshlwapi -luser32 -lversion
-#LDLIBS += -lidn2 -lssh2 -lpsl -lbcrypt -lcrypt32 -lbcrypt -lwldap32 -lzstd -lz -lws2_32 -lidn2 -liconv -lunistring -lbrotlidec -lbrotlicommon -lcurl #.dll
-#LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
+
+ifneq (${WITH_CURL},)
 #pacman -S mingw-w64-x86_64-curl-gnutls
-#LDLIBS += -lcurl -lssh2 -lssh2 -lpsl -lbcrypt -ladvapi32 -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
-#LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
-#LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
+ifeq ($(STATIC_CURL),1)
+LDLIBS += -lcurl
 else
-LDLIBS += -lcurl.dll -lidn2 -lssh2 -lpsl -lbcrypt -lcrypt32 -lwldap32 -lzstd -lz -lws2_32 -liconv -lunistring -lbrotlidec -lbrotlicommon -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion	
-#LDLIBS += -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion
-#LDLIBS += -Wl,-Bdynamic -lcurl #-Wl,-Bstatic
-#LDLIBS += -lssh2 -lpsl -lbcrypt -lcrypt32 -lbcrypt -lwldap32 -lzstd -lzstd -lbrotlidec -lbrotlidec -lz -lws2_32
-#LDLIBS += -lbrotlidec -lbrotlicommon -lidn2 -liconv -lunistring
+LDLIBS += -lcurl.dll
 endif
+LDLIBS += -lidn2 -lssh2 -lpsl -lbcrypt -lcrypt32 -lzstd -lz -liconv -lunistring -lbrotlidec -lbrotlicommon
+endif
+LDLIBS += -lwldap32 -lws2_32 -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion	
 endif
 
 #MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
