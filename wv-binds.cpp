@@ -537,6 +537,21 @@ void create_binds()
 #define Putenv putenv
 #endif
 
+  w.bind_doc("setenv", "Set environment variable to given value.", [&](const std::string &req) -> std::string {
+     std::string var = json_parse(req, "", 0);
+     std::string val = json_parse(req, "", 1);
+     std::cout << var << '=' << val << std::endl;
+
+     if (var != "") {
+       std::string expr=var+"="+val;
+       Putenv((char *)expr.c_str());
+//       return expr;
+     }
+
+//     return "Undefined environment variable";
+     return "";
+ });
+
   w.bind_doc("addpth", "Add program path to the PATH env variable if is not yet added.",
              [&](const std::string &req) -> std::string {
                std::string pth = my_getenv("PATH");
