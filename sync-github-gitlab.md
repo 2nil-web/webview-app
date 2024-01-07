@@ -1,15 +1,11 @@
-## Adding gitlab to already existing github repo
+<h3><u><center>Adding gitlab to this github repo</center></u></h3>
 
-### On gitlab
+#### On gitlab
 
-Created repo webview-app.
-
+Created a repo named webview-app (not sure that name is important).
 Added branch master as default (setting >> repository >> Branch defaults).
-
 Added branch master as Protected branch.
-
 Allowed to push and merge for Maintainers.
-
 Cloned gitlab repo and deleted main branch locally and remotely : 
 
 ```bash
@@ -19,7 +15,7 @@ git branch -d main
 git push origin --delete main
 ```
 
-### On github local repo
+#### On github local repo
 
 ```bash
 cd ../2-webview-app
@@ -34,11 +30,11 @@ git branch -r
   origin/master`
 ```
 
-#### Checked on both site that file 'sync-github-gitlab.md' has been added.
+#### Conclusion
 
-#### Deleted gitlab local repo
-
-```bash
-cd ..
-rm -rf webview-app
-```
+- Checked on both site that file 'sync-github-gitlab.md' has been added.
+- Deleted gitlab local repo.
+  ```bash
+  cd ..
+  rm -rf webview-app
+- Now any git push will be done on both remote repositories (I hope).
