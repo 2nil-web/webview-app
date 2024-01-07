@@ -59,7 +59,7 @@ upx : strip
 	$(UPX) ${TARGET} | true
 
 ifeq ($(MAKECMDGOALS),deliv)
-DLLDEPS=$(shell ldd ${TARGET} | sed "/WINDOWS/d;s/.*=> //;s/ .0x.*//" | sort -u | tr '\n' ' ')
+DLLDEPS=$(shell ldd ${TARGET} | sed "/\/windows\//Id;s/.*=> //;s/ .0x.*//" | sort -u | tr '\n' ' ')
 endif
 
 deliv : upx
