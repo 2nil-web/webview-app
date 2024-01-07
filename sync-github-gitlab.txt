@@ -11,4 +11,6 @@ Then on gitlab
 Then on github local repo
 git remote add gitlab https://gitlab.com/dplalanne/webview-app.git
 git remote set-url --add --push origin https://gitlab.com/dplalanne/webview-app.git
-git add 
+git add sync-github-gitlab.txt
+gitci (git commit -a -m "..." ; git push)
+
