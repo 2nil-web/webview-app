@@ -23,20 +23,6 @@
 #include "wv-util.h"
 #include "wv-wrap.h"
 
-std::string my_getenv(const std::string vname)
-{
-#ifdef _MSC_VER
-  char *pValue;
-  size_t len;
-  errno_t err = _dupenv_s(&pValue, &len, vname.c_str());
-  if (err)
-    return "";
-  return pValue;
-#else
-  return std::getenv(vname.c_str());
-#endif
-}
-
 webview_wrapper w;
 
 void write_cons(std::string s, std::ostream &out = std::cout)
@@ -529,14 +515,6 @@ void create_binds()
                }).detach();
              });
 
-#ifdef _WIN32
-#define Putenv _putenv
-#define PATHSEP ';'
-#else
-#define PATHSEP ':'
-#define Putenv putenv
-#endif
-
   w.bind_doc("setenv", "Set environment variable to given value.", [&](const std::string &req) -> std::string {
      std::string var = json_parse(req, "", 0);
      std::string val = json_parse(req, "", 1);
@@ -544,13 +522,17 @@ void create_binds()
 
      if (var != "") {
        std::string expr=var+"="+val;
-       Putenv((char *)expr.c_str());
-//       return expr;
+       if (my_setenv(var, val)) return "true";
      }
 
-//     return "Undefined environment variable";
-     return "";
+     return "false";
  });
+
+#ifdef _WIN32
+#define PATHSEP ';'
+#else
+#define PATHSEP ':'
+#endif
 
   w.bind_doc("addpth", "Add program path to the PATH env variable if is not yet added.",
              [&](const std::string &req) -> std::string {
@@ -567,8 +549,8 @@ void create_binds()
                if (do_add)
                {
                  // pth=(std::string("PATH=")+pth+':'+std::filesystem::current_path().string());
-                 pth = "PATH=" + pth + PATHSEP + std::filesystem::current_path().string();
-                 Putenv((char *)pth.c_str());
+                 //pth = "PATH=" + pth + PATHSEP + std::filesystem::current_path().string();
+                 my_setenv("PATH", pth + PATHSEP + std::filesystem::current_path().string());
                }
                return "";
              });

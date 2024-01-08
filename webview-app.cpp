@@ -30,6 +30,12 @@ std::string url, title = "", init_js = "";
 
 // short_opt, long_opt, value of opt or empty string
 
+std::string add_bro_args="";
+void set_browser_args(char, std::string, std::string val)
+{
+  add_bro_args+=" --"+val;
+}
+
 void set_url(char, std::string, std::string val)
 {
   if (val.starts_with("http:") || val.starts_with("https:"))
@@ -74,6 +80,11 @@ void set_hints(char, std::string, std::string val)
 }
 
 std::vector<run_opt> r_opts = {
+#ifdef _WIN32
+    {"browser-args", 'b', opt_only, required_argument,
+     "Provide additional browser arguments to the webview2 component.",
+     set_browser_args},
+#endif
     {"url", 'f', opt_only, required_argument,
      "Provide the url. Default is to search for index.html or index.js in the "
      "current directory, if there is no '-u' option this information might "
@@ -147,11 +158,19 @@ int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLi
   LPSTR *argv;
   int argc;
   argv = CommandLineToArgv(GetCommandLine(), &argc);
+  getopt_init(argc, argv, r_opts, "WebView app.", "", "(c) Denis LALANNE. Provided as is. NO WARRANTY of any kind.");
+
+  // Set default value of WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS to --disable-web-security
+  if (add_bro_args == "") my_setenv("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--disable-web-security");
+  // Or to the ones provided through repetitive call to the -b options
+  else my_setenv("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", add_bro_args);
+  // Eventuellement voir ICoreWebView2EnvironmentOptions, put_AdditionalBrowserArguments
+  // Dans https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2environmentoptions?view=webview2-1.0.2210.55
 #else
 int main(int argc, char **argv, char **)
 {
-#endif
   getopt_init(argc, argv, r_opts, "WebView app.", "", "(c) Denis LALANNE. Provided as is. NO WARRANTY of any kind.");
+#endif
   // extern std::string do_fstat(std::string sp);
   // std::cout << "fstat1" << std::endl;
   // do_fstat(url);

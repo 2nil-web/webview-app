@@ -7,6 +7,10 @@
 #include <string>
 #include <vector>
 
+bool my_setenv(const std::string var, std::string val);
+std::string my_getenv(const std::string var);
+
+
 // Convert wstring to string
 std::string ws2s(std::wstring ws);
 // Convert string to wstring
