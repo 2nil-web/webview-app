@@ -307,22 +307,17 @@ void create_binds()
                  w.resolve(seq, 0, ret);
                }).detach();
              });
-
-  /* Set http options
-  w.bind_doc("httpopt", "set various parameter to http query.",
-             [&](const std::string &seq, const std::string &req, void *) {
-               std::thread([&, seq, req] {
-                 auto opt = json_parse(req, "", 0);
-                 auto param = json_parse(req, "", 1);
-
-                 std::string res = "{\"value\": \"";
-                 if (httpcred(id, pass)) res+="true";
-                 else res+="false";
-                 res+="\"}";
-                 w.resolve(seq, 0, res);
-               }).detach();
-             });*/
 #endif
+#ifdef _WIN32
+  w.bind_doc("msgbox", "Display a dialog in Windows MessageBox style.", [&](const std::string &req) -> std::string {
+     std::string msg = json_parse(req, "", 0);
+     std::string tit = json_parse(req, "", 1);
+     int but = std::stoi(json_parse(req, "", 2));
+     int ret=MessageBox((HWND)(w.window()), msg.c_str(), tit.c_str(), but);
+     return std::to_string(ret);
+ });
+#endif
+  
   w.bind_doc("webview_ver", "Return a string indicating the webview version.",
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
@@ -365,72 +360,6 @@ void create_binds()
                  w.resolve(seq, 0, '"' + htent + '"');
                }).detach();
              });
-
-  w.bind_doc("utf", "return a random utf string.", [&](const std::string &seq, const std::string &req, void *) {
-    std::thread([&, seq, req] {
-      auto sp = json_parse(req, "", 0);
-      std::cout << "utf param " << sp << std::endl;
-      std::string s;
-      if (sp == "1")
-        s = "totö要らない";
-      else if (sp == "2")
-        s = "पार्सल् एक्स्प्रेस्";
-      else if (sp == "3")
-        s = "123456788:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-            "¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊ"
-            "ċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴ"
-            "ŵŶŷŸŹźŻżŽž؀؁؂؃؄؅؆؇؈؉؊؋،؍؎؏ؘؙؚؐؑؒؓؔؕؖؗ؛؜؝؞؟ؠءآأؤإئابةتثجحخدذرزسشصضطظعغػؼؽؾؿـفقكلمنهوىيًٌٍَُِّْٕٖٓٔٗ"
-            "٘"
-            "ٙ"
-            "ٚ"
-            "ٛ"
-            "ٜ"
-            "ٝ"
-            "ٞ"
-            "ٟ"
-            "٠";
-      else if (sp == "4")
-        s = "123456788:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-            "¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊ"
-            "ċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴ"
-            "ŵŶŷŸŹźŻżŽžſƀƁƂƃƄƅƆƇƈƉƊƋƌƍƎƏƐƑƒƓƔƕƖƗƘƙƚƛƜƝƞƟƠơƢƣƤƥƦƧƨƩƪƫƬƭƮƯưƱƲƳƴƵƶƷƸƹƺƻƼƽƾƿǀǁǂǃǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǝǞǟǠǡǢǣǦǧǨǩ"
-            "ǪǫǬǭǮǯǰǴǵǶǷǸǹǼǽǾǿȀȁȂȃȄȅȆȇȈȉȊȋȌȍȎȏȐȑȒȓȔȕȖȗȘșȚțȜȝȞȟȠȡȤȥȦȧȨȩȪȫȬȭȮȯȰȱȲȳȴȵȶȷȸȹȺȻȼȽȾȿɀɁɂɃɄɅɌɍɐɑɒɓɔɕɖɗɘəɚɛɜɝɞɟɠɡɢ"
-            "ɣɤɥɦɧɨɩɪɫɬɭɮɯɰɱɲɳɴɵɶɷɸɹɺɻɼɽɾɿʀʁʂʃʄʅʆʇʈʉʊʋʌʍʎʏʐʑʒʓʔʕʖʗʘʙʚʛʜʝʞʟʠʡʢʣʤʥʦʧʨʩʪʫʬʭʮʯʰʱʲʳʴʵʶʷʸʹʺʻʼʽʾʿˀˁ˂˃˄˅ˆˇˈˉˌˍˎ"
-            "ˏːˑ˒˓˔˕˖˗˘˙˚˛˜˝˞˟ˠˡˢˣˤ˥˦˧˨˩˪˫ˬ˭ˮ˯˰˱˲˳˴˵˶˷˸˹˺˻˼˽˾˿̴̵̶̷̸̡̢̧̨̛̖̗̘̙̜̝̞̟̠̣̤̥̦̩̪̫̬̭̮̯̰̱̲̳̹̺̻̼͇͈͉͍͎̀́̂̃̄̅̆̇̈̉̊̋̌̍̎̏̐̑̒̓̔̽̾̿̀́͂̓̈́͆͊͋͌̕̚ͅͰͱͲͳʹ͵Ͷͷͺͻͼͽ;Ϳ΄΅Ά·ΈΉΊΌΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨ"
-            "Ω"
-            "Ϊ"
-            "Ϋ"
-            "ά"
-            "έ"
-            "ή"
-            "ί"
-            "ΰ"
-            "αβγδεζηθικλμνξοπρςστυφχψωϊϋόύώϏϐϑϒϓϔϕϖϗϘϙϚϛϜϝϞϟϠϡϢϣϤϥϦϧϨϩϪϫϬϭϮϯϰϱϲϳϴϵ϶ϷϸϹϺϻϼϽϾϿЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙК"
-            "ЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяѐёђѓєѕіїјљњћќѝўџѢѣѲѳҐґҒғҔҕҖҗҘҙҚқҢңҤҥҪҫҬҭҮүҰұҲҳӀӁӂӃӄӇӈ"
-            "ӋӌӏӐӑӒӓӔӕӖӗӘәӚӛӜӝӞӟӠӡӢӣӤӥӦӧӨөӪӫӬӭӮӯӰӱӲӳӴӵӶӷӸӹԬԭԮԯ԰ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՒՓՔՕՖՙ՚՛՜՝"
-            "՞"
-            "՟"
-            "ա"
-            "բ"
-            "գ"
-            "դ"
-            "ե"
-            "զ"
-            "էըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆև։֊֍֎֏־ֿ׀ׁׂ׃ׅׄ׆ׇ؀؁؂؃؄؅؆؇؈؉؊؋،؍؎؏ؘؙؚؐؑؒؓؔؕؖؗ؛؜؝؞؟ؠءآأؤإئابةتثجحخدذرزسشصضطظ"
-            "ع"
-            "غ"
-            "ػ"
-            "ؼ"
-            "ؽ"
-            "ؾ"
-            "ؿ"
-            "ـ"
-            "فقكلمنهوىيًٌٍَُِّْٕٖٜٟٓٔٗ٘ٙٚٛٝٞ٠";
-      else
-        s = "toto12";
-      w.resolve(seq, 0, '"' + to_htent(s) + '"');
-    }).detach();
-  });
 
   w.bind_doc("fstat", "gives information details on a file.",
              [&](const std::string &seq, const std::string &req, void *) {
