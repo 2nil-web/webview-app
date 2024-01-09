@@ -10,15 +10,19 @@
   </head>
   <body>
     <div class="topnav">
-      <a onclick="webapp_exit()">Quit</a>
+      <a onclick="save_and_exit()">Quit</a>
       <a onclick="about()" >About</a>
     </div>
     <div>
-      <label for="start">Start date:</label>
-      <input type="date" id="start_date" value="2018-07-22" min="2018-01-01" max="2018-12-31" />
+      <label for="userlist">Comma separated list of users to scan:</label>
+      <textarea id="userlist">
+      </textarea>
       <br/><br/>
+      <label for="start">Start date:</label>
+      <input type="date" id="start_date" />
+      &nbsp;&nbsp;&nbsp;
       <label for="end">End date:</label>
-      <input type="date" id="end_date" value="2018-07-22" min="2018-01-01" max="2018-12-31" />
+      <input type="date" id="end_date" />
       <br/><br/>
       <button onclick="compute_contrib()">Grab wiki contributions for the current period</button>
       

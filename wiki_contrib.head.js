@@ -30,6 +30,19 @@ function about () {
   
 }
 
+function loadreg() {
+  defval="alkadea,arnones,capous,cavallc,chaumia1,essaydh,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,ropold,thurona,tourel,xsii077,xsii076";
+  GetReg("Software\\WikiContrib", "userlist", defval).then(regUserlist => {
+    userlist.value=regUserlist;
+    console.log(userlist.value);
+  });
+}
+
+
+function save_and_exit() {
+  StoReg("Software\\WikiContrib", "userlist", userlist.value)
+  webapp_exit();
+}
 
 function decodeEntities(html) {
     var txt = document.createElement("textarea");

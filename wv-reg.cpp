@@ -1,14 +1,14 @@
 
 #include <string>
 #include <cstdio>
+#include <iostream>
 #include <windows.h>
 
 #include "wv-winapi.h"
 #include "wv-reg.h"
 
-#define MAX_STR 1024
+#define MAX_STR 2048
 #define THE_HKEY HKEY_CURRENT_USER
-#define SUBKEY "SoftWare"
 
 HKEY RegOpen(const char *subKey)
 {
@@ -20,6 +20,7 @@ HKEY RegOpen(const char *subKey)
   if (ret != ERROR_SUCCESS)
     WinError("RegCreateKeyEx");
 
+  std::cout << "RegOpen hkey " << THE_HKEY << ", subKey " << subKey << std::endl;
   return hkRes;
 }
 
@@ -99,15 +100,14 @@ std::string GetRegString(const std::string subKey, const std::string var, const 
   HKEY hk = RegOpen(subKey.c_str());
   DWORD type, lval;
 
-  if (RegQueryValueEx(hk, var.c_str(), NULL, &type, NULL, &lval) == ERROR_MORE_DATA && type == REG_SZ)
-  {
+  if (RegQueryValueEx(hk, var.c_str(), NULL, &type, NULL, &lval) == ERROR_MORE_DATA && type == REG_SZ) {
     auto val = new BYTE[lval];
 
     RegQueryValueEx(hk, var.c_str(), NULL, &type, val, &lval);
     ret = std::string((char *)val);
-  }
-  else
-    ret = defval;
+  } else ret = defval;
+
+  std::cout << "GetRegString key " << subKey << ", var " << var << ", val " << ret << std::endl;
 
   RegCloseKey(hk);
   return ret;
@@ -151,9 +151,16 @@ int *GetRegIntArray(const std::string subKey, const std::string var, int *size)
 void PutRegString(const char *subKey, const char *var, const char *val)
 {
   HKEY hk = RegOpen(subKey);
+  std::cout << "PutRegString key " << subKey << ", var " << var << ", val " << val << std::endl;
   RegSetValueEx(hk, var, 0, REG_SZ, (LPBYTE)val, (DWORD)strlen(val) + 1);
   RegCloseKey(hk);
 }
+
+void PutRegString(const std::string subKey, const std::string var, const std::string val)
+{
+  PutRegString(subKey.c_str(), var.c_str(), val.c_str());
+}
+
 
 void PutRegInt(const char *subKey, const char *var, DWORD val)
 {
@@ -187,11 +194,6 @@ void PutRegBin(const char *subKey, const char *var, DWORD size, CONST BYTE *val)
   HKEY hk = RegOpen(subKey);
   RegSetValueEx(hk, var, 0, REG_BINARY, val, size);
   RegCloseKey(hk);
-}
-
-void PutRegString(const std::string subKey, const std::string var, const std::string val)
-{
-  PutRegString(subKey.c_str(), var.c_str(), val.c_str());
 }
 
 void PutRegInt(const std::string subKey, const std::string var, DWORD val)

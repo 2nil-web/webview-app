@@ -13,6 +13,7 @@
 
 #ifdef _WIN32
 #include "wv-winapi.h"
+#include "wv-reg.h"
 #endif
 
 #ifdef WITH_CURL
@@ -316,6 +317,29 @@ void create_binds()
      int ret=MessageBox((HWND)(w.window()), msg.c_str(), tit.c_str(), but);
      return std::to_string(ret);
  });
+
+// Windows registry storage
+  w.bind_doc("StoReg", "Store a string to the Windows registry.", [&](const std::string &req) -> std::string {
+    std::string key = json_parse(req, "", 0);
+    std::string var = json_parse(req, "", 1);
+    std::string val = json_parse(req, "", 2);
+    PutRegString(key, var, val);
+    return "";
+ });
+
+  w.bind_doc("GetReg", "Retrieve a string from the Windows registry.",
+    [&](const std::string &seq, const std::string &req, void *) {
+      std::thread([&, seq, req] {
+        std::string key = json_parse(req, "", 0);
+        std::string var = json_parse(req, "", 1);
+        std::string defval = json_parse(req, "", 2);
+        std::cout << "GetReg key [" << key << "], var [" << var << "], defval [" << defval << ']' << std::endl;
+        auto val=GetRegString(key, var, defval);
+        std::cout << "GetReg key [" << key << "], var [" << var << "], val [" << val << ']' << std::endl;
+        w.resolve(seq, 0, '"' + val + '"');
+   }).detach();
+ });
+
 #endif
   
   w.bind_doc("webview_ver", "Return a string indicating the webview version.",

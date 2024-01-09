@@ -4,7 +4,6 @@
 
 #include <string>
 
-const std::string REGKEY = "Software\\webview-app";
 std::string GetRegString(const std::string subKey, const std::string var, const std::string defval);
 std::string GetRegExpString(const std::string subKey, const std::string var, const std::string defval);
 
