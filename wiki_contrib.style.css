@@ -1,0 +1,87 @@
+
+body {
+  overflow: hidden;
+}
+
+.topnav {
+  overflow: hidden;
+  border-bottom: 1px solid black;
+  /*background-color: #333;*/
+  /*background-color: #cccccc;*/
+}
+
+.topnav a {
+  float: left;
+  /*color: #f2f2f2;*/
+  color: #0;
+  text-align: center;
+  padding: 2px 12px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a:hover {
+  cursor: pointer;
+  /*background-color: #ddd;*/
+  background-color: #aaffaa;
+  color: blue;
+}
+/*
+.topnav a.active {
+  background-color: #04ff6d;
+  color: white;
+}
+*/
+div {
+  width: 100%;
+}
+
+textarea {
+  width: 100%;
+  resize: none;
+}
+
+#dv1 {
+  height: 10%;
+}
+
+#dv2 {
+  margin-top: 1em;
+  height: 7%;
+}
+
+#dv2_1 {
+  border: 1px solid;
+  /* top right bottom left */
+  margin: 4px 4px 4px 10px;
+  padding: 4px 4px 4px 4px;
+}
+
+#dv3 {
+  height: 75%;
+}
+
+
+#cmd {
+  vertical-align: middle;
+  width:100%;
+  height:90%;
+  resize: vertical;
+}
+
+#tout_warn {
+  color: red;
+  font-weight: bold;
+  font-style: italic;
+}
+
+#output {
+  height:99%;
+}
+
+#output_clear {
+  position: fixed;
+  right: 10px;
+  /*bottom: 6px;*/
+}
+

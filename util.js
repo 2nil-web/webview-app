@@ -46,3 +46,21 @@ function getParams(prom_func) {
     return params;
 }
 
+function basename(path) {
+   return path.split('/').reverse()[0];
+}
+
+function del_ext(path) {
+  return path.replace(/\.[^/.]+$/, "")
+}
+
+function stem (path) {
+  return del_ext(basename(path));
+}
+
+// Polyfills
+String.prototype.insert=function (str, pos) {
+  return this.substring(0, pos)+str+this.substring(pos)
+};
+
+

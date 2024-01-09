@@ -20,3 +20,17 @@ const id = {
   yes: 6, no: 7, tryagain: 10, cont: 11
 }
 
+function infobox (msg) {
+  console.log ("[["+document.title+"]]");
+//  if (document.title === "")
+    window.webapp_get_title().then(wtitle => { msgbox(msg, stem(wtitle), mb.ok); });
+//  else msgbox(msg, document.title, mb.ok);
+}
+
+// Tester retour msgbox ...
+function confirmbox (msg) {
+  if (document.title == "")
+    window.webapp_get_title().then(wtitle => { msgbox(msg, document.title, mb.okcancel); });
+  else msgbox(msg, document.title, mb.okcancel);
+}
+
