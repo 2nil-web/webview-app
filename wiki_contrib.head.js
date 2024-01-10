@@ -1,8 +1,8 @@
 
 if (typeof webapp_title === "function") {
-  // Default and minimal size
-  //webapp_size(640, 400, 0);
-  webapp_size(640, 400, 1);
+  // Default position and minimal size
+  //webapp_pos(700, 300);
+  webapp_size(640, 330, 0);
   window.webapp_get_title().then(wtitle => { window.webapp_title(stem(wtitle)); });
 }
 document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
@@ -30,19 +30,57 @@ function about () {
   
 }
 
-function loadreg() {
-  defval="alkadea,arnones,capous,cavallc,chaumia1,essaydh,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,ropold,thurona,tourel,xsii077,xsii076";
-  GetReg("Software\\WikiContrib", "userlist", defval).then(regUserlist => {
-    userlist.value=regUserlist;
-    console.log(userlist.value);
-  });
+function conf_update(elt_id) {
+  elt=document.getElementById(elt_id);
+  //console.log(elt_id+' '+elt.value);
+  localStorage.setItem(elt_id, elt.value);
 }
 
+function conf_load() {
+  login.value=localStorage.getItem('login');
+  if (login.value === "") {
+    getenv('USERNAME').then(val => {
+      if (val === "") {
+        getenv('USER').then(val2 => {
+          login.value=val2;
+        });
+      } else login.value=val;
+    });
+  }
 
-function save_and_exit() {
-  StoReg("Software\\WikiContrib", "userlist", userlist.value)
-  webapp_exit();
+  psswd.value=localStorage.getItem('psswd');
+  //console.log("login "+login.value+", password "+psswd.value);
+
+  userlist.value=localStorage.getItem('userlist');
+  if (userlist.value === "") {
+    userlist.value="alkadea,arnones,capous,cavallc,chaumia1,essaydh,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,ropold,thurona,tourel,xsii077,xsii076";
+  }
+
+  // preset the period
+  var d=new Date(); // current date
+  d.setDate(1); // going to 1st of the month
+  d.setHours(-1); // going to the end of previous month
+  end_date.value=d.toISOString().split('T')[0];
+  d.setDate(1); // going to 1st of previous month
+  start_date.value=d.toISOString().split('T')[0];
 }
+
+function check_period () {
+  let elt=event.srcElement;
+  sd=new Date(start_date.value);
+  ed=new Date(end_date.value);
+
+  //console.log("Caller id "+elt.id+", sd "+sd+", ed "+ed);
+
+  if (elt.id === "start_date") {
+    // Si la date de début modifiée est supérieure à la date de fin alors on met la date de fin à égalité avec la date de début.
+    if (sd > ed) end_date.value=sd.toISOString().split('T')[0];
+  } else if (elt.id === "end_date") {
+    // Si la date de fin modifiée est inférieure à la date de début alors on met la date de début à égalité avec la date de fin.
+      if (ed < sd) start_date.value=ed.toISOString().split('T')[0];
+  }
+}
+
 
 function decodeEntities(html) {
     var txt = document.createElement("textarea");

@@ -10,19 +10,33 @@
   </head>
   <body>
     <div class="topnav">
-      <a onclick="save_and_exit()">Quit</a>
+      <a onclick="webapp_exit()">Quit</a>
       <a onclick="about()" >About</a>
     </div>
     <div>
+      <fieldset>
+        <legend>Credentials to use in order to query the wiki.</legend>
+        <label for="login">login:</label>
+        <input id="login" onchange="conf_update('login')">
+        &nbsp;&nbsp;&nbsp;
+        <label for="psswd">password:</label>
+        <input id="psswd" type="password" onchange="conf_update('psswd')">
+      </fieldset>
+      <br/>
+
       <label for="userlist">Comma separated list of users to scan:</label>
       <textarea id="userlist">
       </textarea>
       <br/><br/>
+
+      <fieldset>
+        <legend>Period has been preset to previous month but you can change it.</legend>
       <label for="start">Start date:</label>
-      <input type="date" id="start_date" />
+      <input type="date" id="start_date" onchange="check_period()">
       &nbsp;&nbsp;&nbsp;
       <label for="end">End date:</label>
-      <input type="date" id="end_date" />
+      <input type="date" id="end_date" onchange="check_period()">
+      </fieldset>
       <br/><br/>
       <button onclick="compute_contrib()">Grab wiki contributions for the current period</button>
       

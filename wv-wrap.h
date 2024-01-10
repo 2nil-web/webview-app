@@ -43,6 +43,8 @@ public:
   void dispatch(std::function<void()>);
 
   void set_title(const std::string &);
+  void ini_pos(int, int);
+  void set_pos(int, int);
   void set_size(int, int, int);
   void set_html(const std::string &);
   void init(const std::string &);
@@ -51,6 +53,7 @@ public:
 
 private:
   void *w = nullptr;
+  int ini_x=-1, ini_y=-1;
   std::vector<pair_of_string> func_help = {};
 };
 

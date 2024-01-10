@@ -27,7 +27,7 @@
 
 std::string my_getenv(const std::string var)
 {
-  std::cout << "var " << var << std::endl;
+//  std::cout << "var " << var << std::endl;
 
   char *pValue;
 #ifdef _MSC_VER
@@ -48,7 +48,7 @@ std::string my_getenv(const std::string var)
 
 bool my_setenv(const std::string var, const std::string val)
 {
-  std::cout << "var " << var << ", val " << val << std::endl;
+//  std::cout << "var " << var << ", val " << val << std::endl;
 
 #ifdef _WIN32
   return (_putenv((char *)(var+'='+val).c_str()) == 0);

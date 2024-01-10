@@ -576,9 +576,17 @@ void create_binds()
                }).detach();
              });
 
+  // Change window position
+  w.bind_doc("webapp_pos", "set window position.", [&](const std::string &req) -> std::string {
+    auto l_x = std::stoi(json_parse(req, "", 0));
+    auto l_y = std::stoi(json_parse(req, "", 1));
+    w.set_pos(l_x, l_y);
+    return "";
+  });
+
   // Change window dimension and sizing behaviour
   w.bind_doc("webapp_size", "set dimension and hint of webapp window.", [&](const std::string &req) -> std::string {
-    auto params = json_parse(req, "", 0);
+//    auto params = json_parse(req, "", 0);
     auto l_width = std::stoi(json_parse(req, "", 0));
     auto l_height = std::stoi(json_parse(req, "", 1));
     auto l_hints = std::stoi(json_parse(req, "", 2));
@@ -636,7 +644,7 @@ void create_binds()
 }
 
 bool run_and_exit = false;
-void webview_set(bool devmode, int width, int height, int hints, bool _run_and_exit)
+void webview_set(bool devmode, int x, int y, int width, int height, int hints, bool _run_and_exit)
 {
   void *wnd = nullptr;
   run_and_exit = _run_and_exit;
@@ -658,6 +666,7 @@ void webview_set(bool devmode, int width, int height, int hints, bool _run_and_e
   }
 #endif
 
+  w.ini_pos(x, y);
   w.create(devmode, (void *)wnd);
   w.set_size(width, height, hints);
   create_binds();

@@ -19,7 +19,7 @@
 bool devmode = false;
 bool runjs_and_exit = false;
 bool html_string = false;
-int width = -1, height = -1, hints = 0; /*
+int xpos=-1, ypos=-1, width = -1, height = -1, hints = 0; /*
       0 Width and height are default size
       1 Width and height are minimum bounds
       2 Width and height are maximum bounds
@@ -105,6 +105,12 @@ std::vector<run_opt> r_opts = {
      }},
     {"debug", 'd', opt_only, no_argument, "Activate the developper mode in the webview.",
      [](char, std::string, std::string) -> void { devmode = true; }},
+    /*
+    {"xpos", 'x', opt_only, required_argument, "Set webview windows initial x position (no default).",
+     [](char, std::string, std::string val) -> void { xpos = std::stoi(val); }},
+    {"ypos", 'y', opt_only, required_argument, "Set webview windows initial y position (no default).",
+     [](char, std::string, std::string val) -> void { ypos = std::stoi(val); }},
+     */
     {"width", 'w', opt_only, required_argument, "Set webview windows initial witdh (Default is 640).",
      [](char, std::string, std::string val) -> void { width = std::stoi(val); }},
     {"height", 'h', opt_only, required_argument, "Set webview windows initial height (Default is 480).",
@@ -209,7 +215,9 @@ int main(int argc, char **argv, char **)
     width = 640;
   if (height < 0)
     height = 480;
-  webview_set(devmode, width, height, hints, runjs_and_exit);
+  webview_set(devmode, xpos, ypos, width, height, hints, runjs_and_exit);
+
+
 
   if (url.starts_with("html://"))
   {

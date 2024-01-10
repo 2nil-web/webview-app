@@ -62,10 +62,7 @@ textarea {
 }
 
 
-#cmd {
-  vertical-align: middle;
-  width:100%;
-  height:90%;
+#userlist {
   resize: vertical;
 }
 
