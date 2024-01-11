@@ -318,6 +318,7 @@ void create_binds()
      return std::to_string(ret);
  });
 
+#ifdef _REGISTRY
 // Windows registry storage
   w.bind_doc("StoReg", "Store a string to the Windows registry.", [&](const std::string &req) -> std::string {
     std::string key = json_parse(req, "", 0);
@@ -339,7 +340,7 @@ void create_binds()
         w.resolve(seq, 0, '"' + val + '"');
    }).detach();
  });
-
+#endif
 #endif
   
   w.bind_doc("webview_ver", "Return a string indicating the webview version.",
