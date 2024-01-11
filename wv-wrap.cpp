@@ -120,8 +120,20 @@ void webview_wrapper::ini_pos(int x, int y)
   ini_x=x;
   ini_y=y;
 }
+
+void webview_wrapper::hide()
+{
+  ShowWindow((HWND)WP->window(), SW_SHOWMINIMIZED);
+}
+
+void webview_wrapper::show()
+{
+  ShowWindow((HWND)WP->window(), SW_SHOWNORMAL);
+}
+
 void webview_wrapper::set_pos(int x, int y)
 {
+  std::cout << "setpos x " << x << ", y " << y << std::endl;
 #ifdef _WIN32
   HWND hw=(HWND)WP->window();
   SetWindowPos(hw, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);

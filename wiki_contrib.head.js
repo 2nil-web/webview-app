@@ -1,9 +1,11 @@
 
 if (typeof webapp_title === "function") {
   // Default position and minimal size
+  //webapp_hide();
   //webapp_pos(700, 300);
-  webapp_size(640, 330, 0);
+  //webapp_size(640, 330, 0);
   window.webapp_get_title().then(wtitle => { window.webapp_title(stem(wtitle)); });
+  webapp_show();
 }
 document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 

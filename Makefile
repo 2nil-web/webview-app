@@ -6,7 +6,7 @@ PREFIX=webview-app
 SRCS=$(wildcard *.cpp)
 
 ifeq (${WITH_CURL},)
-SRCS:=$(filter-out wv-curl.cpp wv-curleasy.cpp,${SRCS})
+SRCS:=$(filter-out wv-reg.cpp wv-curl.cpp wv-curleasy.cpp,${SRCS})
 endif
 
 ifeq (${OS},Linux)

@@ -42,6 +42,8 @@ public:
   void terminate();
   void dispatch(std::function<void()>);
 
+  void show();
+  void hide();
   void set_title(const std::string &);
   void ini_pos(int, int);
   void set_pos(int, int);

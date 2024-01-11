@@ -13,7 +13,9 @@
 
 #ifdef _WIN32
 #include "wv-winapi.h"
+#ifdef WITH_REGISTRY
 #include "wv-reg.h"
+#endif
 #endif
 
 #ifdef WITH_CURL
@@ -318,7 +320,17 @@ void create_binds()
      return std::to_string(ret);
  });
 
-#ifdef _REGISTRY
+  w.bind_doc("webapp_show", "Hide the webapp window.", [&](const std::string &req) -> std::string {
+    w.show();
+    return "";
+ });
+
+  w.bind_doc("webapp_hide", "Hide the webapp window.", [&](const std::string &req) -> std::string {
+    w.hide();
+    return "";
+ });
+
+#ifdef WITH_REGISTRY
 // Windows registry storage
   w.bind_doc("StoReg", "Store a string to the Windows registry.", [&](const std::string &req) -> std::string {
     std::string key = json_parse(req, "", 0);
@@ -667,10 +679,14 @@ void webview_set(bool devmode, int x, int y, int width, int height, int hints, b
   }
 #endif
 
-  w.ini_pos(x, y);
+  //w.ini_pos(x, y);
   w.create(devmode, (void *)wnd);
+  w.hide();
+  std::cout << "x " << x << ", y " << y << ", w " << width << ", h " << height << std::endl;
   w.set_size(width, height, hints);
+  if (x > -1 && y > -1) w.set_pos(x, y);
   create_binds();
+  w.show();
 }
 
 void webview_run(std::string url, std::string title, std::string init_js)

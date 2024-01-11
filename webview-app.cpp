@@ -105,12 +105,12 @@ std::vector<run_opt> r_opts = {
      }},
     {"debug", 'd', opt_only, no_argument, "Activate the developper mode in the webview.",
      [](char, std::string, std::string) -> void { devmode = true; }},
-    /*
+
     {"xpos", 'x', opt_only, required_argument, "Set webview windows initial x position (no default).",
      [](char, std::string, std::string val) -> void { xpos = std::stoi(val); }},
     {"ypos", 'y', opt_only, required_argument, "Set webview windows initial y position (no default).",
      [](char, std::string, std::string val) -> void { ypos = std::stoi(val); }},
-     */
+
     {"width", 'w', opt_only, required_argument, "Set webview windows initial witdh (Default is 640).",
      [](char, std::string, std::string val) -> void { width = std::stoi(val); }},
     {"height", 'h', opt_only, required_argument, "Set webview windows initial height (Default is 480).",
