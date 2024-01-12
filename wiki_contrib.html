@@ -15,6 +15,15 @@
     </div>
     <div>
       <fieldset>
+        <legend>Confluence wiki.</legend>
+        <label for="url">url:</label>
+        <input id="url" size="50" onchange="conf_update('url')">
+        &nbsp;&nbsp;&nbsp;
+        <label for="space">space:</label>
+        <input id="space" size="10" onchange="conf_update('space')">
+      </fieldset>
+      <br/>
+
         <legend>Credentials to use in order to query the wiki.</legend>
         <label for="login">login:</label>
         <input id="login" onchange="conf_update('login')">

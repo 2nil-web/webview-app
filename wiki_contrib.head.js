@@ -38,7 +38,17 @@ function conf_update(elt_id) {
   localStorage.setItem(elt_id, elt.value);
 }
 
+function getItemOrDefault(itemName, defVal) {
+  itemVal=localStorage.getItem(itemName);
+  if (itemVal === null || itemVal === "") itemVal=defVal;
+  console.log(itemVal);
+  return itemVal;
+}
+
 function conf_load() {
+  url.value=getItemOrDefault('url', "https://wiki.space.thales");
+  space.value=getItemOrDefault('space', "orchestra");
+
   login.value=localStorage.getItem('login');
   if (login.value === "") {
     getenv('USERNAME').then(val => {
@@ -53,10 +63,7 @@ function conf_load() {
   psswd.value=localStorage.getItem('psswd');
   //console.log("login "+login.value+", password "+psswd.value);
 
-  userlist.value=localStorage.getItem('userlist');
-  if (userlist.value === "") {
-    userlist.value="alkadea,arnones,capous,cavallc,chaumia1,essaydh,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,ropold,thurona,tourel,xsii077,xsii076";
-  }
+  userlist.value=getItemOrDefault('userlist', "alkadea,arnones,capous,cavallc,chaumia1,essaydh,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,ropold,thurona,tourel,xsii077,xsii076");
 
   // preset the period
   var d=new Date(); // current date
