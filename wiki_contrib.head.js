@@ -41,7 +41,7 @@ function conf_update(elt_id) {
 function getItemOrDefault(itemName, defVal) {
   itemVal=localStorage.getItem(itemName);
   if (itemVal === null || itemVal === "") itemVal=defVal;
-  console.log(itemVal);
+  //console.log(itemVal);
   return itemVal;
 }
 
@@ -79,8 +79,6 @@ function check_period () {
   sd=new Date(start_date.value);
   ed=new Date(end_date.value);
 
-  //console.log("Caller id "+elt.id+", sd "+sd+", ed "+ed);
-
   if (elt.id === "start_date") {
     // Si la date de début modifiée est supérieure à la date de fin alors on met la date de fin à égalité avec la date de début.
     if (sd > ed) end_date.value=sd.toISOString().split('T')[0];
@@ -89,7 +87,6 @@ function check_period () {
       if (ed < sd) start_date.value=ed.toISOString().split('T')[0];
   }
 }
-
 
 function decodeEntities(html) {
     var txt = document.createElement("textarea");
@@ -105,57 +102,42 @@ async function readfile (filename, obj=output) {
   });
 }
 
-
-function scan(obj, elt, par="") {
-  if (obj instanceof Object) {
-    for (k in obj) {
-      if (obj.hasOwnProperty(k)) scan(obj[k], elt, par+'['+k+']');
-    }
-  } else {
-    txt=decodeEntities(par+':'+obj+'\n');
-    if (elt) elt.value+=txt;
-    //else console.log(txt);
+var table="";
+var sep=';';
+async function wiki_rest(dt) {
+  curr_date=dt.toISOString().split('T')[0];
+  const response=await fetch(
+    `${url.value}/rest/api/content/search?cql=contributor+in+(${userlist.value})+and+space+=+${space.value}+and+lastmodified+=+${curr_date}&limit=1000`,
+    { headers: new Headers({ "Authorization": `${login.value}:${psswd.value}` }),}
+  );
+  const data = await response.json();
+  let today_contrib = data.results;
+  //console.log(today_contrib);
+  for (i=0; i < today_contrib.length; i++) {
+    contrib=today_contrib[i];
+    console.log(`Retrieving for ${curr_date}`);
+    table+=`${curr_date}${sep}${contrib.type}${sep}"${contrib.title}"\n`;
+    loader.innerText+='.';
   }
 }
 
-function isJson(item) {
-  let value = typeof item !== "string" ? JSON.stringify(item) : item;
-  try {
-    value = JSON.parse(value);
-  } catch (e) {
-    return false;
-  }
-
-  return typeof value === "object" && value !== null;
-}
-
-
-async function mywiki() {
-  const response = await fetch("https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-12-07&limit=1000", { headers: new Headers({ "Authorization": 'lalannd2:ocvdBum12$*4' }),});
-//    "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
-  const data = await response.json();
-  console.log(data);
-  output.value += JSON.stringify(data);
-}
-
-async function mywikiNOCRED() {
-  const response = await fetch("https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-12-07&limit=1000");
-  const data = await response.json();
-  console.log(data);
-  output.value += JSON.stringify(data);
-}
-
-async function mywikiRES() {
-  const response = await fetch("https://wiki.space.thales/rest/api/content?limit=2", { credentials: 'include', });
-  const data = await response.json();
-  console.log(data);
-}
-
-function compute_contrib() {
+async function compute_contrib() {
+  run.disabled=true;
   d1=new Date(start_date.value);
   d2=new Date(end_date.value);
 
   for (var d = d1; d <= d2; d.setDate(d.getDate() + 1)) {
-    console.log(d.toISOString().split('T')[0]);
+    await wiki_rest(d);
   }
+
+  d1s=d1.toISOString().split('T')[0];
+  d2s=d2.toISOString().split('T')[0];
+
+  fwrite("wiki_contrib.csv", "Wiki documenting contributions\n");
+  fappend("wiki_contrib.csv", `Period${sep}${d1s}${sep}${d2s}\n`);
+  fappend("wiki_contrib.csv", `Date${sep}Type${sep}Title\n`);
+  fappend("wiki_contrib.csv", table);
+  run.disabled=false;
+  //console.log(table);
 }
+

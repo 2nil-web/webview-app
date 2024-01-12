@@ -31,7 +31,7 @@
         <label for="psswd">password:</label>
         <input id="psswd" type="password" onchange="conf_update('psswd')">
       </fieldset>
-      <br/>
+      <br/><br/>
 
       <label for="userlist">SIA comma separated list of users whose contributions to the wiki should be scanned:</label>
       <textarea id="userlist">
@@ -47,7 +47,8 @@
       <input type="date" id="end_date" onchange="check_period()">
       </fieldset>
       <br/><br/>
-      <button onclick="compute_contrib()">Grab wiki contributions for the current period</button>
+      <button id="run" onclick="compute_contrib()">Get wiki contributions for the current period</button>
+      <a id="loader"></a>
       
     </div>
   </body>

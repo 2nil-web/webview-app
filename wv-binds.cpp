@@ -416,28 +416,27 @@ void create_binds()
                }).detach();
              });
 
-  w.bind_doc("fwrite", "truncate and write to file with provided file name.",
-             [&](const std::string &req) -> std::string {
-               std::string fn, s;
-               int n = 0;
-               fn = json_parse(req, "", n++);
-               for (;;)
-               {
-                 s = json_parse(req, "", n++);
-                 if (s.empty())
-                   break;
-                 if (n == 2)
-                 {
-                   fwrite(fn, s, std::ios::out);
-                 }
-                 else
-                 {
-                   fwrite(fn, "\n");
-                   fwrite(fn, s);
-                 }
-               }
-               return "";
-             });
+  w.bind_doc("fwrite", "truncate and write to file with provided file name.", [&](const std::string &req) -> std::string {
+    std::string fn, s;
+    int n = 0;
+    fn = json_parse(req, "", n++);
+    for (;;)
+    {
+      s = json_parse(req, "", n++);
+      if (s.empty())
+        break;
+      if (n == 2)
+      {
+        fwrite(fn, s, std::ios::out);
+      }
+      else
+      {
+        fwrite(fn, "\n");
+        fwrite(fn, s);
+      }
+    }
+    return "";
+  });
 
   w.bind_doc("fappend", "append to file with provided file name.", [&](const std::string &req) -> std::string {
     std::string fn, s;
