@@ -12,9 +12,10 @@
 #include <thread>
 #include <vector>
 
-#include "wv-binds.h"
 #include "wv-opts.h"
 #include "wv-util.h"
+#include "wv-wrap.h"
+#include "wv-binds.h"
 
 bool devmode = false;
 bool runjs_and_exit = false;
@@ -148,6 +149,82 @@ std::string get_index()
   return "";
 }
 
+webview_wrapper w;
+
+bool run_and_exit = false;
+void webview_set(bool devmode = false, int x=-1, int y=-1, int width = 640, int height = 480, int hints = 0, bool _run_and_exit = false)
+{
+  void *wnd = nullptr;
+  run_and_exit = _run_and_exit;
+
+#ifdef _WIN32
+  if (run_and_exit)
+  {
+    if (AttachConsole(ATTACH_PARENT_PROCESS))
+    {
+      // Console mode, webview window will not be rendered.
+      // HWND hwnd; extern HWND CreateWin(); hwnd=CreateWin(); wnd=&hwnd;
+    }
+    else
+    {
+      // GUI mode is not compatible with run_and_exit option
+      run_and_exit = false;
+      devmode = true;
+    }
+  }
+#endif
+
+  //w.ini_pos(x, y);
+  w.create(devmode, (void *)wnd);
+  //w.hide();
+  std::cout << "x " << x << ", y " << y << ", w " << width << ", h " << height << std::endl;
+  w.set_size(width, height, hints);
+  //if (x > -1 && y > -1) w.set_pos(x, y);
+  create_binds(w);
+ // w.show();
+}
+
+void webview_run(std::string url, std::string title = "", std::string init_js = "")
+{
+  // std::cout << "URL " << url << ", TITLE " << title << ", JS " << init_js <<
+  // std::endl;
+  w.set_title(title);
+
+  if (run_and_exit)
+  {
+    if (init_js.back() != ';')
+      init_js += ';';
+    init_js += " webapp_exit();";
+    w.init(init_js);
+
+    w.set_html("html://<div></div>");
+  }
+  else
+  {
+    if (!init_js.empty())
+    {
+      w.init(init_js);
+    }
+
+    if (url.starts_with("html://"))
+    {
+      w.set_html(url);
+    }
+    else
+    {
+      if (!url.starts_with("http://") && !url.starts_with("https://"))
+      {
+        url = "file://" + url;
+      }
+      w.navigate(url);
+    }
+  }
+
+  // std::cout << init_js << std::endl;
+  w.run();
+}
+
+
 // Live html test :
 // ./webview-app.exe -c "<input type='button' value='Exit web app'
 // onclick='exit_webapp()'>"
@@ -236,3 +313,4 @@ int main(int argc, char **argv, char **)
 
   return 0;
 }
+
