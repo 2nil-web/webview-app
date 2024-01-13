@@ -6,6 +6,27 @@
 #include <filesystem>
 #include <iostream>
 
+std::string StrError(const char *fmt, ...)
+{
+  CHAR *lpMsgBuf;
+  char title[1024];
+  DWORD len;
+  va_list ap;
+
+  va_start(ap, fmt);
+  vsnprintf(title, 1024, fmt, ap);
+  va_end(ap);
+
+  len = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
+                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
+  lpMsgBuf[len - 2] = '\0';
+  std::string ret=title;
+  ret=ret+" - "+lpMsgBuf;
+  LocalFree(lpMsgBuf);
+
+  return ret;
+}
+
 void WinError(const char *fmt, ...)
 {
   CHAR *lpMsgBuf;

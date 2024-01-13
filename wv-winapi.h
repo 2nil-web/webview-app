@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
 void WinError(const char *fmt, ...);
+std::string StrError(const char *fmt, ...);
 #ifdef UNICODE
 #define CommandLineToArgv CommandLineToArgvW
 #else

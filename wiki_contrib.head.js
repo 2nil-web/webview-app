@@ -38,12 +38,11 @@ function conf_update(elt_id) {
   localStorage.setItem(elt_id, elt.value);
 }
 
-function getItemOrDefault(itemName, defVal) {
+function getItemOrDefault (itemName, defVal) {
   itemVal=localStorage.getItem(itemName);
   if (itemVal === null || itemVal === "") itemVal=defVal;
-  //console.log(itemVal);
   return itemVal;
-}
+};
 
 function conf_load() {
   url.value=getItemOrDefault('url', "https://wiki.space.thales");

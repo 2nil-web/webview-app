@@ -23,6 +23,9 @@
 #include <filesystem>
 #endif
 
+#ifdef _WIN32
+#include "wv-winapi.h"
+#endif
 #include "wv-util.h"
 
 std::string my_getenv(const std::string var)
@@ -450,6 +453,24 @@ std::string pipe2s(const std::string command)
     return to_htent(oss.str());
   }
 
+  return "";
+}
+
+std::string shell_cmd(std::string cmd, std::string param, std::string dir, std::string ope)
+{
+  if (cmd == "") return "First parameter cannot be empty";
+#ifdef _WIN32
+  LPCSTR lpOperation=NULL, lpFile=cmd.c_str(), lpParameters=NULL, lpDirectory=NULL;
+  if (! ope.empty()) lpOperation=ope.c_str();
+  if (! param.empty()) lpParameters=param.c_str();
+  if (! dir.empty()) lpDirectory=dir.c_str();
+ if (ShellExecute(NULL, lpOperation, lpFile, lpParameters, lpDirectory, SW_SHOW) <= (HINSTANCE)32)
+      return StrError("ShellExecute error with file %s, parameters %s, directory %s\n", lpFile, lpParameters, lpDirectory);
+#else
+  pid_t pid=fork();
+  if (pid == 0) execl(cmd.c_str(), param.c_str(), NULL);
+  if (pid == -1) return strerror(errno);
+#endif
   return "";
 }
 

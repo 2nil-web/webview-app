@@ -330,6 +330,29 @@ void create_binds()
     return "";
  });
 
+  // Run a local command and return an eventual result at a later time.
+  w.bind_doc("webapp_shell", "open an external windows command (See ShellExecute).", [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+      std::string cmd, param, dir, ope;
+      cmd = json_parse(req, "", 0);
+
+      if ((param=json_parse(req, "", 1)) != "") {
+        if ((dir=json_parse(req, "", 2)) != "") {
+          ope=json_parse(req, "", 3);
+        }
+      }
+
+      std::cout << "cmd: " << cmd << std::endl;
+      std::string res_cmd = shell_cmd(cmd, param, dir, ope);
+      std::cout << "res_cmd: " << res_cmd << std::endl;
+      rep_bs(res_cmd);
+      auto result = "{\"value\": \"" + res_cmd + "\"}";
+      std::cout << "result: " << result << std::endl;
+      w.resolve(seq, 0, result);
+    }).detach();
+  });
+
+
 #ifdef WITH_REGISTRY
 // Windows registry storage
   w.bind_doc("StoReg", "Store a string to the Windows registry.", [&](const std::string &req) -> std::string {
