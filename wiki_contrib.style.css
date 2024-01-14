@@ -30,12 +30,14 @@ div {
   width: 100%;
 }
 
-textarea {
-  width: 100%;
-  resize: none;
-}
-
 #userlist {
-  resize: vertical;
+  position: absolute;
+  overflow: hidden;
+  
+  resize: none;
+  bottom: 6px;
+  left: 6px;
+  top: 260px;
+  right: 6px;
 }
 

@@ -52,6 +52,12 @@ void set_html(char, std::string, std::string val)
     title = "HTML string";
 }
 
+int width=-1, height=-1, hints=-1;
+#ifdef _WIN32
+int xpos=-1, ypos=-1;
+bool minimized=false;
+#endif
+
 std::vector<run_opt> r_opts = {
 #ifdef _WIN32
     {"browser-args", 'b', opt_only, required_argument,
@@ -78,6 +84,24 @@ std::vector<run_opt> r_opts = {
      }},
     {"debug", 'd', opt_only, no_argument, "Activate the developper mode in the webview.",
      [](char, std::string, std::string) -> void { devmode = true; }},
+#ifdef _WIN32
+    {"xpos", 'x', opt_only, required_argument, "Set webview windows initial x position.",
+     [](char, std::string, std::string val) -> void { xpos = std::stoi(val); }},
+    {"ypos", 'y', opt_only, required_argument, "Set webview windows initial y position.",
+     [](char, std::string, std::string val) -> void { ypos = std::stoi(val); }},
+    {"minimized", 'm', opt_only, no_argument,
+     "The webview window will be minimized at startup, a javascript call to the function 'webapp_restore()' will necessary to restore it to its normal size.",
+     [](char, std::string, std::string) -> void { minimized = true; }},
+#endif
+    {"width", 'w', opt_only, required_argument, "Set webview windows initial witdh.",
+     [](char, std::string, std::string val) -> void { width = std::stoi(val); }},
+    {"height", 'h', opt_only, required_argument, "Set webview windows initial height.",
+     [](char, std::string, std::string val) -> void { height = std::stoi(val); }},
+    {"hints", 'i', opt_only, required_argument,
+     "Set webview hints => 0: width and height are default size, 1 set them as "
+     "minimum bound, 2 set them as maximum bound. 3 they are fixed. Any other "
+     "value is ignored.",
+     [](char, std::string, std::string val) -> void { hints = std::stoi(val); }},
 };
 
 std::string get_index()
@@ -130,10 +154,14 @@ void webview_set(bool devmode = false, bool _run_and_exit = false)
   create_binds(w);
 }
 
-void DisplayGeom (HWND hw) {
+void GetGeom (HWND hw, int& x, int& y, int& w, int& h) {
   RECT rc;
   GetWindowRect(hw, &rc);
-  std::cout << "x " << rc.left << ", y " << rc.top << ", w " << rc.right-rc.left << ", h " << rc.bottom-rc.top << std::endl;
+  x=rc.left;
+  y=rc.top;
+  w=rc.right-rc.left;
+  h=rc.bottom-rc.top;
+  //std::cout << "GetWindow x " << x << ", y " << y << ", w " << w << ", h " << h << std::endl;
 }
 
 void webview_run(std::string url, std::string title = "", std::string init_js = "")
@@ -172,21 +200,53 @@ void webview_run(std::string url, std::string title = "", std::string init_js = 
     }
   }
 
+
+#ifdef _WIN32
   HWND hw=(HWND)(w.window());
+  bool pre_size=(xpos > 0 && ypos > 0 && width > 0 && height > 0);
 
-  // ShowWindow(m_window, SW_SHOWMINIMIZED); at line 2642 of webview.h
-  DisplayGeom(hw);
-// IsWindowVisible
-// LONG lStyles = GetWindowLong(GWL_STYLE); if( lStyles & WS_MINIMIZE )
+  if  (pre_size) {
+    int xg, yg, wg, hg;
+    // ==> must patch webview.h 0.11.0 at line 2642 with : 'ShowWindow(m_window, SW_SHOWMINIMIZED);'
+    GetGeom(hw, xg, yg, wg, hg);
+    //std::cout << "xpos " << xpos << ", ypos " << ypos << ", wi " << width << ", he " << height << std::endl;
+    if (xpos < 0) xpos=xg;
+    if (xpos < 0) xpos=0;
+    if (ypos < 0) ypos=yg;
+    if (ypos < 0) ypos=0;
+    if (width < 0) width=wg;
+    if (width < 0) width=640;
+    if (height < 0) height=hg;
+    if (height < 0) height=400;
 
-//  if (ini_x > -1 && ini_y > -1) {
-    MoveWindow(hw, 20, 20, 400, 300, FALSE);
-    ShowWindow(hw, SW_SHOWNORMAL);
-    MoveWindow(hw, 20, 20, 400, 300, TRUE);
-//  } else {
-//    ShowWindow(hw, SW_SHOWNORMAL);
-//  }
-  DisplayGeom(hw);
+    //std::cout << "xpos " << xpos << ", ypos " << ypos << ", wi " << width << ", he " << height << std::endl;
+    if (!minimized) {
+      MoveWindow(hw, xpos, ypos, width, height, FALSE);
+      ShowWindow(hw, SW_RESTORE);
+      MoveWindow(hw, xpos, ypos, width, height, TRUE);
+    } else {
+      ShowWindow(hw, SW_RESTORE);
+    }
+  }
+
+  if (!minimized) {
+  // IsWindowVisible
+  // LONG lStyles = GetWindowLong(GWL_STYLE); if( lStyles & WS_MINIMIZE )
+    ShowWindow(hw, SW_RESTORE);
+  }
+
+  if (hints > -1 && hints < 4) {
+    std::cout << "set_hints" << std::endl;
+    w.set_hints(hints);
+  }
+#else
+  if ( width > 0 || height > 0 || (hints > -1 && hints < 4)) {
+    if (width < 0) width=640;
+    if (height < 0) height=480;
+    if (hints < 0) hints=0;
+    w.set_size(width, height, hints);
+  }
+#endif
 
   w.run();
 }

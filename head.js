@@ -1,14 +1,13 @@
 
 document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
-console.log("move & resize");
-document.moveTo(580,240);
-document.resizeTo(800,600);
+
 if (typeof webapp_title === "function") {
   // Default and minimal size
-  //webapp_pos(200, 200);
-  //webapp_size(600, 420, 0);
   webapp_title("Test");
-  //window.webapp_get_title().then(result => { console.log(result); });
+  webapp_restore();
+  webapp_size(800, 480);
+  webapp_pos(90, 90);
+  webapp_hints(3);
 }
 
 // Polyfills

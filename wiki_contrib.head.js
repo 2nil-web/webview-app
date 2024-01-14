@@ -1,7 +1,11 @@
 
 if (typeof webapp_title === "function") {
   window.webapp_get_title().then(wtitle => { window.webapp_title(stem(wtitle)); });
-  webapp_size(640, 300, 0);
+  webapp_restore();
+  webapp_size(640, 300);
+  webapp_pos(640, 390);
+  // Faire une méthode webap_move(x, y, w, h); ...
+  //webapp_hints(3);
 }
 
 document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });

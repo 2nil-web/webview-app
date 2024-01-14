@@ -126,15 +126,14 @@ void webview_wrapper::set_title(const std::string &title)
   WP->set_title(title);
 }
 
-void webview_wrapper::hide()
+void webview_wrapper::minimize()
 {
   ShowWindow((HWND)WP->window(), SW_SHOWMINIMIZED);
 }
 
-void webview_wrapper::show()
+void webview_wrapper::restore()
 {
-  HWND hw=(HWND)WP->window();
-  ShowWindow(hw, SW_SHOW);
+  ShowWindow((HWND)WP->window(), SW_RESTORE);
 }
 
 void webview_wrapper::set_pos(int x, int y)
@@ -147,8 +146,30 @@ void webview_wrapper::set_pos(int x, int y)
 
 void webview_wrapper::set_size(int width, int height, int hints)
 {
+  //std::cout << "set_size w " << width << ", h " << height << ", hints " << hints << std::endl;
+  if (hints < 0) {
+#ifdef _WIN32
+  HWND hw=(HWND)WP->window();
+  SetWindowPos(hw, NULL, 0, 0, width, height, SWP_NOREPOSITION | SWP_NOZORDER);
+#else
+  hints=0;
+#endif
+  }
+
   WP->set_size(width, height, hints);
 }
+
+#ifdef _WIN32
+void webview_wrapper::set_hints(int hints)
+{
+  if (hints > -1 && hints < 4) {
+    RECT rc;
+    HWND hw=(HWND)WP->window();
+    GetWindowRect(hw, &rc);
+    set_size(rc.right-rc.left, rc.bottom-rc.top, hints);
+  }
+}
+#endif
 
 void webview_wrapper::set_html(const std::string &html)
 {

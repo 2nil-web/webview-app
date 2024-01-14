@@ -33,11 +33,6 @@
       </fieldset>
       <br/><br/>
 
-      <label for="userlist">SIA comma separated list of users whose contributions to the wiki should be scanned:</label>
-      <textarea id="userlist">
-      </textarea>
-      <br/><br/>
-
       <fieldset>
         <legend>The scan period is predefined for last month but it can be modified.</legend>
       <label for="start">Start date:</label>
@@ -47,8 +42,15 @@
       <input type="date" id="end_date" onchange="check_period()">
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <button id="run" onclick="compute_contrib()">Get contributions</button>
-      </fieldset>
       <a id="loader"></a>
+      </fieldset>
+      <br/>
+
+      <label for="userlist">SIA comma separated list of users whose contributions to the wiki should be scanned:</label>
+      <textarea id="userlist">
+      </textarea>
+
+      
       
     </div>
   </body>

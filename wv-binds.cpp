@@ -319,13 +319,13 @@ void create_binds(webview_wrapper& w)
      return std::to_string(ret);
  });
 
-  w.bind_doc("webapp_show", "Hide the webapp window.", [&](const std::string &req) -> std::string {
-    w.show();
+  w.bind_doc("webapp_restore", "Hide the webapp window.", [&](const std::string &req) -> std::string {
+    w.restore();
     return "";
  });
 
-  w.bind_doc("webapp_hide", "Hide the webapp window.", [&](const std::string &req) -> std::string {
-    w.hide();
+  w.bind_doc("webapp_minimize", "Hide the webapp window.", [&](const std::string &req) -> std::string {
+    w.minimize();
     return "";
  });
 
@@ -610,11 +610,19 @@ void create_binds(webview_wrapper& w)
                }).detach();
              });
 
+  // Change window hints
+  w.bind_doc("webapp_hints", "set window hints.", [&](const std::string &req) -> std::string {
+    auto hints = std::stoi(json_parse(req, "", 0));
+    //std::cout << "x " << l_x << ", y " << l_y << std::endl;
+    w.set_hints(hints);
+    return "";
+  });
+
   // Change window position
   w.bind_doc("webapp_pos", "set window position.", [&](const std::string &req) -> std::string {
     auto l_x = std::stoi(json_parse(req, "", 0));
     auto l_y = std::stoi(json_parse(req, "", 1));
-    std::cout << "x " << l_x << ", y " << l_y << std::endl;
+    //std::cout << "x " << l_x << ", y " << l_y << std::endl;
     w.set_pos(l_x, l_y);
     return "";
   });
@@ -624,7 +632,18 @@ void create_binds(webview_wrapper& w)
 //    auto params = json_parse(req, "", 0);
     auto l_width = std::stoi(json_parse(req, "", 0));
     auto l_height = std::stoi(json_parse(req, "", 1));
-    auto l_hints = std::stoi(json_parse(req, "", 2));
+    auto s_hints = json_parse(req, "", 2);
+    int l_hints;
+    if (s_hints.empty()) {
+#ifdef _WIN32
+      l_hints = -1;
+#else
+      l_hints = 0;
+#endif
+    } else {
+      l_hints = std::stoi(s_hints);
+    }
+
     //std::cout << "width " << l_width << ", height " << l_height << std::endl;
     w.set_size(l_width, l_height, l_hints);
     /*
