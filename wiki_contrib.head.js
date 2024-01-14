@@ -1,5 +1,6 @@
 
 if (typeof webapp_title === "function") {
+  // To be called with -m option
   window.webapp_get_title().then(wtitle => { window.webapp_title(stem(wtitle)); });
   webapp_restore();
   webapp_size(640, 300);
