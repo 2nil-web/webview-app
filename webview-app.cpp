@@ -23,6 +23,7 @@ std::string url, title = "", init_js = "";
 std::string add_bro_args="";
 void set_browser_args(char, std::string, std::string val)
 {
+  std::cout << "Adding browser argument [--" << val << "]" << std::endl;
   add_bro_args+=" --"+val;
 }
 
@@ -101,11 +102,11 @@ std::string get_index()
 }
 
 webview_wrapper w;
-
+HWND *wnd=nullptr;
 bool run_and_exit = false;
 void webview_set(bool devmode = false, bool _run_and_exit = false)
 {
-  void *wnd = nullptr;
+//  void *wnd = nullptr;
   run_and_exit = _run_and_exit;
 
 #ifdef _WIN32
@@ -127,6 +128,12 @@ void webview_set(bool devmode = false, bool _run_and_exit = false)
 
   w.create(devmode, (void *)wnd);
   create_binds(w);
+}
+
+void DisplayGeom (HWND hw) {
+  RECT rc;
+  GetWindowRect(hw, &rc);
+  std::cout << "x " << rc.left << ", y " << rc.top << ", w " << rc.right-rc.left << ", h " << rc.bottom-rc.top << std::endl;
 }
 
 void webview_run(std::string url, std::string title = "", std::string init_js = "")
@@ -165,6 +172,22 @@ void webview_run(std::string url, std::string title = "", std::string init_js = 
     }
   }
 
+  HWND hw=(HWND)(w.window());
+
+  // ShowWindow(m_window, SW_SHOWMINIMIZED); at line 2642 of webview.h
+  DisplayGeom(hw);
+// IsWindowVisible
+// LONG lStyles = GetWindowLong(GWL_STYLE); if( lStyles & WS_MINIMIZE )
+
+//  if (ini_x > -1 && ini_y > -1) {
+    MoveWindow(hw, 20, 20, 400, 300, FALSE);
+    ShowWindow(hw, SW_SHOWNORMAL);
+    MoveWindow(hw, 20, 20, 400, 300, TRUE);
+//  } else {
+//    ShowWindow(hw, SW_SHOWNORMAL);
+//  }
+  DisplayGeom(hw);
+
   w.run();
 }
 
@@ -180,6 +203,24 @@ void webview_run(std::string url, std::string title = "", std::string init_js = 
 // cygwin/mingw mintty console start /wait webview-app.exe -r "for(i=0; i < 10;
 // i++) writeln(i);" # under a windows cmd
 #ifdef _WIN32
+
+/* From https://github.com/MicrosoftEdge/WebView2Feedback/issues/4166, env var "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS" with following values :
+--disable-web-security # Tested fetch works with wiki.space.thales
+--allow-insecure-localhost
+--unsafely-treat-insecure-origin-as-secure=http:*
+--disable-site-isolation-trials
+--disable-block-insecure-private-network-requests
+--enable-insecure-private-network-requests-allowed
+--disable-private-network-access-respect-preflight-results
+--disable-features=AutoupgradeMixedContent,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults,BlockInsecurePrivateNetworkRequests
+--enable-features=PrivateNetworkAccessNonSecureContextsAllowed,InsecurePrivateNetworkRequestsAllowed
+--enable-blink-features=PrivateNetworkAccessNonSecureContextsAllowed,InsecurePrivateNetworkRequestsAllowed
+
+ See also : https://github.com/MicrosoftEdge/WebView2Feedback/issues/4166
+ See there : https://observablehq.com/@mbostock/fetch-with-basic-auth
+*/
+
+
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/)
 {
   LPSTR *argv;

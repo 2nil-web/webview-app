@@ -1,6 +1,8 @@
 
 document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
-
+console.log("move & resize");
+document.moveTo(580,240);
+document.resizeTo(800,600);
 if (typeof webapp_title === "function") {
   // Default and minimal size
   //webapp_pos(200, 200);
@@ -353,21 +355,6 @@ async function mygithub() {
   console.log(data);
 }
 
-/* From https://github.com/MicrosoftEdge/WebView2Feedback/issues/4166, env var "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS" with following values :
---disable-web-security # Tested fetch works with wiki.space.thales
---allow-insecure-localhost
---unsafely-treat-insecure-origin-as-secure=http:*
---disable-site-isolation-trials
---disable-block-insecure-private-network-requests
---enable-insecure-private-network-requests-allowed
---disable-private-network-access-respect-preflight-results
---disable-features=AutoupgradeMixedContent,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults,BlockInsecurePrivateNetworkRequests
---enable-features=PrivateNetworkAccessNonSecureContextsAllowed,InsecurePrivateNetworkRequestsAllowed
---enable-blink-features=PrivateNetworkAccessNonSecureContextsAllowed,InsecurePrivateNetworkRequestsAllowed
-
- See also : https://github.com/MicrosoftEdge/WebView2Feedback/issues/4166
- See there : https://observablehq.com/@mbostock/fetch-with-basic-auth
-*/
 async function mywiki() {
   const response = await fetch("https://wiki.space.thales/rest/api/content/search?cql=contributor+in+(alkadea,arnones,capous,cavallc,chaumia1,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,thurona,tourel,xsii077,xsii076)+and+space+=+orchestra+and+lastmodified+=+2023-12-07&limit=1000", { headers: new Headers({ "Authorization": 'lalannd2:ocvdBum12$*4' }),});
 //    "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
