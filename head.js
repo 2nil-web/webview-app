@@ -3,8 +3,9 @@ document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { weba
 
 if (typeof webapp_title === "function") {
   // Default and minimal size
-  //webapp_size(640, 400, 0);
-  webapp_size(640, 400, 1);
+  //webapp_pos(200, 200);
+  //webapp_size(600, 420, 0);
+  webapp_title("Test");
   //window.webapp_get_title().then(result => { console.log(result); });
 }
 

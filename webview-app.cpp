@@ -17,19 +17,8 @@
 #include "wv-wrap.h"
 #include "wv-binds.h"
 
-bool devmode = false;
-bool runjs_and_exit = false;
-bool html_string = false;
-int xpos=-1, ypos=-1, width = -1, height = -1, hints = 0; /*
-      0 Width and height are default size
-      1 Width and height are minimum bounds
-      2 Width and height are maximum bounds
-      3 Window size is fixed
-      */
-
+bool devmode = false, runjs_and_exit = false, html_string = false;
 std::string url, title = "", init_js = "";
-
-// short_opt, long_opt, value of opt or empty string
 
 std::string add_bro_args="";
 void set_browser_args(char, std::string, std::string val)
@@ -62,24 +51,6 @@ void set_html(char, std::string, std::string val)
     title = "HTML string";
 }
 
-void set_title(char, std::string, std::string val)
-{
-  title = val;
-}
-
-void set_hints(char, std::string, std::string val)
-{
-  hints = std::stoi(val);
-
-  if (hints < 0 || hints > 3)
-  {
-    std::cerr << "hints value must be an integer value from 0 to 3, defaulting "
-                 "to zero."
-              << std::endl;
-    hints = 0;
-  }
-}
-
 std::vector<run_opt> r_opts = {
 #ifdef _WIN32
     {"browser-args", 'b', opt_only, required_argument,
@@ -96,7 +67,7 @@ std::vector<run_opt> r_opts = {
     {"title", 't', opt_only, required_argument,
      "Set the title of the webview windows, default is to display the url as "
      "title if it is provided or nothing if just an html string is provided.",
-     set_title},
+     [](char, std::string, std::string val) -> void { title = val; }},
     {"js", 'j', opt_only, required_argument, "Inject a javascript command before loading html page.",
      [](char, std::string, std::string val) -> void { init_js = val; }},
     {"runjs", 'r', opt_only, required_argument, "Run the provided javascript command and exit.",
@@ -106,26 +77,6 @@ std::vector<run_opt> r_opts = {
      }},
     {"debug", 'd', opt_only, no_argument, "Activate the developper mode in the webview.",
      [](char, std::string, std::string) -> void { devmode = true; }},
-
-    {"xpos", 'x', opt_only, required_argument, "Set webview windows initial x position (no default).",
-     [](char, std::string, std::string val) -> void { xpos = std::stoi(val); }},
-    {"ypos", 'y', opt_only, required_argument, "Set webview windows initial y position (no default).",
-     [](char, std::string, std::string val) -> void { ypos = std::stoi(val); }},
-
-    {"width", 'w', opt_only, required_argument, "Set webview windows initial witdh (Default is 640).",
-     [](char, std::string, std::string val) -> void { width = std::stoi(val); }},
-    {"height", 'h', opt_only, required_argument, "Set webview windows initial height (Default is 480).",
-     [](char, std::string, std::string val) -> void { height = std::stoi(val); }},
-    {"hints", 'i', opt_only, required_argument,
-     "Set webview hints => 0: width and height are default size, 1 set them as "
-     "minimum bound, 2 set them as maximum bound. 3 they are fixed. Any other "
-     "value is defaulted to 0 with a warning.",
-     set_hints}
-
-    /*
-      { "", '\0', 0, 0, "\nAdditionnal help message.", nullptr },
-      { "", '\0', 0, 0, "", nullptr },
-      { "", '\0', 0, 0, "\n2nd Additional message.", nullptr }*/
 };
 
 std::string get_index()
@@ -152,7 +103,7 @@ std::string get_index()
 webview_wrapper w;
 
 bool run_and_exit = false;
-void webview_set(bool devmode = false, int x=-1, int y=-1, int width = 640, int height = 480, int hints = 0, bool _run_and_exit = false)
+void webview_set(bool devmode = false, bool _run_and_exit = false)
 {
   void *wnd = nullptr;
   run_and_exit = _run_and_exit;
@@ -174,14 +125,8 @@ void webview_set(bool devmode = false, int x=-1, int y=-1, int width = 640, int 
   }
 #endif
 
-  //w.ini_pos(x, y);
   w.create(devmode, (void *)wnd);
-  //w.hide();
-  std::cout << "x " << x << ", y " << y << ", w " << width << ", h " << height << std::endl;
-  w.set_size(width, height, hints);
-  //if (x > -1 && y > -1) w.set_pos(x, y);
   create_binds(w);
- // w.show();
 }
 
 void webview_run(std::string url, std::string title = "", std::string init_js = "")
@@ -220,7 +165,6 @@ void webview_run(std::string url, std::string title = "", std::string init_js = 
     }
   }
 
-  // std::cout << init_js << std::endl;
   w.run();
 }
 
@@ -288,13 +232,7 @@ int main(int argc, char **argv, char **)
     }
   }
 
-  if (width < 0)
-    width = 640;
-  if (height < 0)
-    height = 480;
-  webview_set(devmode, xpos, ypos, width, height, hints, runjs_and_exit);
-
-
+  webview_set(devmode, runjs_and_exit);
 
   if (url.starts_with("html://"))
   {

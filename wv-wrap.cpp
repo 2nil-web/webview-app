@@ -14,21 +14,21 @@
 
 
 /*
- * webview.h 
- * line 2890 : using browser_engine = detail::win32_edge_engine;
- * line 2484 : class win32_edge_engine
- * line 1077 : using browser_engine = detail::gtk_webkit_engine;
- * line 879 : class gtk_webkit_engine {
- * line 1565 : using browser_engine = detail::cocoa_wkwebview_engine;
- * line 1170 : class cocoa_wkwebview_engine
+webview.h 
+line 879 : class gtk_webkit_engine
+line 1077 : using browser_engine = detail::gtk_webkit_engine;
 
+line 1170 : class cocoa_wkwebview_engine
+line 1565 : using browser_engine = detail::cocoa_wkwebview_engine;
+
+line 2484 : class win32_edge_engine
+line 2890 : using browser_engine = detail::win32_edge_engine;
+*/
 void webview_wrapper::create(bool debug, void *wnd)
 {
   if (w != nullptr)
     return;
   w = new webview::webview(debug, wnd);
-  //hide();
-  //if (ini_x > -1 && ini_y > -1) set_pos(ini_x, ini_y);
   bind_doc("webapp_help", "return a help message.", [&](const std::string &req) -> std::string {
     auto arg1 = json_parse(req, "", 0);
     std::string res, s = "";
@@ -126,12 +126,6 @@ void webview_wrapper::set_title(const std::string &title)
   WP->set_title(title);
 }
 
-void webview_wrapper::ini_pos(int x, int y)
-{
-  ini_x=x;
-  ini_y=y;
-}
-
 void webview_wrapper::hide()
 {
   ShowWindow((HWND)WP->window(), SW_SHOWMINIMIZED);
@@ -139,12 +133,12 @@ void webview_wrapper::hide()
 
 void webview_wrapper::show()
 {
-  ShowWindow((HWND)WP->window(), SW_SHOWNORMAL);
+  HWND hw=(HWND)WP->window();
+  ShowWindow(hw, SW_SHOW);
 }
 
 void webview_wrapper::set_pos(int x, int y)
 {
-  std::cout << "setpos x " << x << ", y " << y << std::endl;
 #ifdef _WIN32
   HWND hw=(HWND)WP->window();
   SetWindowPos(hw, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
@@ -155,15 +149,7 @@ void webview_wrapper::set_size(int width, int height, int hints)
 {
   WP->set_size(width, height, hints);
 }
-/*
-void webview_wrapper::set_center()
-{
-#ifdef _WIN32
-  HWND hw=(HWND)WP->window();
-  SetWindowPos(hw, x, y, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-#endif
-}
-*/
+
 void webview_wrapper::set_html(const std::string &html)
 {
   WP->set_html(html);

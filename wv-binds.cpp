@@ -614,6 +614,7 @@ void create_binds(webview_wrapper& w)
   w.bind_doc("webapp_pos", "set window position.", [&](const std::string &req) -> std::string {
     auto l_x = std::stoi(json_parse(req, "", 0));
     auto l_y = std::stoi(json_parse(req, "", 1));
+    std::cout << "x " << l_x << ", y " << l_y << std::endl;
     w.set_pos(l_x, l_y);
     return "";
   });
@@ -624,7 +625,14 @@ void create_binds(webview_wrapper& w)
     auto l_width = std::stoi(json_parse(req, "", 0));
     auto l_height = std::stoi(json_parse(req, "", 1));
     auto l_hints = std::stoi(json_parse(req, "", 2));
+    //std::cout << "width " << l_width << ", height " << l_height << std::endl;
     w.set_size(l_width, l_height, l_hints);
+    /*
+      0 Width and height are default size
+      1 Width and height are minimum bounds
+      2 Width and height are maximum bounds
+      3 Window size is fixed
+    */
     return "";
   });
 
