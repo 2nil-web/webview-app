@@ -462,11 +462,41 @@ std::string shell_cmd(std::string cmd, std::string param, std::string dir, std::
   if (cmd == "") return "First parameter cannot be empty";
 #ifdef _WIN32
   LPCSTR lpOperation=NULL, lpFile=cmd.c_str(), lpParameters=NULL, lpDirectory=NULL;
-  if (! ope.empty()) lpOperation=ope.c_str();
-  if (! param.empty()) lpParameters=param.c_str();
-  if (! dir.empty()) lpDirectory=dir.c_str();
+  if (! ope.empty() && ope != "") lpOperation=ope.c_str();
+  if (! param.empty() && param != "") lpParameters=param.c_str();
+  if (! dir.empty() && dir != "") lpDirectory=dir.c_str();
  if (ShellExecute(NULL, lpOperation, lpFile, lpParameters, lpDirectory, SW_SHOW) <= (HINSTANCE)32)
       return StrError("ShellExecute error with file %s, parameters %s, directory %s\n", lpFile, lpParameters, lpDirectory);
+#else
+  pid_t pid=fork();
+  if (pid == 0) execl(cmd.c_str(), param.c_str(), NULL);
+  if (pid == -1) return strerror(errno);
+#endif
+  return "";
+}
+
+std::string shell_cmd_wait(std::string cmd, std::string param, std::string dir, std::string ope)
+{
+  if (cmd == "") return "First parameter cannot be empty";
+#ifdef _WIN32
+  SHELLEXECUTEINFO ShExecInfo = {0};
+  ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+  ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+  ShExecInfo.hwnd = NULL;
+  ShExecInfo.lpVerb = NULL;
+  ShExecInfo.lpFile = cmd.c_str();        
+  ShExecInfo.lpParameters = NULL;   
+  ShExecInfo.lpDirectory = NULL;
+  ShExecInfo.nShow = SW_SHOW;
+  ShExecInfo.hInstApp = NULL; 
+  if (! ope.empty() && ope != "") ShExecInfo.lpVerb=ope.c_str();
+  if (! param.empty() && param != "") ShExecInfo.lpParameters=param.c_str();
+  if (! dir.empty() && dir != "") ShExecInfo.lpDirectory=dir.c_str();
+  ShellExecuteEx(&ShExecInfo);
+  WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
+  CloseHandle(ShExecInfo.hProcess);
+// if (!ShellExecuteEx(&ShExecInfo))
+//      return StrError("ShellExecute error with file %s, parameters %s, directory %s\n", lpFile, lpParameters, lpDirectory);
 #else
   pid_t pid=fork();
   if (pid == 0) execl(cmd.c_str(), param.c_str(), NULL);

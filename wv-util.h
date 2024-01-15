@@ -48,6 +48,7 @@ std::string temppath();
 std::string tempfile(std::string tpath = "", std::string pfx = "");
 std::string exec_cmd(std::string cmd);
 std::string shell_cmd(std::string cmd, std::string param="", std::string dir="", std::string ope="");
+std::string shell_cmd_wait(std::string cmd, std::string param="", std::string dir="", std::string ope="");
 void replace_all(std::string &s, std::string srch, std::string repl);
 void replace_all(std::wstring &s, std::wstring srch, std::wstring repl);
 void rep_crlf(std::string &s);

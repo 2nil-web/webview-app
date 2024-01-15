@@ -103,8 +103,15 @@ async function readfile (filename, obj=output) {
   });
 }
 
+function inc_datestr(sdt) {
+  var dt = new Date(sdt);
+  dt.setDate(dt.getDate() + 1);
+  return dt.toISOString().split('T')[0];
+}
+
 var table="";
 var sep=';';
+
 async function wiki_rest(dt) {
   curr_date=dt.toISOString().split('T')[0];
   const response=await fetch(
@@ -118,7 +125,6 @@ async function wiki_rest(dt) {
     contrib=today_contrib[i];
     console.log(`Retrieving for ${curr_date}`);
     table+=`${curr_date}${sep}${contrib.type}${sep}"${contrib.title}"\n`;
-    loader.innerText+='.';
   }
 }
 
@@ -127,17 +133,38 @@ async function compute_contrib() {
   d1=new Date(start_date.value);
   d2=new Date(end_date.value);
 
-  for (var d = d1; d <= d2; d.setDate(d.getDate() + 1)) {
-    await wiki_rest(d);
-  }
-
   d1s=d1.toISOString().split('T')[0];
   d2s=d2.toISOString().split('T')[0];
 
-  fwrite("wiki_contrib.csv", "Wiki documenting contributions\n");
-  fappend("wiki_contrib.csv", `Period${sep}${d1s}${sep}${d2s}\n`);
-  fappend("wiki_contrib.csv", `Date${sep}Type${sep}Title\n`);
-  fappend("wiki_contrib.csv", table);
+
+  if (true) {
+    loader.innerText=d1s;
+    for (var d = d1; d <= d2; d.setDate(d.getDate() + 1)) {
+      await wiki_rest(d);
+      loader.innerText=inc_datestr(loader.innerText);
+    }
+
+    fwrite("wiki_contrib.csv", "Wiki documenting contributions\n");
+    fappend("wiki_contrib.csv", `Period${sep}${d1s}${sep}${d2s}\n`);
+    fappend("wiki_contrib.csv", `Date${sep}Type${sep}Title\n`);
+    fappend("wiki_contrib.csv", table);
+  }
+    current_path().then(currdir => {
+      scriptName=`${currdir}/runImportWikiStats.js`;
+      xlFileName=`${currdir}/Wiki contributions from ${d1s} until ${d2s}.xlsx`;
+      console.log(`${scriptName}\n${xlFileName}`);
+
+      webapp_shell(scriptName).then( () => {
+//        setTimeout(() => {
+//        if (confirm("Open the corresponding file ?")) {
+          exists(xlFileName).then(res => {
+            console.log("RES "+res);
+            if (res) webapp_shell(xlFileName);
+            else alert(`The expected file '${xlFileName}' does not exist check for any possible troubles`);
+          });
+//        }, 4000);
+      });
+    });
   run.disabled=false;
   //console.log(table);
 }

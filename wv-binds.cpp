@@ -342,7 +342,7 @@ void create_binds(webview_wrapper& w)
       }
 
       std::cout << "cmd: " << cmd << std::endl;
-      std::string res_cmd = shell_cmd(cmd, param, dir, ope);
+      std::string res_cmd = shell_cmd_wait(cmd, param, dir, ope);
       std::cout << "res_cmd: " << res_cmd << std::endl;
       rep_bs(res_cmd);
       auto result = "{\"value\": \"" + res_cmd + "\"}";
@@ -420,6 +420,19 @@ void create_binds(webview_wrapper& w)
                }).detach();
              });
 
+  w.bind_doc("exists", "return true if file exists.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto fname = json_parse(req, "", 0);
+                 std::cout << "Test if exists " << fname << std::endl;
+                 std::string res;
+                 if (std::filesystem::exists(fname)) res="true";
+                 else res="false";
+                 std::cout << "Test if exists " << fname << " ==> " << res << std::endl;
+                 w.resolve(seq, 0, res);
+               }).detach();
+             });
+
   w.bind_doc("fstat", "gives information details on a file.",
              [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
@@ -481,6 +494,15 @@ void create_binds(webview_wrapper& w)
     }
     return "";
   });
+
+  w.bind_doc("current_path", "gives current path.",
+             [&](const std::string &seq, const std::string &req, void *) {
+               std::thread([&, seq, req] {
+                 auto res = std::filesystem::current_path().string();
+                 replace_all(res, "\\", "/");
+                 w.resolve(seq, 0, '"' + res + '"');
+               }).detach();
+             });
 
   w.bind_doc("absolute", "gives absolute path of a file path.",
              [&](const std::string &seq, const std::string &req, void *) {
