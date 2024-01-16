@@ -103,10 +103,15 @@ async function readfile (filename, obj=output) {
   });
 }
 
-function inc_datestr(sdt) {
-  var dt = new Date(sdt);
-  dt.setDate(dt.getDate() + 1);
-  return dt.toISOString().split('T')[0];
+var can_touch_loader=true;
+function move_loader(sdt) {
+  if (can_touch_loader) {
+    can_touch_loader=false;
+    var dt = new Date(loader.innerText);
+    dt.setDate(dt.getDate() + 1);
+    loader.innerText=dt.toISOString().split('T')[0];
+    can_touch_loader=true;
+  }
 }
 
 var table="";
@@ -141,7 +146,7 @@ async function compute_contrib() {
     loader.innerText=d1s;
     for (var d = d1; d <= d2; d.setDate(d.getDate() + 1)) {
       await wiki_rest(d);
-      loader.innerText=inc_datestr(loader.innerText);
+      move_loader();
     }
 
     fwrite("wiki_contrib.csv", "Wiki documenting contributions\n");

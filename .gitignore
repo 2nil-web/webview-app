@@ -54,3 +54,5 @@ README.docx
 
 *.dll
 *.old
+wiki_contrib/wiki_contrib.csv
+wiki_contrib/*.xlsx
