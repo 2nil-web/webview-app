@@ -57,7 +57,7 @@ bool my_setenv(const std::string var, const std::string val)
 #ifdef _WIN32
   return (_putenv((char *)(var+'='+val).c_str()) == 0);
 #else
-  return (setenv((char *)var.c_str(), (char *)val.c_str()) == 0);
+  return (setenv((char *)var.c_str(), (char *)val.c_str(), 1) == 0);
 #endif
 }
 

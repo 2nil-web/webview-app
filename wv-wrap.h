@@ -46,12 +46,14 @@ public:
   void minimize();
   void set_title(const std::string &);
   void set_pos(int, int);
+
+  void set_hints(int);
 #ifdef _WIN32
   void set_size(int, int, int hints=-1);
-  void set_hints(int);
 #else
   void set_size(int, int, int hints=0);
 #endif
+
   void set_html(const std::string &);
   void init(const std::string &);
   void eval(const std::string &);

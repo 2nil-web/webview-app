@@ -17,6 +17,11 @@
 #include "wv-wrap.h"
 #include "wv-binds.h"
 
+#ifndef _WIN32
+typedef void* HWND;
+#endif
+
+
 bool devmode = false, runjs_and_exit = false, html_string = false;
 std::string url, title = "", init_js = "";
 
@@ -126,7 +131,9 @@ std::string get_index()
 }
 
 webview_wrapper w;
+
 HWND *wnd=nullptr;
+
 bool run_and_exit = false;
 void webview_set(bool devmode = false, bool _run_and_exit = false)
 {
@@ -155,6 +162,7 @@ void webview_set(bool devmode = false, bool _run_and_exit = false)
 }
 
 void GetGeom (HWND hw, int& x, int& y, int& w, int& h) {
+#ifdef _WIN32
   RECT rc;
   GetWindowRect(hw, &rc);
   x=rc.left;
@@ -162,6 +170,7 @@ void GetGeom (HWND hw, int& x, int& y, int& w, int& h) {
   w=rc.right-rc.left;
   h=rc.bottom-rc.top;
   //std::cout << "GetWindow x " << x << ", y " << y << ", w " << w << ", h " << h << std::endl;
+#endif
 }
 
 void webview_run(std::string url, std::string title = "", std::string init_js = "")
