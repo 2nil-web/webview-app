@@ -114,7 +114,8 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #263238;
+  /*background: #263238;*/
+  background: #CCCCFF;
 }
 @keyframes rotation {
   0% { transform: rotate(0deg) }
