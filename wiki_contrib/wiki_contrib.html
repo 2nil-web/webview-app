@@ -2,6 +2,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-8">
     <link rel="stylesheet" type="text/css" href="wiki_contrib.style.css">
+    <link rel="stylesheet" type="text/css" href="loaders.css">
     <script type="text/javascript" src="../msgbox.js"></script>
     <script type="text/javascript" src="../util.js"></script>
     <script type="text/javascript" src="../time.js"></script>
@@ -42,7 +43,8 @@
       <input type="date" id="end_date" onchange="check_period()">
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <button id="run" onclick="compute_contrib()">Get contributions</button>
-      <a id="loader"></a>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <span id="my_loader" class="loader5"></span>
       </fieldset>
       <br/>
 

@@ -103,17 +103,6 @@ async function readfile (filename, obj=output) {
   });
 }
 
-var can_touch_loader=true;
-function move_loader(sdt) {
-  if (can_touch_loader) {
-    can_touch_loader=false;
-    var dt = new Date(loader.innerText);
-    dt.setDate(dt.getDate() + 1);
-    loader.innerText=dt.toISOString().split('T')[0];
-    can_touch_loader=true;
-  }
-}
-
 var table="";
 var sep=';';
 
@@ -134,43 +123,52 @@ async function wiki_rest(dt) {
 }
 
 async function compute_contrib() {
-  run.disabled=true;
-  d1=new Date(start_date.value);
-  d2=new Date(end_date.value);
+  //run.disabled=true;
+  ldClMax=5;
+  clidx=1+Math.floor(Math.random() * (ldClMax));
+  cl='loader'+clidx;
+  console.log("Class "+cl);
+  my_loader.className=cl;
+  my_loader.removeAttribute("hidden");
+return;
+  if (false) {
+    d1=new Date(start_date.value);
+    d2=new Date(end_date.value);
 
-  d1s=d1.toISOString().split('T')[0];
-  d2s=d2.toISOString().split('T')[0];
+    d1s=d1.toISOString().split('T')[0];
+    d2s=d2.toISOString().split('T')[0];
 
-
-  if (true) {
-    loader.innerText=d1s;
     for (var d = d1; d <= d2; d.setDate(d.getDate() + 1)) {
       await wiki_rest(d);
-      move_loader();
     }
 
     fwrite("wiki_contrib.csv", "Wiki documenting contributions\n");
     fappend("wiki_contrib.csv", `Period${sep}${d1s}${sep}${d2s}\n`);
     fappend("wiki_contrib.csv", `Date${sep}Type${sep}Title\n`);
     fappend("wiki_contrib.csv", table);
-  }
     current_path().then(currdir => {
       scriptName=`${currdir}/runImportWikiStats.js`;
       xlFileName=`${currdir}/Wiki contributions from ${d1s} until ${d2s}.xlsx`;
       console.log(`${scriptName}\n${xlFileName}`);
 
       webapp_shell(scriptName).then( () => {
-//        setTimeout(() => {
 //        if (confirm("Open the corresponding file ?")) {
           exists(xlFileName).then(res => {
             console.log("RES "+res);
             if (res) webapp_shell(xlFileName);
             else alert(`The expected file '${xlFileName}' does not exist check for any possible troubles`);
           });
-//        }, 4000);
       });
     });
+  } else {
+        setTimeout(() => {
+          console.log("Delayed for 1 second.");
+  my_loader.setAttribute("hidden", "hidden");
   run.disabled=false;
+        }, "4000");
+
+  }
+
   //console.log(table);
 }
 
