@@ -163,11 +163,11 @@ if (true) {
         exists(xlFileName).then(res => {
           console.log("RES "+res);
           if (res) {
-            webapp_shell(xlFileName).then(() => { setLoader(false); });
+            webapp_shell(xlFileName);//.then(() => { setLoader(false); });
           } else {
             alert(`The expected file '${xlFileName}' does not exist check for any possible troubles`);
-            setLoader(false); 
           }
+            setLoader(false); 
         });
     });
   });
