@@ -1,0 +1,84 @@
+
+
+body {
+  overflow: hidden;
+}
+
+.topnav {
+  overflow: hidden;
+  border-bottom: 1px solid black;
+}
+
+.topnav a {
+  float: left;
+  /*color: #f2f2f2;*/
+  color: #0;
+  text-align: center;
+  padding: 2px 12px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a:hover {
+  cursor: pointer;
+  /*background-color: #ddd;*/
+  background-color: #aaffaa;
+  color: blue;
+}
+
+
+fieldset.togglable {
+  height: 0px;
+  overflow: hidden;
+}
+
+fieldset.togglable.expanded {
+  height: auto;
+}
+
+fieldset.togglable > div:before {
+  display: block;
+}
+
+
+fieldset.togglable > legend span:before {
+  content: '➕';
+  padding: 0 0 0 0; 
+  margin: 0 0 0 0; 
+}
+
+fieldset.togglable.expanded > legend span:before {
+ content: '➖';
+  padding: 0 0 0 0; 
+  margin: 0 0 0 0; 
+}
+
+/*
+fieldset.togglable > legend {
+  cursor: pointer;
+}
+
+fieldset.togglable.expanded > legend{
+  cursor: pointer;
+}
+*/
+#userlist {
+  width: 100%;
+  resize: none;
+}
+/*
+div {
+  width: 100%;
+}
+
+#userlist {
+  position: absolute;
+  overflow: hidden;
+  
+  resize: none;
+  bottom: 6px;
+  left: 6px;
+  top: 260px;
+  right: 6px;
+}
+*/

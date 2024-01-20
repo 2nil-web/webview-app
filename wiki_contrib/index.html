@@ -1,13 +1,13 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/plain; charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="wiki_contrib.style.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
     <link rel="stylesheet" type="text/css" href="loaders.css">
     <script type="text/javascript" src="../msgbox.js"></script>
     <script type="text/javascript" src="../util.js"></script>
     <script type="text/javascript" src="../time.js"></script>
     <script type="text/javascript" src="../filesystem.js"></script>
-    <script type="text/javascript" src="wiki_contrib.head.js"></script>
+    <script type="text/javascript" src="head.js"></script>
   </head>
   <body>
     <div class="topnav">
@@ -15,27 +15,26 @@
       <a onclick="about()" >About</a>
     </div>
     <div>
-      <fieldset>
-        <legend>Confluence wiki.</legend>
+      <fieldset id="wiki" class="togglable">
+        <legend><span>Confluence wiki:</span></legend>
         <label for="url">url:</label>
         <input id="url" size="50" onchange="conf_update('url')">
         &nbsp;&nbsp;&nbsp;
         <label for="space">space:</label>
         <input id="space" size="10" onchange="conf_update('space')">
       </fieldset>
-      <br/>
 
-        <legend>Credentials to use in order to query the wiki.</legend>
+      <fieldset id="cred" class="togglable">
+        <legend><span>Credentials:</span></legend>
         <label for="login">login:</label>
         <input id="login" onchange="conf_update('login')">
         &nbsp;&nbsp;&nbsp;
         <label for="psswd">password:</label>
         <input id="psswd" type="password" onchange="conf_update('psswd')">
       </fieldset>
-      <br/><br/>
 
-      <fieldset style="height: 40px;">
-        <legend>The scan period is predefined for last month but it can be modified.</legend>
+      <fieldset>
+        <legend>Scan period:</legend>
       <label for="start">Start:</label>
       <input type="date" id="start_date" onchange="check_period()">
       &nbsp;&nbsp;&nbsp;
@@ -46,16 +45,11 @@
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <span hidden="hidden" id="my_loader" class="" style="vertical-align: top;"></span>
       </fieldset>
-      <br/>
 
       <label for="userlist">SIA comma separated list of users whose contributions to the wiki should be scanned:</label>
-      <textarea id="userlist">
-      </textarea>
-
-      
-      
+      <textarea id="userlist"></textarea>
     </div>
   </body>
-    <script type="text/javascript" src="wiki_contrib.body.js"></script>
+    <script type="text/javascript" src="body.js"></script>
 <html>
 

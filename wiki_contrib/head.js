@@ -9,8 +9,6 @@ if (typeof webapp_title === "function") {
   //webapp_hints(3);
 }
 
-document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
-
 function about () {
   info="Wiki contrib 1.0.0, includes:\n";
   app_info().then((ainf) => {
@@ -42,12 +40,37 @@ function conf_update(elt_id) {
 
 function getItemOrDefault (itemName, defVal) {
   itemVal=localStorage.getItem(itemName);
-  if (itemVal === null || itemVal === "") itemVal=defVal;
+  if (itemVal === null || itemVal === "") {
+    itemVal=defVal;
+    localStorage.setItem(itemName, itemVal);
+  }
   return itemVal;
 };
 
+function getBoolItemOrDefault (itemId, defVal) {
+  itemVal=localStorage.getItem(itemId);
+  //console.log("getBoolItemOrDefault for "+itemId+'='+itemVal);
+  if (itemVal === null) {
+    itemVal=defVal;
+    localStorage.setItem(itemId, itemVal);
+  }
+  return (itemVal === "true");
+};
+
+function adjustToWindowHeight(elemId) {
+  var elem=document.getElementById(elemId);
+  var elemRect=elem.getBoundingClientRect();
+  eleT=Math.trunc(elemRect.top);
+  //console.log("window.innerHeight "+window.innerHeight+"-userlist.top "+eleT+"="+(window.innerHeight-eleT-10));
+  elem.style.height=(window.innerHeight-eleT-10)+"px";
+}
+
+function windowSize() {
+  adjustToWindowHeight("userlist");
+}
+
 function conf_load() {
-  url.value=getItemOrDefault('url', "https://wiki.space.thales");
+  document.getElementById('url').value=getItemOrDefault('url', "https://wiki.space.thales");
   space.value=getItemOrDefault('space', "orchestra");
 
   login.value=localStorage.getItem('login');
@@ -74,6 +97,54 @@ function conf_load() {
   d.setDate(1); // going to 1st of previous month
   start_date.value=d.toISOString().split('T')[0];
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  //localStorage.clear(); // Clear all localStorage values
+  // List all localStorage
+  for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); }
+  console.log("");
+
+  conf_load();
+
+  document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
+  document.querySelectorAll('.togglable').forEach((elt) => {
+    if (elt.hasAttribute('id')) {
+      if (getBoolItemOrDefault(elt.id+".expanded", true)) {
+        elt.innerHTML=elt.innerHTML.replace("<br>", "");
+        elt.classList.add("expanded");
+      } else {
+        elt.innerHTML='<br>'+elt.innerHTML;
+        elt.classList.remove("expanded");
+      }
+    }
+
+    elt.querySelector('legend').addEventListener('click', (event) => {
+      console.log("Onclick legend for element "+elt.id);
+      if (elt.classList.contains('expanded')) {
+        elt.innerHTML='<br>'+elt.innerHTML;
+      } else {
+        elt.innerHTML=elt.innerHTML.replace(/<br>/,'');
+      }
+
+      elt.classList.toggle('expanded');
+
+      if (elt.hasAttribute('id')) {
+        if (elt.classList.contains('expanded')) {
+          localStorage.setItem(elt.id+".expanded", true);
+        } else {
+          localStorage.setItem(elt.id+".expanded", false);
+        }
+      }
+      windowSize();
+    });
+
+    elt.addEventListener('resize', (event) => {
+      windowSize();
+    });
+  });
+});
+
+window.onresize = windowSize;
 
 function check_period () {
   let elt=event.srcElement;
