@@ -229,7 +229,7 @@ function setLoader(on) {
 async function compute_contrib() {
   setLoader(true);
 
-if (false) {
+if (true) {
   run.disabled=true;
   d1=new Date(start_date.value);
   d2=new Date(end_date.value);
