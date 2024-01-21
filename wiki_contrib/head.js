@@ -1,12 +1,40 @@
 
+function getItemOrDefault (itemId, defVal, msg="") {
+  itemVal=localStorage.getItem(itemId);
+
+  if (itemVal === null || itemVal === "") {
+    itemVal=defVal;
+    //console.log(`For item ${itemId} default ${msg}value is '${itemVal}'`);
+    localStorage.setItem(itemId, itemVal);
+  } else {
+    //console.log(`For item ${itemId} localStorage ${msg}value is '${itemVal}'`);
+  }
+
+  return itemVal;
+};
+
+function getBoolItemOrDefault (itemId, defVal) {
+  return (getItemOrDefault (itemId, defVal, "boolean ") === "true");
+};
+
 if (typeof webapp_title === "function") {
+  winW=getItemOrDefault("window.width", 640);
+  winH=getItemOrDefault("window.height", 360)-3;
   // To be called with -m option
   window.webapp_get_title().then(wtitle => { window.webapp_title(stem(wtitle)); });
   webapp_restore();
-  webapp_size(640, 360);
+  //webapp_size(640, 360, 1);
+  webapp_size(winW, winH);
   webapp_pos(640, 390);
-  // Faire une méthode webap_move(x, y, w, h); ...
+  // Faire une méthode webapp_getpos ...
+  // Faire une méthode webapp_move(x, y, w, h); ...
   //webapp_hints(3);
+    /*
+      0 Width and height are default size
+      1 Width and height are minimum bounds
+      2 Width and height are maximum bounds
+      3 Window size is fixed
+    */
 }
 
 function about () {
@@ -37,24 +65,6 @@ function conf_update(elt_id) {
   localStorage.setItem(elt_id, elt.value);
 }
 
-function getItemOrDefault (itemId, defVal, msg="") {
-  itemVal=localStorage.getItem(itemId);
-
-  if (itemVal === null || itemVal === "") {
-    itemVal=defVal;
-    console.log(`For item ${itemId} default ${msg}value is '${itemVal}'`);
-    localStorage.setItem(itemId, itemVal);
-  } else {
-    console.log(`For item ${itemId} localStorage ${msg}value is '${itemVal}'`);
-  }
-
-  return itemVal;
-};
-
-function getBoolItemOrDefault (itemId, defVal) {
-  return (getItemOrDefault (itemId, defVal, "boolean ") === "true");
-};
-
 function adjustToWindowHeight(elemId) {
   var elem=document.getElementById(elemId);
   var elemRect=elem.getBoundingClientRect();
@@ -63,8 +73,20 @@ function adjustToWindowHeight(elemId) {
   elem.style.height=(window.innerHeight-eleT-20)+"px";
 }
 
+var lastDocCliW=-1, lastDocCliH=-1;
 function windowSize() {
   adjustToWindowHeight("userlist");
+  //console.log(`wind inner (${window.innerWidth}, ${window.innerHeight}), doc client (${document.documentElement.clientWidth}, ${document.documentElement.clientHeight}) and body client (${document.body.clientWidth}, ${document.body.clientHeight})`);
+  console.log(`wind dim (${document.documentElement.clientWidth}, ${document.documentElement.clientHeight})`);
+  if (lastDocCliW !== document.documentElement.clientWidth) {
+    lastDocCliW=document.documentElement.clientWidth;
+    localStorage.setItem("window.width", lastDocCliW);
+  }
+
+  if (lastDocCliH !== document.documentElement.clientHeight) {
+    lastDocCliH=document.documentElement.clientHeight;
+    localStorage.setItem("window.height", lastDocCliH);
+  }
 }
 
 function conf_load() {
@@ -101,8 +123,8 @@ function conf_load() {
 window.addEventListener('load', () => {
   //localStorage.clear(); // Clear all localStorage values
   // List all localStorage
-  for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); }
-  console.log("");
+  /*for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); }
+  console.log("");*/
 
   document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 
@@ -141,6 +163,7 @@ window.addEventListener('load', () => {
 
   conf_load();
   window.onresize = windowSize;
+  windowSize();
 });
 
 function check_period () {
