@@ -15,22 +15,26 @@
       <a onclick="about()" >About</a>
     </div>
     <div>
-      <fieldset id="wiki" class="togglable">
-        <legend><span>Confluence wiki:</span></legend>
-        <label for="url">url:</label>
-        <input id="url" size="50" onchange="conf_update('url')">
-        &nbsp;&nbsp;&nbsp;
-        <label for="space">space:</label>
+      <fieldset>
+        <legend id="wiki" class="collapser">Confluence wiki:</legend>
+        <div class="collapsable">
+          <label for="url">url:</label>
+          <input id="url" size="50" onchange="conf_update('url')">
+          &nbsp;&nbsp;&nbsp;
+          <label for="space">space:</label>
         <input id="space" size="10" onchange="conf_update('space')">
+        </div>
       </fieldset>
 
-      <fieldset id="cred" class="togglable">
-        <legend><span>Credentials:</span></legend>
-        <label for="login">login:</label>
-        <input id="login" onchange="conf_update('login')">
-        &nbsp;&nbsp;&nbsp;
-        <label for="psswd">password:</label>
-        <input id="psswd" type="password" onchange="conf_update('psswd')">
+      <fieldset>
+        <legend id="cred" class="collapser">Credentials:</legend>
+        <div class="collapsable">
+          <label for="login">login:</label>
+          <input id="login" onchange="conf_update('login')">
+          &nbsp;&nbsp;&nbsp;
+          <label for="psswd">password:</label>
+          <input id="psswd" type="password" onchange="conf_update('psswd')">
+        </div>
       </fieldset>
 
       <fieldset>
@@ -41,15 +45,19 @@
       <label for="end">End:</label>
       <input type="date" id="end_date" onchange="check_period()">
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <button id="run" onclick="compute_contrib()">Get contributions</button>
+      <span hidden="hidden" id="my_loader" class="" style="vertical-align: baseline;"></span>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <span hidden="hidden" id="my_loader" class="" style="vertical-align: top;"></span>
+      <button id="run" onclick="compute_contrib()">Get contributions</button>
       </fieldset>
 
+      <fieldset id="contributors">
+        <legend>Contributors:</legend>
+        <div>
       <label for="userlist">SIA comma separated list of users whose contributions to the wiki should be scanned:</label>
-      <textarea id="userlist"></textarea>
+      <textarea id="userlist" onchange="conf_update('userlist')"></textarea>
+        </div>
+      </fieldset>
     </div>
   </body>
-    <script type="text/javascript" src="body.js"></script>
 <html>
 

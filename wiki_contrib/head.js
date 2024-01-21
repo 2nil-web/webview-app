@@ -3,7 +3,7 @@ if (typeof webapp_title === "function") {
   // To be called with -m option
   window.webapp_get_title().then(wtitle => { window.webapp_title(stem(wtitle)); });
   webapp_restore();
-  webapp_size(640, 300);
+  webapp_size(640, 360);
   webapp_pos(640, 390);
   // Faire une méthode webap_move(x, y, w, h); ...
   //webapp_hints(3);
@@ -29,7 +29,6 @@ function about () {
       } else infobox(info);
     });
   });
-  
 }
 
 function conf_update(elt_id) {
@@ -38,23 +37,22 @@ function conf_update(elt_id) {
   localStorage.setItem(elt_id, elt.value);
 }
 
-function getItemOrDefault (itemName, defVal) {
-  itemVal=localStorage.getItem(itemName);
+function getItemOrDefault (itemId, defVal, msg="") {
+  itemVal=localStorage.getItem(itemId);
+
   if (itemVal === null || itemVal === "") {
     itemVal=defVal;
-    localStorage.setItem(itemName, itemVal);
+    console.log(`For item ${itemId} default ${msg}value is '${itemVal}'`);
+    localStorage.setItem(itemId, itemVal);
+  } else {
+    console.log(`For item ${itemId} localStorage ${msg}value is '${itemVal}'`);
   }
+
   return itemVal;
 };
 
 function getBoolItemOrDefault (itemId, defVal) {
-  itemVal=localStorage.getItem(itemId);
-  //console.log("getBoolItemOrDefault for "+itemId+'='+itemVal);
-  if (itemVal === null) {
-    itemVal=defVal;
-    localStorage.setItem(itemId, itemVal);
-  }
-  return (itemVal === "true");
+  return (getItemOrDefault (itemId, defVal, "boolean ") === "true");
 };
 
 function adjustToWindowHeight(elemId) {
@@ -62,7 +60,7 @@ function adjustToWindowHeight(elemId) {
   var elemRect=elem.getBoundingClientRect();
   eleT=Math.trunc(elemRect.top);
   //console.log("window.innerHeight "+window.innerHeight+"-userlist.top "+eleT+"="+(window.innerHeight-eleT-10));
-  elem.style.height=(window.innerHeight-eleT-10)+"px";
+  elem.style.height=(window.innerHeight-eleT-20)+"px";
 }
 
 function windowSize() {
@@ -70,7 +68,9 @@ function windowSize() {
 }
 
 function conf_load() {
-  document.getElementById('url').value=getItemOrDefault('url', "https://wiki.space.thales");
+  url.value=getItemOrDefault('url', "https://wiki.space.thales");
+  if (url.value === "") url.value="toto";
+
   space.value=getItemOrDefault('space', "orchestra");
 
   login.value=localStorage.getItem('login');
@@ -98,53 +98,50 @@ function conf_load() {
   start_date.value=d.toISOString().split('T')[0];
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('load', () => {
   //localStorage.clear(); // Clear all localStorage values
   // List all localStorage
   for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); }
   console.log("");
 
-  conf_load();
-
   document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
-  document.querySelectorAll('.togglable').forEach((elt) => {
+
+  Array.from(document.getElementsByClassName('collapser')).forEach((elt) => {
     if (elt.hasAttribute('id')) {
-      if (getBoolItemOrDefault(elt.id+".expanded", true)) {
-        elt.innerHTML=elt.innerHTML.replace("<br>", "");
-        elt.classList.add("expanded");
-      } else {
-        elt.innerHTML='<br>'+elt.innerHTML;
-        elt.classList.remove("expanded");
-      }
+      divs=elt.parentElement.getElementsByClassName("collapsable");
+      if (divs.length > 0) divs[0].hidden=getBoolItemOrDefault(elt.id+".collapsed", false);
     }
 
-    elt.querySelector('legend').addEventListener('click', (event) => {
-      console.log("Onclick legend for element "+elt.id);
-      if (elt.classList.contains('expanded')) {
-        elt.innerHTML='<br>'+elt.innerHTML;
-      } else {
-        elt.innerHTML=elt.innerHTML.replace(/<br>/,'');
-      }
+    //console.log("elt "+elt);
+    elt.addEventListener('click', (event) => {
+    //console.log("Onclick legend for element "+elt.id);
 
-      elt.classList.toggle('expanded');
+     if (event) event.stopPropagation();
+      obj=event.target.parentElement;
+      divs=obj.getElementsByClassName("collapsable");
+      if (divs.length > 0) {
+        divs[0].hidden=!divs[0].hidden;
+        //console.log("setItem "+elt.id+"="+divs[0].hidden);
+        localStorage.setItem(elt.id+".collapsed", divs[0].hidden);
+        // Cas particulier de la liste des contributeurs
+        if (obj.hasAttribute('id') && obj.id == "contributors") {
 
-      if (elt.hasAttribute('id')) {
-        if (elt.classList.contains('expanded')) {
-          localStorage.setItem(elt.id+".expanded", true);
-        } else {
-          localStorage.setItem(elt.id+".expanded", false);
+          if (divs[0].hidden === false) {
+          } else {
+          }
         }
       }
       windowSize();
     });
 
-    elt.addEventListener('resize', (event) => {
+    elt.addEventListener('resize', () => {
       windowSize();
     });
   });
-});
 
-window.onresize = windowSize;
+  conf_load();
+  window.onresize = windowSize;
+});
 
 function check_period () {
   let elt=event.srcElement;
@@ -209,7 +206,7 @@ function setLoader(on) {
 async function compute_contrib() {
   setLoader(true);
 
-if (true) {
+if (false) {
   run.disabled=true;
   d1=new Date(start_date.value);
   d2=new Date(end_date.value);

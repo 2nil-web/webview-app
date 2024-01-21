@@ -1,5 +1,4 @@
 
-
 body {
   overflow: hidden;
 }
@@ -25,60 +24,30 @@ body {
   background-color: #aaffaa;
   color: blue;
 }
-
-
-fieldset.togglable {
-  height: 0px;
-  overflow: hidden;
-}
-
-fieldset.togglable.expanded {
-  height: auto;
-}
-
-fieldset.togglable > div:before {
-  display: block;
-}
-
-
-fieldset.togglable > legend span:before {
-  content: '➕';
-  padding: 0 0 0 0; 
-  margin: 0 0 0 0; 
-}
-
-fieldset.togglable.expanded > legend span:before {
- content: '➖';
-  padding: 0 0 0 0; 
-  margin: 0 0 0 0; 
-}
-
 /*
-fieldset.togglable > legend {
-  cursor: pointer;
-}
-
-fieldset.togglable.expanded > legend{
-  cursor: pointer;
+.collapsable {
+     border: 1px solid #F00;
 }
 */
+.collapser {
+  width: 85%;
+  border: 1px solid #0F0;
+  padding: 0px 0px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.collapser::after {
+  content: "▼";
+  float: right;
+}
+
+fieldset {
+  margin-bottom: 10px;
+}
+
 #userlist {
   width: 100%;
   resize: none;
 }
-/*
-div {
-  width: 100%;
-}
 
-#userlist {
-  position: absolute;
-  overflow: hidden;
-  
-  resize: none;
-  bottom: 6px;
-  left: 6px;
-  top: 260px;
-  right: 6px;
-}
-*/
