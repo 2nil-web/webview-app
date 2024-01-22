@@ -205,11 +205,17 @@ async function wiki_rest(dt) {
   );
   const data = await response.json();
   let today_contrib = data.results;
+  //console.log(JSON.stringify(today_contrib));
+  fappend("wiki_contrib.min.json", `\n  {\n    "date": "${curr_date}",\n    `);
+  fappend("wiki_contrib.min.json", JSON.stringify(data, null, 2).replace(/\n/g, "\n      "));
+  fappend("wiki_contrib.min.json", "\n  }");
+
   //console.log(today_contrib);
   for (i=0; i < today_contrib.length; i++) {
     contrib=today_contrib[i];
     console.log(`Retrieving for ${curr_date}`);
     table+=`${curr_date}${sep}${contrib.type}${sep}"${contrib.title}"\n`;
+    //fappend("wiki_contrib.min.json", JSON.stringify(today_contrib[i]));
   }
 }
 
@@ -237,9 +243,12 @@ if (true) {
   d1s=d1.toISOString().split('T')[0];
   d2s=d2.toISOString().split('T')[0];
 
+
+  fwrite("wiki_contrib.min.json", "[");
   for (var d = d1; d <= d2; d.setDate(d.getDate() + 1)) {
     await wiki_rest(d);
   }
+  fappend("wiki_contrib.min.json", "]\n");
 
   fwrite("wiki_contrib.csv", "Wiki documenting contributions\n");
   fappend("wiki_contrib.csv", `Period${sep}${d1s}${sep}${d2s}\n`);
