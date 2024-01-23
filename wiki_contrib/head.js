@@ -1,4 +1,8 @@
-
+/*
+Prévoir 
+1) on exit
+2) on windows move
+*/
 function getItemOrDefault (itemId, defVal, msg="") {
   itemVal=localStorage.getItem(itemId);
 
