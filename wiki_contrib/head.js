@@ -164,6 +164,13 @@ window.addEventListener('load', () => {
   conf_load();
   window.onresize = windowSize;
   windowSize();
+/* Marche poo ...
+  window.addEventListener('beforeunload', (event) => {
+    alert(`(${window.screenX},${window.screenY})`);
+      e.preventDefault();
+      e.returnValue = true;
+  });
+*/
 });
 
 function check_period () {
