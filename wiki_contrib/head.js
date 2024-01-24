@@ -1,8 +1,10 @@
+
 /*
 Prévoir 
 1) on exit
 2) on windows move
 */
+
 function getItemOrDefault (itemId, defVal, msg="") {
   itemVal=localStorage.getItem(itemId);
 
@@ -29,7 +31,7 @@ if (typeof webapp_title === "function") {
   webapp_restore();
   //webapp_size(640, 360, 1);
   webapp_size(winW, winH);
-  webapp_pos(640, 390);
+  webapp_set_pos(640, 390);
   // Faire une méthode webapp_getpos ...
   // Faire une méthode webapp_move(x, y, w, h); ...
   //webapp_hints(3);
@@ -168,14 +170,21 @@ window.addEventListener('load', () => {
   conf_load();
   window.onresize = windowSize;
   windowSize();
-/* Marche poo ...
+// Marche poo ...
   window.addEventListener('beforeunload', (event) => {
-    alert(`(${window.screenX},${window.screenY})`);
-      e.preventDefault();
-      e.returnValue = true;
+ //   alert(`(${window.screenX},${window.screenY})`);
+//      event.preventDefault();
+      event.returnValue = `(${window.pageXOffset   },${window.screenTop })`;
   });
-*/
+
 });
+/*
+window.onbeforeunload = function(e) {
+  alert(`(${window.screenX},${window.screenY})`);
+    e.preventDefault();
+    e.returnValue = true;
+});
+*/
 
 function check_period () {
   let elt=event.srcElement;

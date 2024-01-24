@@ -140,6 +140,17 @@ void webview_wrapper::restore()
 #endif
 }
 
+void webview_wrapper::get_pos(int& x, int& y)
+{
+#ifdef _WIN32
+  HWND hw=(HWND)WP->window();
+  RECT rc;
+  GetWindowRect(hw, &rc);
+  x=rc.left;
+  y=rc.top;
+#endif
+}
+
 void webview_wrapper::set_pos(int x, int y)
 {
 #ifdef _WIN32

@@ -46,6 +46,7 @@ public:
   void minimize();
   void set_title(const std::string &);
   void set_pos(int, int);
+  void get_pos(int&, int&);
 
   void set_hints(int);
 #ifdef _WIN32

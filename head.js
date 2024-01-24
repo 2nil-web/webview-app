@@ -1,4 +1,55 @@
 
+
+///////////// TEST récup X,Y avant exit
+
+  for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); } ; console.log("");
+var incover=0;
+function localStoreXY(msg) {
+  webapp_get_pos().then(res => {
+    localStorage.setItem("x", res.x);
+    localStorage.setItem("y", res.y);
+    console.log(`${incover}: ${msg} (${res.x}, ${res.y})`);
+    incover++;
+  });
+}
+localStoreXY();
+
+var itvmov=0;
+window.addEventListener("mouseout", function(evt){ 
+  if (itvmov === 0) {
+    console.log("setitv");
+    itvmov=setInterval(function () { localStoreXY("poll_out"); }, 250);
+  }
+});
+
+window.addEventListener("mouseover", (evt) => {
+  localStoreXY("over");
+  if (itvmov !== 0) {
+    console.log("clritv");
+    clearInterval(itvmov);
+  }
+});
+
+window.addEventListener("focus", (evt) => { localStoreXY("focus"); });
+window.addEventListener("blur", (evt) => { localStoreXY("blur"); });
+
+//window.addEventListener("mousemove", (evt) => { localStoreXY("move"); });
+/*
+addEventListener("pagehide", (event) => {
+  localStoreXY();
+});
+
+addEventListener("unload", (event) => { localStoreXY(); });
+window.addEventListener("beforeunload", function (e) {
+  localStoreXY();
+  var confirmationMessage = "\\o/";
+
+  e.returnValue = confirmationMessage;
+  return confirmationMessage;
+}); */
+
+///////////// FIN TEST récup X,Y avant exit
+
 document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 
 if (typeof webapp_title === "function") {
@@ -6,7 +57,7 @@ if (typeof webapp_title === "function") {
   webapp_title("Test");
   webapp_restore();
   webapp_size(800, 480);
-  webapp_pos(90, 90);
+  webapp_set_pos(90, 90);
   webapp_hints(3);
 }
 

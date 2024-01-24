@@ -640,8 +640,19 @@ void create_binds(webview_wrapper& w)
     return "";
   });
 
+  // Get window position
+  w.bind_doc("webapp_get_pos", "get window position.",
+            [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+    int x, y;
+    w.get_pos(x, y);
+    auto result = "{\"x\": \"" + std::to_string(x) + "\", \"y\": \""+ std::to_string(y) +"\"}";
+    w.resolve(seq, 0, result);
+    }).detach();
+  });
+
   // Change window position
-  w.bind_doc("webapp_pos", "set window position.", [&](const std::string &req) -> std::string {
+  w.bind_doc("webapp_set_pos", "set window position.", [&](const std::string &req) -> std::string {
     auto l_x = std::stoi(json_parse(req, "", 0));
     auto l_y = std::stoi(json_parse(req, "", 1));
     //std::cout << "x " << l_x << ", y " << l_y << std::endl;
