@@ -661,7 +661,7 @@ void create_binds(webview_wrapper& w)
   });
 
   // Change window dimension and sizing behaviour
-  w.bind_doc("webapp_size", "set dimension and hint of webapp window.", [&](const std::string &req) -> std::string {
+  w.bind_doc("webapp_set_size", "set dimension and hint of webapp window.", [&](const std::string &req) -> std::string {
 //    auto params = json_parse(req, "", 0);
     auto l_width = std::stoi(json_parse(req, "", 0));
     auto l_height = std::stoi(json_parse(req, "", 1));
@@ -685,6 +685,25 @@ void create_binds(webview_wrapper& w)
       2 Width and height are maximum bounds
       3 Window size is fixed
     */
+    return "";
+  });
+
+  /* Get window position
+  w.bind_doc("webapp_get_size", "get window size.",
+            [&](const std::string &seq, const std::string &req, void *) {
+    std::thread([&, seq, req] {
+    int w, h;
+    w.get_size(w, h);
+    auto result = "{\"w\": \"" + std::to_string(w) + "\", \"h\": \""+ std::to_string(h) +"\"}";
+    w.resolve(seq, 0, result);
+    }).detach();
+  });
+*/
+  
+  // Exit from the web application
+  w.bind_doc("webapp_onexit", "set onexit callback for webapp.", [&](const std::string &req) -> std::string {
+    auto js = json_parse(req, "", 0);
+    w.set_onexit(js);
     return "";
   });
 

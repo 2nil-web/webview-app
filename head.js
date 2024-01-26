@@ -1,8 +1,9 @@
 
 
-///////////// TEST récup X,Y avant exit
+///////////// TEST récup X,Y, W, H avant exit
 
-  for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); } ; console.log("");
+  //localStorage.clear(); // Clear all localStorage values
+  for (const key of Object.keys(localStorage)) { console.log("onload "+key, localStorage.getItem(key)); } ; console.log("");
 var incover=0;
 function localStoreXY(msg) {
   webapp_get_pos().then(res => {
@@ -12,41 +13,22 @@ function localStoreXY(msg) {
     incover++;
   });
 }
-localStoreXY();
+//localStoreXY("init");
 
-var itvmov=0;
-window.addEventListener("mouseout", function(evt){ 
-  if (itvmov === 0) {
-    console.log("setitv");
-    itvmov=setInterval(function () { localStoreXY("poll_out"); }, 250);
-  }
-});
+function saveconf() {
+  webapp_get_pos().then(res => {
+    localStorage.setItem("win.x", res.x);
+    localStorage.setItem("win.y", res.y);
+  });
 
-window.addEventListener("mouseover", (evt) => {
-  localStoreXY("over");
-  if (itvmov !== 0) {
-    console.log("clritv");
-    clearInterval(itvmov);
-  }
-});
+  localStorage.setItem("win.w", window.innerWidth);
+  localStorage.setItem("win.h", window.innerHeight);
+}
 
-window.addEventListener("focus", (evt) => { localStoreXY("focus"); });
-window.addEventListener("blur", (evt) => { localStoreXY("blur"); });
-
-//window.addEventListener("mousemove", (evt) => { localStoreXY("move"); });
-/*
-addEventListener("pagehide", (event) => {
-  localStoreXY();
-});
-
-addEventListener("unload", (event) => { localStoreXY(); });
-window.addEventListener("beforeunload", function (e) {
-  localStoreXY();
-  var confirmationMessage = "\\o/";
-
-  e.returnValue = confirmationMessage;
-  return confirmationMessage;
-}); */
+function save_and_exit() {
+  saveconf();
+  webapp_exit();
+}
 
 ///////////// FIN TEST récup X,Y avant exit
 
@@ -56,9 +38,11 @@ if (typeof webapp_title === "function") {
   // Default and minimal size
   webapp_title("Test");
   webapp_restore();
-  webapp_size(800, 480);
-  webapp_set_pos(90, 90);
-  webapp_hints(3);
+//  webapp_size(800, 480);
+//  webapp_set_pos(90, 90);
+//  webapp_hints(3);
+  console.log("Installation callback saveconf");
+  webapp_onexit('saveconf();');
 }
 
 // Polyfills

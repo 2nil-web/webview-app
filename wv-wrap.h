@@ -55,6 +55,7 @@ public:
   void set_size(int, int, int hints=0);
 #endif
 
+  void set_onexit(const std::string);
   void set_html(const std::string &);
   void init(const std::string &);
   void eval(const std::string &);

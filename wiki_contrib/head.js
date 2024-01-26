@@ -1,10 +1,4 @@
 
-/*
-Prévoir 
-1) on exit
-2) on windows move
-*/
-
 function getItemOrDefault (itemId, defVal, msg="") {
   itemVal=localStorage.getItem(itemId);
 
@@ -23,15 +17,26 @@ function getBoolItemOrDefault (itemId, defVal) {
   return (getItemOrDefault (itemId, defVal, "boolean ") === "true");
 };
 
+function localStoreXY() {
+  webapp_get_pos().then(res => {
+    localStorage.setItem("webapp.x", res.x);
+    localStorage.setItem("webapp.y", res.y);
+    console.log(`(${res.x}, ${res.y})`);
+  });
+}
+
 if (typeof webapp_title === "function") {
-  winW=getItemOrDefault("window.width", 640);
-  winH=getItemOrDefault("window.height", 360)-3;
+  winX=getItemOrDefault("webapp.x", 640);
+  winY=getItemOrDefault("webapp.y", 390);//-3;
+  winW=getItemOrDefault("webapp.width", 640);
+  winH=getItemOrDefault("webapp.height", 360);//-3;
   // To be called with -m option
   window.webapp_get_title().then(wtitle => { window.webapp_title(stem(wtitle)); });
   webapp_restore();
   //webapp_size(640, 360, 1);
   webapp_size(winW, winH);
-  webapp_set_pos(640, 390);
+  webapp_set_pos(winX, winY);
+  webapp_onexit("localStoreXY()")
   // Faire une méthode webapp_getpos ...
   // Faire une méthode webapp_move(x, y, w, h); ...
   //webapp_hints(3);
@@ -129,8 +134,7 @@ function conf_load() {
 window.addEventListener('load', () => {
   //localStorage.clear(); // Clear all localStorage values
   // List all localStorage
-  /*for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); }
-  console.log("");*/
+  for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); } console.log("");
 
   document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 
@@ -170,15 +174,12 @@ window.addEventListener('load', () => {
   conf_load();
   window.onresize = windowSize;
   windowSize();
-// Marche poo ...
+});
+/* Marche poo ...
   window.addEventListener('beforeunload', (event) => {
- //   alert(`(${window.screenX},${window.screenY})`);
-//      event.preventDefault();
       event.returnValue = `(${window.pageXOffset   },${window.screenTop })`;
   });
 
-});
-/*
 window.onbeforeunload = function(e) {
   alert(`(${window.screenX},${window.screenY})`);
     e.preventDefault();

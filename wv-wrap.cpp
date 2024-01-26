@@ -93,6 +93,7 @@ void webview_wrapper::bind(const std::string &name, binding_t fn, void *arg)
 
 void webview_wrapper::unbind(const std::string &name)
 {
+  std::cout << "wrap_unbind" << std::endl;
   WP->unbind(name);
 }
 
@@ -113,6 +114,7 @@ void *webview_wrapper::window()
 
 void webview_wrapper::terminate()
 {
+  std::cout << "wrap_terminate" << std::endl;
   WP->terminate();
 }
 
@@ -184,6 +186,11 @@ void webview_wrapper::set_hints(int hints)
     set_size(rc.right-rc.left, rc.bottom-rc.top, hints);
 #endif
   }
+}
+
+void webview_wrapper::set_onexit(const std::string js)
+{
+  WP->onexit_func=js;
 }
 
 void webview_wrapper::set_html(const std::string &html)
