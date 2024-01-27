@@ -80,9 +80,9 @@ void webview_wrapper::create(bool debug, void *wnd)
 {
   if (w != nullptr)
     return;
-  std::cout << "Befor constructor " << std::hex << w << std::endl;
+//  std::cout << "Befor constructor " << std::hex << w << std::endl;
   w = new webview::webview(debug, wnd);
-  std::cout << "After constructor " << std::hex << w << std::endl;
+//  std::cout << "After constructor " << std::hex << w << std::endl;
 
 #ifdef _WIN32
   InitializeMSAA();
@@ -174,11 +174,11 @@ void *webview_wrapper::window()
 void webview_wrapper::terminate()
 {
   if (onexit_func != "") {
-    std::cout << "Run " << onexit_func << std::endl;
+    //std::cout << "Run " << onexit_func << std::endl;
     eval(me->onexit_func);
   }
 
-  std::cout << "wrap_terminate" << std::endl;
+  //std::cout << "wrap_terminate" << std::endl;
   WP->terminate();
 }
 

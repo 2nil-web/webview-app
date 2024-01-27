@@ -24,8 +24,8 @@ class webview_wrapper
 private:
 #ifdef _WIN32
   static webview_wrapper *me;
-  std::string onexit_func="";
 #endif
+  std::string onexit_func="";
   void *w = nullptr;
   std::vector<pair_of_string> func_help = {};
 
@@ -58,13 +58,13 @@ public:
   void get_pos(int&, int&);
 
   void set_hints(int);
+  void set_onexit(const std::string);
 #ifdef _WIN32
   // Global variable.
   HWINEVENTHOOK g_hook;
   static void CALLBACK HandleWinEvent(HWINEVENTHOOK, DWORD, HWND, LONG, LONG, DWORD, DWORD);
   void InitializeMSAA();
   void ShutdownMSAA();
-  void set_onexit(const std::string);
   void set_size(int, int, int hints=-1);
 #else
   void set_size(int, int, int hints=0);
