@@ -640,7 +640,7 @@ void create_binds(webview_wrapper& w)
     return "";
   });
 
-  // Get window position
+  /* Get window position
   w.bind_doc("webapp_get_pos", "get window position.",
             [&](const std::string &seq, const std::string &req, void *) {
     std::thread([&, seq, req] {
@@ -649,6 +649,13 @@ void create_binds(webview_wrapper& w)
     auto result = "{\"x\": \"" + std::to_string(x) + "\", \"y\": \""+ std::to_string(y) +"\"}";
     w.resolve(seq, 0, result);
     }).detach();
+  });*/
+
+  // Get window position
+  w.bind_doc("webapp_get_pos", "get window position.", [&](const std::string &req) -> std::string {
+    int x, y;
+    w.get_pos(x, y);
+    return "{\"x\": \"" + std::to_string(x) + "\", \"y\": \""+ std::to_string(y) +"\"}";
   });
 
   // Change window position
@@ -692,14 +699,20 @@ void create_binds(webview_wrapper& w)
   w.bind_doc("webapp_get_size", "get window size.",
             [&](const std::string &seq, const std::string &req, void *) {
     std::thread([&, seq, req] {
-    int w, h;
-    w.get_size(w, h);
-    auto result = "{\"w\": \"" + std::to_string(w) + "\", \"h\": \""+ std::to_string(h) +"\"}";
-    w.resolve(seq, 0, result);
+      int wi, he;
+      w.get_size(wi, he);
+      auto result = "{\"w\": \"" + std::to_string(wi) + "\", \"h\": \""+ std::to_string(he) +"\"}";
+      w.resolve(seq, 0, result);
     }).detach();
+  });*/
+
+  w.bind_doc("webapp_get_size", "get window size.", [&](const std::string &req) -> std::string {
+      int wi, he;
+      w.get_size(wi, he);
+      return "{\"w\": \"" + std::to_string(wi) + "\", \"h\": \""+ std::to_string(he) +"\"}";
   });
-*/
-  
+
+ 
   // Exit from the web application
   w.bind_doc("webapp_onexit", "set onexit callback for webapp.", [&](const std::string &req) -> std::string {
     auto js = json_parse(req, "", 0);

@@ -58,7 +58,7 @@ public:
   void get_pos(int&, int&);
 
   void set_hints(int);
-  void set_onexit(const std::string);
+  void get_size(int&, int&);
 #ifdef _WIN32
   // Global variable.
   HWINEVENTHOOK g_hook;
@@ -70,6 +70,7 @@ public:
   void set_size(int, int, int hints=0);
 #endif
 
+  void set_onexit(const std::string);
   void set_html(const std::string &);
   void init(const std::string &);
   void eval(const std::string &);

@@ -3,46 +3,92 @@
 ///////////// TEST récup X,Y, W, H avant exit
 
   //localStorage.clear(); // Clear all localStorage values
-  for (const key of Object.keys(localStorage)) { console.log("onload "+key, localStorage.getItem(key)); } ; console.log("");
-var incover=0;
-function localStoreXY(msg) {
+  //for (const key of Object.keys(localStorage)) { console.log("onload "+key, localStorage.getItem(key)); } ; console.log("");
+
+function getItemOrDefault (itemId, defVal, msg="") {
+  itemVal=localStorage.getItem(itemId);
+
+  if (itemVal === null || itemVal === "") {
+    itemVal=defVal;
+    //console.log(`For item ${itemId} default ${msg}value is '${itemVal}'`);
+    localStorage.setItem(itemId, itemVal);
+  } else {
+    //console.log(`For item ${itemId} localStorage ${msg}value is '${itemVal}'`);
+  }
+
+  return itemVal;
+};
+
+function getBoolItemOrDefault (itemId, defVal) {
+  return (getItemOrDefault (itemId, defVal, "boolean ") === "true");
+};
+/*
+async function conf_save() {
   webapp_get_pos().then(res => {
-    localStorage.setItem("x", res.x);
-    localStorage.setItem("y", res.y);
-    console.log(`${incover}: ${msg} (${res.x}, ${res.y})`);
-    incover++;
+    localStorage.setItem("webapp.x", res.x);
+    localStorage.setItem("webapp.y", res.y);
+    webapp_get_size().then(res => {
+      localStorage.setItem("webapp.width", res.w);
+      localStorage.setItem("webapp.height", res.h);
+    });
   });
 }
-//localStoreXY("init");
-
-function saveconf() {
-  webapp_get_pos().then(res => {
-    localStorage.setItem("win.x", res.x);
-    localStorage.setItem("win.y", res.y);
-  });
-
-  localStorage.setItem("win.w", window.innerWidth);
-  localStorage.setItem("win.h", window.innerHeight);
+*/
+async function conf_save() {
+  pos=await webapp_get_pos();
+  dim=await webapp_get_size();
+  localStorage.setItem("webapp.x", pos.x);
+  localStorage.setItem("webapp.y", pos.y);
+  localStorage.setItem("webapp.width", dim.w);
+  localStorage.setItem("webapp.height", dim.h);
 }
 
-function save_and_exit() {
-  saveconf();
+/*
+function getwinrec() {
+  webapp_get_pos().then(pos => {
+    webapp_get_size().then(dim => {
+      alert(`${pos.x}, ${pos.y}, ${dim.w}, ${dim.h}`);
+      console.log(`${pos.x}, ${pos.y}, ${dim.w}, ${dim.h}`);
+    });
+  });
+}
+*/
+async function getwinrec() {
+  pos=await webapp_get_pos();
+  dim=await webapp_get_size();
+  alert(`${pos.x}, ${pos.y}, ${dim.w}, ${dim.h}`);
+  console.log(`${pos.x}, ${pos.y}, ${dim.w}, ${dim.h}`);
+}
+
+function conf_save_and_exit() {
+  conf_save();
   webapp_exit();
 }
 
+var winX, winY, winW, winH;
+
+
+function conf_load() {
+  winX=getItemOrDefault("webapp.x", 640);
+  winY=getItemOrDefault("webapp.y", 390);//-3;
+  winW=getItemOrDefault("webapp.width", 640);
+  winH=getItemOrDefault("webapp.height", 360);//-3;
+}
 ///////////// FIN TEST récup X,Y avant exit
 
-document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
+document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { conf_save_and_exit(); } });
+
+conf_load();
 
 if (typeof webapp_title === "function") {
   // Default and minimal size
   webapp_title("Test");
   webapp_restore();
-//  webapp_size(800, 480);
-//  webapp_set_pos(90, 90);
+  console.log(`${winX}, ${winY}, ${winW}, ${winH}`);
+  webapp_set_size(winW, winH);
+  webapp_set_pos(winX, winY);
 //  webapp_hints(3);
-  console.log("Installation callback saveconf");
-  webapp_onexit('saveconf();');
+  webapp_onexit('conf_save()');
 }
 
 // Polyfills

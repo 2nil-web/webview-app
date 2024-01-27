@@ -40,23 +40,22 @@ void DisplayWindowRect(HWND hw) {
 void CALLBACK webview_wrapper::HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime)
 {
   if (me && me->g_hook == hook && ((webview::webview *)(me->w))->window() == hwnd) {
-    static bool firstEvent=true, startCloseButton=false;
-    if (firstEvent) {
-      firstEvent=false;
-    }
+    //static bool firstEvent=true; if (firstEvent) { firstEvent=false; }
 
+    // Cf. winuser.h
+    static bool startCloseButton=false;
     if (event == EVENT_OBJECT_STATECHANGE && idChild == 5) startCloseButton=true;
     else {
       if (startCloseButton && event == RI_MOUSE_RIGHT_BUTTON_UP && idChild == 0) {
-        //std::cout << "bye bye" << std::endl;
-        me->terminate();
+        std::cout << "bye bye" << std::endl;
+        if (me->onexit_func != "") {
+          std::cout << "bye bye " << me->onexit_func << std::endl;
+          me->eval(me->onexit_func);
+        }
+        //me->terminate();
       }
       startCloseButton=false;
     }
-  
-    //std::cout << std::hex << "hwnd " << hwnd << "event:" << event << ", idObject:" << idObject << ", idChild:" << idChild << std::endl;
-    //<< ", dwEventThread:" << dwEventThread << ", dwmsEventTime:" << dwmsEventTime << std::endl << std::dec;
-    //DisplayWindowRect(hwnd);
   }
 }
 
@@ -80,9 +79,7 @@ void webview_wrapper::create(bool debug, void *wnd)
 {
   if (w != nullptr)
     return;
-//  std::cout << "Befor constructor " << std::hex << w << std::endl;
   w = new webview::webview(debug, wnd);
-//  std::cout << "After constructor " << std::hex << w << std::endl;
 
 #ifdef _WIN32
   InitializeMSAA();
@@ -174,11 +171,11 @@ void *webview_wrapper::window()
 void webview_wrapper::terminate()
 {
   if (onexit_func != "") {
-    //std::cout << "Run " << onexit_func << std::endl;
+    std::cout << "terminate " << onexit_func << std::endl;
     eval(me->onexit_func);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 
-  //std::cout << "wrap_terminate" << std::endl;
   WP->terminate();
 }
 
@@ -225,6 +222,17 @@ void webview_wrapper::set_pos(int x, int y)
 #endif
 }
 
+void webview_wrapper::get_size(int& wi, int& he)
+{
+#ifdef _WIN32
+  HWND hw=(HWND)WP->window();
+  RECT rc;
+  GetWindowRect(hw, &rc);
+  wi=rc.right-rc.left;
+  he=rc.bottom-rc.top;
+#endif
+}
+
 void webview_wrapper::set_size(int width, int height, int hints)
 {
   //std::cout << "set_size w " << width << ", h " << height << ", hints " << hints << std::endl;
@@ -255,6 +263,7 @@ void webview_wrapper::set_hints(int hints)
 void webview_wrapper::set_onexit(const std::string js)
 {
   onexit_func=js;
+  std::cout << "set_onexit " << onexit_func << std::endl;
 }
 
 void webview_wrapper::set_html(const std::string &html)
