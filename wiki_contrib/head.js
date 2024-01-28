@@ -23,23 +23,23 @@ var winX, winY, winW, winH;
 // Load geometry
 winX=getItemOrDefault(`${appName}.x`, 640);
 winY=getItemOrDefault(`${appName}.y`, 390);
-console.log(`GET POS ${winX}, ${winY}`);
+//console.log(`GET POS ${winX}, ${winY}`);
 winW=getItemOrDefault(`${appName}.outerWidth`, 640);
 winH=getItemOrDefault(`${appName}.outerHeight`, 360);
-console.log(`GET DIM ${winW}, ${winH}`);
+//console.log(`GET DIM ${winW}, ${winH}`);
 
 function save_pos() {
   webapp_get_pos().then(pos => {
     localStorage.setItem(`${appName}.x`, pos.x);
     localStorage.setItem(`${appName}.y`, pos.y);
-    console.log(`SAVE POS ${pos.x}, ${pos.y}`);
+    //console.log(`SAVE POS ${pos.x}, ${pos.y}`);
   });
 }
 
 function save_dim() {
   localStorage.setItem(`${appName}.outerWidth`, window.outerWidth);
   localStorage.setItem(`${appName}.outerHeight`, window.outerHeight);
-  console.log(`SAVE DIM ${window.outerWidth}, ${window.outerHeight}`);
+  //console.log(`SAVE DIM ${window.outerWidth}, ${window.outerHeight}`);
 }
 
 if (typeof webapp_restore === "function") {
@@ -232,7 +232,7 @@ async function wiki_rest(dt) {
   //console.log(today_contrib);
   for (i=0; i < today_contrib.length; i++) {
     contrib=today_contrib[i];
-    console.log(`Retrieving for ${curr_date}`);
+    //console.log(`Retrieving for ${curr_date}`);
     table+=`${curr_date}${sep}${contrib.type}${sep}"${contrib.title}"\n`;
     //fappend("wiki_contrib.min.json", JSON.stringify(today_contrib[i]));
   }
@@ -243,7 +243,7 @@ function setLoader(on) {
 
   if (on) {
     cl='loader'+(1+Math.floor(Math.random() * (5)));
-    console.log("Class "+cl);
+    //console.log("Class "+cl);
     run.disabled=true;
   }
   my_loader.className=cl;
@@ -276,11 +276,11 @@ if (true) {
   current_path().then(currdir => {
     scriptName=`${currdir}/runImportWikiStats.js`;
     xlFileName=`${currdir}/Wiki contributions from ${d1s} until ${d2s}.xlsx`;
-    console.log(`${scriptName}\n${xlFileName}`);
+    //console.log(`${scriptName}\n${xlFileName}`);
 
     webapp_shell(scriptName).then( () => {
         exists(xlFileName).then(res => {
-          console.log("RES "+res);
+          //console.log("RES "+res);
           if (res) {
             webapp_shell(xlFileName);//.then(() => { setLoader(false); });
           } else {
