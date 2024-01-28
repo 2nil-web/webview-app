@@ -3,17 +3,17 @@
 ///////////// TEST récup X,Y, W, H avant exit
 
   //localStorage.clear(); // Clear all localStorage values
-  //for (const key of Object.keys(localStorage)) { console.log("onload "+key, localStorage.getItem(key)); } ; console.log("");
+  for (const key of Object.keys(localStorage)) { console.log("onload "+key, localStorage.getItem(key)); } ; console.log("");
 
 function getItemOrDefault (itemId, defVal, msg="") {
   itemVal=localStorage.getItem(itemId);
 
   if (itemVal === null || itemVal === "") {
     itemVal=defVal;
-    //console.log(`For item ${itemId} default ${msg}value is '${itemVal}'`);
+    console.log(`For item ${itemId} default ${msg}value is '${itemVal}'`);
     localStorage.setItem(itemId, itemVal);
   } else {
-    //console.log(`For item ${itemId} localStorage ${msg}value is '${itemVal}'`);
+    console.log(`For item ${itemId} localStorage ${msg}value is '${itemVal}'`);
   }
 
   return itemVal;
@@ -22,46 +22,37 @@ function getItemOrDefault (itemId, defVal, msg="") {
 function getBoolItemOrDefault (itemId, defVal) {
   return (getItemOrDefault (itemId, defVal, "boolean ") === "true");
 };
-/*
-async function conf_save() {
-  webapp_get_pos().then(res => {
-    localStorage.setItem("webapp.x", res.x);
-    localStorage.setItem("webapp.y", res.y);
-    webapp_get_size().then(res => {
-      localStorage.setItem("webapp.width", res.w);
-      localStorage.setItem("webapp.height", res.h);
-    });
+
+function save_pos() {
+  webapp_get_pos().then(pos => {
+    localStorage.setItem("webapp.x", pos.x);
+    localStorage.setItem("webapp.y", pos.y);
+    console.log(`SAVE POS ${pos.x}, ${pos.y}`);
   });
 }
-*/
-async function conf_save() {
-  pos=await webapp_get_pos();
-  dim=await webapp_get_size();
-  localStorage.setItem("webapp.x", pos.x);
-  localStorage.setItem("webapp.y", pos.y);
-  localStorage.setItem("webapp.width", dim.w);
-  localStorage.setItem("webapp.height", dim.h);
+
+function save_dim() {
+  localStorage.setItem("window.outerWidth", window.outerWidth);
+  localStorage.setItem("window.outerHeight", window.outerHeight);
+  console.log(`SAVE DIM ${window.outerWidth}, ${window.outerHeight}`);
 }
 
-/*
 function getwinrec() {
   webapp_get_pos().then(pos => {
-    webapp_get_size().then(dim => {
-      alert(`${pos.x}, ${pos.y}, ${dim.w}, ${dim.h}`);
-      console.log(`${pos.x}, ${pos.y}, ${dim.w}, ${dim.h}`);
-    });
+      alert(`${pos.x}, ${pos.y}, ${window.outerWidth}, ${window.outerHeight}`);
+      console.log(`${pos.x}, ${pos.y}, ${window.outerWidth}, ${window.outerHeight}`);
   });
 }
-*/
+/*
 async function getwinrec() {
   pos=await webapp_get_pos();
-  dim=await webapp_get_size();
-  alert(`${pos.x}, ${pos.y}, ${dim.w}, ${dim.h}`);
-  console.log(`${pos.x}, ${pos.y}, ${dim.w}, ${dim.h}`);
+  alert(`${pos.x}, ${pos.y}, ${window.outerWidth}, ${window.outerHeight}`);
+  console.log(`${pos.x}, ${pos.y}, ${window.outerWidth}, ${window.outerHeight}`);
+  //save_pos();
 }
-
-function conf_save_and_exit() {
-  conf_save();
+*/
+function save_pos_and_exit() {
+  save_pos();
   webapp_exit();
 }
 
@@ -71,25 +62,42 @@ var winX, winY, winW, winH;
 function conf_load() {
   winX=getItemOrDefault("webapp.x", 640);
   winY=getItemOrDefault("webapp.y", 390);//-3;
-  winW=getItemOrDefault("webapp.width", 640);
-  winH=getItemOrDefault("webapp.height", 360);//-3;
+  console.log(`GET POS ${winX}, ${winY}`);
+  winW=getItemOrDefault("window.outerWidth", 640);
+  winH=getItemOrDefault("window.outerHeight", 360);//-3;
+  console.log(`GET DIM ${window.outerWidth}, ${window.outerHeight}`);
 }
 ///////////// FIN TEST récup X,Y avant exit
 
-document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { conf_save_and_exit(); } });
-
 conf_load();
 
-if (typeof webapp_title === "function") {
+if (typeof webapp_get_title === "function") {
   // Default and minimal size
-  webapp_title("Test");
+  webapp_set_title("Test");
   webapp_restore();
-  console.log(`${winX}, ${winY}, ${winW}, ${winH}`);
   webapp_set_size(winW, winH);
   webapp_set_pos(winX, winY);
 //  webapp_hints(3);
-  webapp_onexit('conf_save()');
+  webapp_on_move('save_pos()');
+  //webapp_on_exit('save_pos()');
 }
+
+document.addEventListener("keyup", (event) => {
+  if (event.keyCode === 27) {
+    save_pos_and_exit();
+  }
+});
+
+window.addEventListener("keyup", (event) => {
+  if (event.keyCode === 27) {
+    save_pos_and_exit();
+  }
+});
+
+window.addEventListener("resize", (event) => {
+  save_dim();
+});
+
 
 // Polyfills
 String.prototype.insert=function (str, pos) {

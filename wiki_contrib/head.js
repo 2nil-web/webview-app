@@ -1,4 +1,6 @@
 
+var appName="Wiki contributors";
+
 function getItemOrDefault (itemId, defVal, msg="") {
   itemVal=localStorage.getItem(itemId);
 
@@ -17,35 +19,43 @@ function getBoolItemOrDefault (itemId, defVal) {
   return (getItemOrDefault (itemId, defVal, "boolean ") === "true");
 };
 
-function localStoreXY() {
-  webapp_get_pos().then(res => {
-    localStorage.setItem("webapp.x", res.x);
-    localStorage.setItem("webapp.y", res.y);
-    console.log(`(${res.x}, ${res.y})`);
+var winX, winY, winW, winH;
+// Load geometry
+winX=getItemOrDefault(`${appName}.x`, 640);
+winY=getItemOrDefault(`${appName}.y`, 390);
+console.log(`GET POS ${winX}, ${winY}`);
+winW=getItemOrDefault(`${appName}.outerWidth`, 640);
+winH=getItemOrDefault(`${appName}.outerHeight`, 360);
+console.log(`GET DIM ${winW}, ${winH}`);
+
+function save_pos() {
+  webapp_get_pos().then(pos => {
+    localStorage.setItem(`${appName}.x`, pos.x);
+    localStorage.setItem(`${appName}.y`, pos.y);
+    console.log(`SAVE POS ${pos.x}, ${pos.y}`);
   });
 }
 
-if (typeof webapp_title === "function") {
-  winX=getItemOrDefault("webapp.x", 640);
-  winY=getItemOrDefault("webapp.y", 390);//-3;
-  winW=getItemOrDefault("webapp.width", 640);
-  winH=getItemOrDefault("webapp.height", 360);//-3;
+function save_dim() {
+  localStorage.setItem(`${appName}.outerWidth`, window.outerWidth);
+  localStorage.setItem(`${appName}.outerHeight`, window.outerHeight);
+  console.log(`SAVE DIM ${window.outerWidth}, ${window.outerHeight}`);
+}
+
+if (typeof webapp_restore === "function") {
+  window.webapp_set_title(appName);
   // To be called with -m option
-  window.webapp_get_title().then(wtitle => { window.webapp_title(stem(wtitle)); });
   webapp_restore();
-  //webapp_size(640, 360, 1);
-  webapp_size(winW, winH);
+  webapp_set_size(winW, winH);
   webapp_set_pos(winX, winY);
-  webapp_onexit("localStoreXY()")
-  // Faire une méthode webapp_getpos ...
-  // Faire une méthode webapp_move(x, y, w, h); ...
   //webapp_hints(3);
-    /*
-      0 Width and height are default size
-      1 Width and height are minimum bounds
-      2 Width and height are maximum bounds
-      3 Window size is fixed
-    */
+  /*
+    0 Width and height are default size
+    1 Width and height are minimum bounds
+    2 Width and height are maximum bounds
+    3 Window size is fixed
+  */
+  webapp_on_move('save_pos()');
 }
 
 function about () {
@@ -87,16 +97,15 @@ function adjustToWindowHeight(elemId) {
 var lastDocCliW=-1, lastDocCliH=-1;
 function windowSize() {
   adjustToWindowHeight("userlist");
-  //console.log(`wind inner (${window.innerWidth}, ${window.innerHeight}), doc client (${document.documentElement.clientWidth}, ${document.documentElement.clientHeight}) and body client (${document.body.clientWidth}, ${document.body.clientHeight})`);
-  console.log(`wind dim (${document.documentElement.clientWidth}, ${document.documentElement.clientHeight})`);
+  //console.log(`wind dim (${document.documentElement.clientWidth}, ${document.documentElement.clientHeight})`);
   if (lastDocCliW !== document.documentElement.clientWidth) {
     lastDocCliW=document.documentElement.clientWidth;
-    localStorage.setItem("window.width", lastDocCliW);
+    localStorage.setItem(`${appName}.outerWidth`, lastDocCliW);
   }
 
   if (lastDocCliH !== document.documentElement.clientHeight) {
     lastDocCliH=document.documentElement.clientHeight;
-    localStorage.setItem("window.height", lastDocCliH);
+    localStorage.setItem(`${appName}.outerHeight`, lastDocCliH);
   }
 }
 
@@ -134,7 +143,7 @@ function conf_load() {
 window.addEventListener('load', () => {
   //localStorage.clear(); // Clear all localStorage values
   // List all localStorage
-  for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); } console.log("");
+  //for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); } console.log("");
 
   document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
 
@@ -175,17 +184,6 @@ window.addEventListener('load', () => {
   window.onresize = windowSize;
   windowSize();
 });
-/* Marche poo ...
-  window.addEventListener('beforeunload', (event) => {
-      event.returnValue = `(${window.pageXOffset   },${window.screenTop })`;
-  });
-
-window.onbeforeunload = function(e) {
-  alert(`(${window.screenX},${window.screenY})`);
-    e.preventDefault();
-    e.returnValue = true;
-});
-*/
 
 function check_period () {
   let elt=event.srcElement;
