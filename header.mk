@@ -94,7 +94,8 @@ LDLIBS += -lcurl.dll
 endif
 LDLIBS += -lidn2 -lssh2 -lpsl -lbcrypt -lcrypt32 -lzstd -lz -liconv -lunistring -lbrotlidec -lbrotlicommon
 endif
-LDLIBS += -lwldap32 -lws2_32 -ladvapi32 -lole32 -lshell32 -lshlwapi -luser32 -lversion	
+
+LDLIBS += -lwldap32 -lws2_32 -ladvapi32 -lole32 -lshell32 -lshlwapi -loleaut32 -lactiveds -luser32 -lnetapi32 -lversion	
 endif
 
 #MSBUILD='C:\Program\ Files\Microsoft\ Visual\ Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe'
