@@ -20,6 +20,15 @@ constexpr bool is_control_char(unsigned int c);
 
 class webview_wrapper
 {
+
+private:
+#ifdef _WIN32
+  static webview_wrapper *me;
+#endif
+  std::string on_move_func="", on_exit_func="";
+  void *w = nullptr;
+  std::vector<pair_of_string> func_help = {};
+
 public:
   webview_wrapper();
   webview_wrapper(bool debug, void *wnd = nullptr);
@@ -49,21 +58,25 @@ public:
   void get_pos(int&, int&);
 
   void set_hints(int);
+  void get_size(int&, int&);
 #ifdef _WIN32
+  // Global variable.
+  HWINEVENTHOOK g_hook;
+  static void CALLBACK HandleWinEvent(HWINEVENTHOOK, DWORD, HWND, LONG, LONG, DWORD, DWORD);
+  void InitSpy();
+  void ExitSpy();
+  static LRESULT myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
   void set_size(int, int, int hints=-1);
 #else
   void set_size(int, int, int hints=0);
 #endif
 
-  void set_onexit(const std::string);
+  void set_on_exit(const std::string);
+  void set_on_move(const std::string);
   void set_html(const std::string &);
   void init(const std::string &);
   void eval(const std::string &);
   std::string version();
-
-private:
-  void *w = nullptr;
-  std::vector<pair_of_string> func_help = {};
 };
 
 #endif /* WEBVIEW_WRAPPER_H */

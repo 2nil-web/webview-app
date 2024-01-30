@@ -7,6 +7,8 @@
 #include "wv-util.h"
 #ifdef _WIN32
 #include "wv-winapi.h"
+#include <commctrl.h>
+#include "wv-wm_map.h"
 #endif
 #include "wv-wrap.h"
 
@@ -24,11 +26,102 @@ line 1565 : using browser_engine = detail::cocoa_wkwebview_engine;
 line 2484 : class win32_edge_engine
 line 2890 : using browser_engine = detail::win32_edge_engine;
 */
+
+#ifdef _WIN32
+#include <oleacc.h>
+#pragma comment(lib,"Oleacc.lib")
+webview_wrapper *webview_wrapper::me;
+
+void DisplayWindowRect(HWND hw) {
+  RECT rc;
+  GetWindowRect(hw, &rc);
+  std::cout << "left:" << rc.left << ", top:" << rc.top << ", right:" << rc.right << ", bottom:" << rc.bottom << std::endl;
+}
+
+// Callback functions that handles events.
+void CALLBACK webview_wrapper::HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime)
+{
+  if (me && me->g_hook == hook && ((webview::webview *)(me->w))->window() == hwnd) {
+    //static bool firstEvent=true; if (firstEvent) { firstEvent=false; }
+
+    // Cf. winuser.h
+    static bool startCloseButton=false;
+    if (event == EVENT_OBJECT_STATECHANGE && idChild == 5) startCloseButton=true;
+    else {
+      if (startCloseButton && event == RI_MOUSE_RIGHT_BUTTON_UP && idChild == 0) {
+        std::cout << "bye bye" << std::endl;
+        if (me->on_exit_func != "") {
+          std::cout << "bye bye " << me->on_exit_func << std::endl;
+          me->eval(me->on_exit_func);
+        }
+        //me->terminate();
+      }
+      startCloseButton=false;
+    }
+  }
+}
+
+void webview_wrapper::InitSpy()
+{
+#ifdef DO_WINHOOK
+  CoInitialize(NULL);
+  g_hook = SetWinEventHook(EVENT_MIN, EVENT_MAX, NULL, &HandleWinEvent, GetProcessId(GetCurrentProcess()), 0, 0);
+#else
+  std::cout << "Create HWND " << (HWND)WP->window() << std::endl;
+  SetWindowSubclass((HWND)WP->window(), myWindowProc, 0, 0);
+  me=this;
+#endif
+}
+
+// Unhooks the event and shuts down COM.
+void webview_wrapper::ExitSpy()
+{
+#ifdef DO_WINHOOK
+    UnhookWinEvent(g_hook);
+    CoUninitialize();
+#endif
+}
+
+LRESULT webview_wrapper::myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+  if (me && ((webview::webview *)(me->w))->window() == hWnd && wm_map.count(uMsg)) {
+    std::cout << wm_map[uMsg] << std::endl;
+    switch (uMsg) {
+      case WM_CLOSE:
+      case WM_QUIT:
+      case WM_SYSCOMMAND:
+      case WM_DESTROY:
+        if (me->on_exit_func != "") {
+          std::cout << "bye bye " << me->on_exit_func << std::endl;
+          //me->init(me->on_exit_func);
+          me->eval(me->on_exit_func);
+        }
+        break;
+      case WM_MOVE:
+        if (me->on_move_func != "") {
+          std::cout << "on move " << me->on_move_func << std::endl;
+          me->eval(me->on_move_func);
+        }
+        break;
+      default :
+        break;
+    }
+  }
+  return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
+
+
+#endif
+
 void webview_wrapper::create(bool debug, void *wnd)
 {
   if (w != nullptr)
     return;
   w = new webview::webview(debug, wnd);
+
+#ifdef _WIN32
+  InitSpy();
+#endif
+
   bind_doc("webapp_help", "return a help message.", [&](const std::string &req) -> std::string {
     auto arg1 = json_parse(req, "", 0);
     std::string res, s = "";
@@ -114,7 +207,12 @@ void *webview_wrapper::window()
 
 void webview_wrapper::terminate()
 {
-  std::cout << "wrap_terminate" << std::endl;
+  if (on_exit_func != "") {
+    std::cout << "terminate " << on_exit_func << std::endl;
+    eval(me->on_exit_func);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  }
+
   WP->terminate();
 }
 
@@ -161,6 +259,17 @@ void webview_wrapper::set_pos(int x, int y)
 #endif
 }
 
+void webview_wrapper::get_size(int& wi, int& he)
+{
+#ifdef _WIN32
+  HWND hw=(HWND)WP->window();
+  RECT rc;
+  GetWindowRect(hw, &rc);
+  wi=rc.right-rc.left;
+  he=rc.bottom-rc.top;
+#endif
+}
+
 void webview_wrapper::set_size(int width, int height, int hints)
 {
   //std::cout << "set_size w " << width << ", h " << height << ", hints " << hints << std::endl;
@@ -188,9 +297,16 @@ void webview_wrapper::set_hints(int hints)
   }
 }
 
-void webview_wrapper::set_onexit(const std::string js)
+void webview_wrapper::set_on_move(const std::string js)
 {
-  WP->onexit_func=js;
+  on_move_func=js;
+  std::cout << "set_on_move " << on_move_func << std::endl;
+}
+
+void webview_wrapper::set_on_exit(const std::string js)
+{
+  on_exit_func=js;
+  std::cout << "set_on_exit " << on_exit_func << std::endl;
 }
 
 void webview_wrapper::set_html(const std::string &html)

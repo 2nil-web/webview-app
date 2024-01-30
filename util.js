@@ -46,8 +46,11 @@ function getParams(prom_func) {
     return params;
 }
 
-function basename(path) {
-   return path.split('/').reverse()[0];
+function basename(str) {
+  console.log(`PATH ${str}`);
+  return str.replace(/.*\/|\.[^.]*$/g, '');  
+//  return str.substr(str.lastIndexOf('/') + 1)
+//  return str.split('/').reverse()[0];
 }
 
 function del_ext(path) {
