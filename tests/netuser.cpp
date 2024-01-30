@@ -15,58 +15,63 @@
 void tab_print_header(std::string sep=";") {
   std::cout << "Name" << sep << 
    // "Password" << sep << 
-   "Password_age" << sep << "Priv" << sep << "Home_dir" << sep <<
-   "Comment" << sep << "Flags" << sep << "Script_path" << sep << "Auth_flags" << sep << "Full_name" << sep << "Usr_comment" << sep <<
-   "Parms" << sep << "Workstations" << sep << "Last_logon" << sep << "Last_logoff" << sep << "Acct_expires" << sep <<
-   "Max_storage" << sep << "Units_per_week" << sep << "Logon_hours" << sep << "Bad_pw_count" << sep << "Num_logons" << sep <<
-   "Logon_server" << sep << "Country_code" << sep << "Code_page" << sep << "User_id" << sep << "Primary_group_id" << sep <<
-   "Profile" << sep << "Home_dir_drive" << sep << "Password_expired" << std::endl;
+   "Password age" << sep << "Priv" << sep << "Home dir" << sep <<
+   // "Comment" << sep << 
+   "Flags" << sep << "Script path" << sep << "Auth flags" << sep << "Full name" << sep << "Usr comment" << sep <<
+   "Parms" << sep << "Workstations" << sep << "Last logon" << sep << "Last logoff" << sep << "Acct expires" << sep <<
+   "Max storage" << sep << "Units per week" << sep << "Logon hours" << sep << "Bad pw count" << sep << "Num logons" << sep <<
+   "Logon server" << sep << "Country code" << sep << "Code page" << sep << "User id" << sep << "Primary group id" << sep <<
+   "Profile" << sep << "Home dir drive" << sep << "Password expired" << std::endl;
 }
 
-void tab_print_usri3 (LPUSER_INFO_3 u, std::wstring sep=L"];[") {
-  std::wcout << '[' <<
+void tab_print_usri3 (LPUSER_INFO_3 u, std::wstring sep=L";") {
+  std::wcout << 
+    // '[' <<
     u->usri3_name << sep <<
     //u->usri3_password << sep << 
     u->usri3_password_age << sep << u->usri3_priv << sep <<
-    u->usri3_home_dir << sep << u->usri3_comment << sep << u->usri3_flags << sep << u->usri3_script_path << sep << u->usri3_auth_flags << sep <<
+    u->usri3_home_dir << sep << 
+    // u->usri3_comment << sep
+    u->usri3_flags << sep << u->usri3_script_path << sep << u->usri3_auth_flags << sep <<
     u->usri3_full_name << sep << u->usri3_usr_comment << sep << u->usri3_parms << sep << u->usri3_workstations << sep <<
     u->usri3_last_logon << sep << u->usri3_last_logoff << sep << u->usri3_acct_expires << sep << u->usri3_max_storage << sep <<
     u->usri3_units_per_week << sep << u->usri3_logon_hours << sep << u->usri3_bad_pw_count << sep << u->usri3_num_logons << sep <<
     u->usri3_logon_server << sep << u->usri3_country_code << sep << u->usri3_code_page << sep << u->usri3_user_id << sep <<
     u->usri3_primary_group_id << sep << u->usri3_profile << sep << u->usri3_home_dir_drive << sep << u->usri3_password_expired << sep <<
-    ']' << std::endl;
+    // ']' << 
+    std::endl;
 }
 
 void form_print_usri3 (LPUSER_INFO_3 u) {
   std::wcout << "Name:" << u->usri3_name << std::endl;
-  std::wcout << "Password:" << u->usri3_password << std::endl;
+//  std::wcout << "Password:" << u->usri3_password << std::endl;
   std::wcout << "Password_age:" << u->usri3_password_age << std::endl;
   std::wcout << "Priv:" << u->usri3_priv << std::endl;
-  std::wcout << "Home_dir:" << u->usri3_home_dir << std::endl;
-  std::wcout << "Comment:" << u->usri3_comment << std::endl;
+  std::wcout << "Home dir:" << u->usri3_home_dir << std::endl;
+//  std::wcout << "Comment:" << u->usri3_comment << std::endl;
   std::wcout << "Flags:" << u->usri3_flags << std::endl;
-  std::wcout << "Script_path:" << u->usri3_script_path << std::endl;
-  std::wcout << "Auth_flags:" << u->usri3_auth_flags << std::endl;
-  std::wcout << "Full_name:" << u->usri3_full_name << std::endl;
-  std::wcout << "Usr_comment:" << u->usri3_usr_comment << std::endl;
+  std::wcout << "Script path:" << u->usri3_script_path << std::endl;
+  std::wcout << "Auth flags:" << u->usri3_auth_flags << std::endl;
+  std::wcout << "Full name:" << u->usri3_full_name << std::endl;
+  std::wcout << "Usr comment:" << u->usri3_usr_comment << std::endl;
   std::wcout << "Parms:" << u->usri3_parms << std::endl;
   std::wcout << "Workstations:" << u->usri3_workstations << std::endl;
-  std::wcout << "Last_logon:" << u->usri3_last_logon << std::endl;
-  std::wcout << "Last_logoff:" << u->usri3_last_logoff << std::endl;
-  std::wcout << "Acct_expires:" << u->usri3_acct_expires << std::endl;
-  std::wcout << "Max_storage:" << u->usri3_max_storage << std::endl;
-  std::wcout << "Units_per_week:" << u->usri3_units_per_week << std::endl;
-  std::wcout << "Logon_hours:" << u->usri3_logon_hours << std::endl;
-  std::wcout << "Bad_pw_count:" << u->usri3_bad_pw_count << std::endl;
-  std::wcout << "Num_logons:" << u->usri3_num_logons << std::endl;
-  std::wcout << "Logon_server:" << u->usri3_logon_server << std::endl;
-  std::wcout << "Country_code:" << u->usri3_country_code << std::endl;
-  std::wcout << "Code_page:" << u->usri3_code_page << std::endl;
-  std::wcout << "User_id:" << u->usri3_user_id << std::endl;
-  std::wcout << "Primary_group_id:" << u->usri3_primary_group_id << std::endl;
+  std::wcout << "Last logon:" << u->usri3_last_logon << std::endl;
+  std::wcout << "Last logoff:" << u->usri3_last_logoff << std::endl;
+  std::wcout << "Acct expires:" << u->usri3_acct_expires << std::endl;
+  std::wcout << "Max storage:" << u->usri3_max_storage << std::endl;
+  std::wcout << "Units per week:" << u->usri3_units_per_week << std::endl;
+  std::wcout << "Logon hours:" << u->usri3_logon_hours << std::endl;
+  std::wcout << "Bad pw count:" << u->usri3_bad_pw_count << std::endl;
+  std::wcout << "Num logons:" << u->usri3_num_logons << std::endl;
+  std::wcout << "Logon server:" << u->usri3_logon_server << std::endl;
+  std::wcout << "Country code:" << u->usri3_country_code << std::endl;
+  std::wcout << "Code page:" << u->usri3_code_page << std::endl;
+  std::wcout << "User id:" << u->usri3_user_id << std::endl;
+  std::wcout << "Primary group_id:" << u->usri3_primary_group_id << std::endl;
   std::wcout << "Profile:" << u->usri3_profile << std::endl;
-  std::wcout << "Home_dir_drive:" << u->usri3_home_dir_drive << std::endl;
-  std::wcout << "Password_expired:" << u->usri3_password_expired << std::endl;
+  std::wcout << "Home dir drive:" << u->usri3_home_dir_drive << std::endl;
+  std::wcout << "Password expired:" << u->usri3_password_expired << std::endl;
   std::cout << std::endl;
 }
 

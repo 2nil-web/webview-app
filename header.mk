@@ -82,7 +82,7 @@ PANDOC=pandoc
 else
 EXEXT=.exe
 CPPFLAGS += --include=webview_mingw_support.h
-LDFLAGS += -mwindows
+#LDFLAGS += -mwindows
 LDFLAGS += -static
 
 ifneq (${WITH_CURL},)
