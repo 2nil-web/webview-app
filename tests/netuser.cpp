@@ -190,59 +190,19 @@ void form_print_usri3 (LPUSER_INFO_3 u) {
 
 void NetUserGetInfoForm(LPCWSTR serverName, LPCWSTR userName) {
   LPUSER_INFO_0 pBuf = NULL;
-  LPUSER_INFO_3 pBuf3 = NULL;
   NET_API_STATUS nStatus;
 
-  // Call the NetUserGetInfo function.
-  wprintf(L"\nCalling NetUserGetinfo with Servername=%s Username=%s Level=3\n", serverName, userName);
+  //std::wcout << L"\nCalling NetUserGetinfo with Servername=" << serverName << ", Username=" << userName << ", Level=3" << std::endl;
   nStatus = NetUserGetInfo(serverName, userName, 3, (LPBYTE *) & pBuf);
+
   // If the call succeeds, print the user information.
   if (nStatus == NERR_Success) {
-    if (pBuf != NULL) {
-      pBuf3 = (LPUSER_INFO_3) pBuf;
-      form_print_usri3(pBuf3);
-    }
-  // Otherwise, print the system error.
+    if (pBuf != NULL) form_print_usri3((LPUSER_INFO_3) pBuf);
   } else fprintf(stderr, "NetUserGetinfo failed with error: %ld\n", nStatus);
 
   // Free the allocated memory.
   if (pBuf != NULL) NetApiBufferFree(pBuf);
 }
-
-void RESNetQueryDisplayInformationList(LPCWSTR serverName, std::string sep=";") {
-   PNET_DISPLAY_USER  pBuff, p;
-   DWORD res, dwRec, i = 0;
-
-   std::cout << "Name" << sep << "Comment" << sep << "Flags" << sep << "Full name" << sep << "User id" << std::endl;
-
-   do {
-      // Call the NetQueryDisplayInformation function; specify information level 3 (group account information).
-      res = NetQueryDisplayInformation(serverName, 1, i, 1000, MAX_PREFERRED_LENGTH, &dwRec, (PVOID*) &pBuff);
-
-      // If the call succeeds,
-      if((res==ERROR_SUCCESS) || (res==ERROR_MORE_DATA)) {
-         p = pBuff;
-         for(;dwRec>0;dwRec--) {
-           std::wcout <<  p->usri1_name; std::cout << sep;
-           std::wcout <<  p->usri1_comment; std::cout << sep;
-           std::cout  <<  p->usri1_flags; std::cout << sep;
-           std::wcout <<  p->usri1_full_name; std::cout << sep;
-           std::cout  <<  p->usri1_user_id; std::cout << sep;
-           std::cout  <<  p->usri1_next_index;
-           std::cout << std::endl;
-
-           // If there is more data, set the index.
-           i = p->usri1_next_index;
-           p++;
-         }
-         // Free the allocated memory.
-         NetApiBufferFree(pBuff);
-      } else std::cerr << "Error:" << res << std::endl;
-   // Continue while there is more data.
-   } while (res==ERROR_MORE_DATA); // end do
-   return;
-}
-
 
 void NetQueryDisplayInformationList(LPCWSTR serverName, std::string sep=";") {
    PNET_DISPLAY_USER  pBuff, p;
