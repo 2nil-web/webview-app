@@ -18,5 +18,7 @@ if exist webview\ (
 
 cmd /C webview\script\build.bat
 
+::copy webview\webview.h .
+copy webview\build\external\libs\Microsoft.Web.WebView2*\build\native\include\* .
 echo You can now compile this example by running Visual Studio.
 

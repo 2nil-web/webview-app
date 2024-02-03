@@ -52,8 +52,8 @@ ifeq (${root_dir},)
 	root_dir=.
 endif
 
-WVDIR=${root_dir}/webview
-WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38
+#WVDIR=${root_dir}/webview
+#WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 
 
@@ -63,7 +63,7 @@ ifeq ($(STATIC_CURL),1)
 CPPFLAGS += -DCURL_STATICLIB
 endif
 endif
-CPPFLAGS += -I${WVDIR} -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
+#CPPFLAGS += -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
 
 CXXFLAGS += -std=c++20 -g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
@@ -82,7 +82,7 @@ PANDOC=pandoc
 else
 EXEXT=.exe
 CPPFLAGS += --include=webview_mingw_support.h
-#LDFLAGS += -mwindows
+LDFLAGS += -mwindows
 LDFLAGS += -static
 
 ifneq (${WITH_CURL},)

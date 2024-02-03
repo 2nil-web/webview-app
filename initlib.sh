@@ -24,6 +24,9 @@ fi
 
 ${WVDIR}/script/build.sh
 
+#cp ${WVDIR}/webview.h my_webview.h
+#cp ${WVDIR}/webview_mingw_support.h .
+cp ${WVDIR}/build/external/libs/Microsoft.Web.WebView2*/build/native/include/* .
 echo -n "You can now compile this example by running "
 [ "$WVDIR" = "webview-vs" ] && echo "Visual Studio." || echo "the make command."
 

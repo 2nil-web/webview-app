@@ -73,7 +73,7 @@ endif
 ifneq ($(DO_MSBUILD),1)
 # Régles pour construire les fichier objet d'après les .rc
 %.o : %.rc
-	$(RC) $(CPPFLAGS) $< --include-dir . $(OUTPUT_OPTION)
+	$(RC) $< --include-dir . $(OUTPUT_OPTION)
 
 %.d: %.c
 	@echo Checking header dependencies from $<

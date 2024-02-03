@@ -19,15 +19,6 @@ function getBoolItemOrDefault (itemId, defVal) {
   return (getItemOrDefault (itemId, defVal, "boolean ") === "true");
 };
 
-var winX, winY, winW, winH;
-// Load geometry
-winX=getItemOrDefault(`${appName}.x`, 640);
-winY=getItemOrDefault(`${appName}.y`, 390);
-//console.log(`GET POS ${winX}, ${winY}`);
-winW=getItemOrDefault(`${appName}.outerWidth`, 640);
-winH=getItemOrDefault(`${appName}.outerHeight`, 360);
-//console.log(`GET DIM ${winW}, ${winH}`);
-
 function save_pos() {
   webapp_get_pos().then(pos => {
     localStorage.setItem(`${appName}.x`, pos.x);
@@ -43,6 +34,15 @@ function save_dim() {
 }
 
 if (typeof webapp_restore === "function") {
+  var winX, winY, winW, winH;
+  // Load geometry
+  winX=getItemOrDefault(`${appName}.x`, 640);
+  winY=getItemOrDefault(`${appName}.y`, 390);
+  //console.log(`GET POS ${winX}, ${winY}`);
+  winW=getItemOrDefault(`${appName}.outerWidth`, 640);
+  winH=getItemOrDefault(`${appName}.outerHeight`, 360)-3;
+  //console.log(`GET DIM ${winW}, ${winH}`);
+
   window.webapp_set_title(appName);
   // To be called with -m option
   webapp_restore();
@@ -97,7 +97,6 @@ function adjustToWindowHeight(elemId) {
 var lastDocCliW=-1, lastDocCliH=-1;
 function windowSize() {
   adjustToWindowHeight("userlist");
-  //console.log(`wind dim (${document.documentElement.clientWidth}, ${document.documentElement.clientHeight})`);
   if (lastDocCliW !== document.documentElement.clientWidth) {
     lastDocCliW=document.documentElement.clientWidth;
     localStorage.setItem(`${appName}.outerWidth`, lastDocCliW);
@@ -161,16 +160,22 @@ window.addEventListener('load', () => {
       obj=event.target.parentElement;
       divs=obj.getElementsByClassName("collapsable");
       if (divs.length > 0) {
+        avH=divs[0].offsetHeight;
         divs[0].hidden=!divs[0].hidden;
-        //console.log("setItem "+elt.id+"="+divs[0].hidden);
-        localStorage.setItem(elt.id+".collapsed", divs[0].hidden);
-        // Cas particulier de la liste des contributeurs
-        if (obj.hasAttribute('id') && obj.id == "contributors") {
 
-          if (divs[0].hidden === false) {
-          } else {
-          }
-        }
+        // Preserve contributors list height
+        webapp_get_pos().then(pos => {
+          webapp_get_size().then(siz => {
+            //webapp_hide();
+            newH=window.outerHeight+divs[0].offsetHeight-avH;
+            webapp_set_size(window.outerWidth, newH);
+            webapp_set_pos(pos.x, pos.y);
+            //webapp_restore();
+          });
+        });
+
+
+        localStorage.setItem(elt.id+".collapsed", divs[0].hidden);
       }
       windowSize();
     });

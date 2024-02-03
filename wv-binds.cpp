@@ -319,13 +319,18 @@ void create_binds(webview_wrapper& w)
      return std::to_string(ret);
  });
 
-  w.bind_doc("webapp_restore", "Hide the webapp window.", [&](const std::string &req) -> std::string {
+  w.bind_doc("webapp_restore", "Restore the webapp window.", [&](const std::string &req) -> std::string {
     w.restore();
     return "";
  });
 
-  w.bind_doc("webapp_minimize", "Hide the webapp window.", [&](const std::string &req) -> std::string {
+  w.bind_doc("webapp_minimize", "Minimize the webapp window.", [&](const std::string &req) -> std::string {
     w.minimize();
+    return "";
+ });
+
+  w.bind_doc("webapp_hide", "Hide the webapp window.", [&](const std::string &req) -> std::string {
+    w.hide();
     return "";
  });
 
@@ -646,7 +651,7 @@ void create_binds(webview_wrapper& w)
     std::thread([&, seq, req] {
     int x, y;
     w.get_pos(x, y);
-    auto result = "{\"x\": \"" + std::to_string(x) + "\", \"y\": \""+ std::to_string(y) +"\"}";
+    auto result = "{\"x\": " + std::to_string(x) + ", \"y\": "+ std::to_string(y) +"}";
     w.resolve(seq, 0, result);
     }).detach();
   });*/
@@ -711,7 +716,8 @@ void create_binds(webview_wrapper& w)
   w.bind_doc("webapp_get_size", "get window size.", [&](const std::string &req) -> std::string {
     int wi, he;
     w.get_size(wi, he);
-    std::string res="{\"w\": \"" + std::to_string(wi) + "\", \"h\": \""+ std::to_string(he) +"\"}";
+    //std::string res="{\"w\": \"" + std::to_string(wi) + "\", \"h\": \""+ std::to_string(he) +"\"}";
+    std::string res="{\"w\": " + std::to_string(wi) + ", \"h\": "+ std::to_string(he) +"}";
     std::cout << "webapp_get_size " << res << std::endl;
     return res;
   });

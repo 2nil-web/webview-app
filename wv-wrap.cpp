@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-#include <webview.h>
+#include "my_webview.h"
 
 #include "wv-util.h"
 #ifdef _WIN32
@@ -226,6 +226,13 @@ void webview_wrapper::set_title(const std::string &title)
   WP->set_title(title);
 }
 
+void webview_wrapper::hide()
+{
+#ifdef _WIN32
+  ShowWindow((HWND)WP->window(), SW_HIDE);
+#endif
+}
+
 void webview_wrapper::minimize()
 {
 #ifdef _WIN32
@@ -270,19 +277,19 @@ void webview_wrapper::get_size(int& wi, int& he)
 #endif
 }
 
+
 void webview_wrapper::set_size(int width, int height, int hints)
 {
   //std::cout << "set_size w " << width << ", h " << height << ", hints " << hints << std::endl;
   if (hints < 0) {
 #ifdef _WIN32
-  HWND hw=(HWND)WP->window();
-  SetWindowPos(hw, NULL, 0, 0, width, height, SWP_NOREPOSITION | SWP_NOZORDER);
+  //HWND hw=(HWND)WP->window();
+  //SetWindowPos(hw, NULL, 0, 0, width, height, SWP_NOREPOSITION | SWP_NOZORDER);
+  WP->my_set_size(width, height);
 #else
   hints=0;
 #endif
-  }
-
-  WP->set_size(width, height, hints);
+  } else WP->set_size(width, height, hints);
 }
 
 void webview_wrapper::set_hints(int hints)
@@ -292,7 +299,7 @@ void webview_wrapper::set_hints(int hints)
     RECT rc;
     HWND hw=(HWND)WP->window();
     GetWindowRect(hw, &rc);
-    set_size(rc.right-rc.left, rc.bottom-rc.top, hints);
+    WP->set_size(rc.right-rc.left, rc.bottom-rc.top, hints);
 #endif
   }
 }

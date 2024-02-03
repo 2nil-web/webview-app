@@ -51,6 +51,7 @@ public:
   void terminate();
   void dispatch(std::function<void()>);
 
+  void hide();
   void restore();
   void minimize();
   void set_title(const std::string &);
