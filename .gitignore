@@ -56,3 +56,7 @@ README.docx
 *.old
 wiki_contrib/wiki_contrib.csv
 wiki_contrib/*.xlsx
+
+tmp_test/
+wiki_contrib/wiki_contrib.min.json
+
