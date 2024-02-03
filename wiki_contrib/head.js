@@ -1,6 +1,16 @@
 
 var appName="Wiki contributors";
 
+// To avoid the webapp to load multiple times
+const channel = new BroadcastChannel(appName);
+channel.postMessage('another-'+appName);
+channel.addEventListener('message', (msg) => {
+  if (msg.data === 'another-'+appName) {
+    // Exitting from 2nd instance of appName
+    webapp_exit();;
+  }
+});
+
 function getItemOrDefault (itemId, defVal, msg="") {
   itemVal=localStorage.getItem(itemId);
 
@@ -46,6 +56,9 @@ if (typeof webapp_restore === "function") {
   window.webapp_set_title(appName);
   // To be called with -m option
   webapp_restore();
+  // Define minimum bounds
+  webapp_set_size(635, 330, 1);
+  // Set size
   webapp_set_size(winW, winH);
   webapp_set_pos(winX, winY);
   //webapp_hints(3);
@@ -106,6 +119,7 @@ function windowSize() {
     lastDocCliH=document.documentElement.clientHeight;
     localStorage.setItem(`${appName}.outerHeight`, lastDocCliH);
   }
+  //console.log(`dim ${lastDocCliW}, ${lastDocCliH}`);
 }
 
 function conf_load() {
