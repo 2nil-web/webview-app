@@ -57,7 +57,7 @@ if (typeof webapp_restore === "function") {
   // To be called with -m option
   webapp_restore();
   // Define minimum bounds
-  webapp_set_size(635, 330, 1);
+  webapp_set_size(560, 290, 1);
   // Set size
   webapp_set_size(winW, winH);
   webapp_set_pos(winX, winY);
@@ -124,8 +124,6 @@ function windowSize() {
 
 function conf_load() {
   url.value=getItemOrDefault('url', "https://wiki.space.thales");
-  if (url.value === "") url.value="toto";
-
   space.value=getItemOrDefault('space', "orchestra");
 
   login.value=localStorage.getItem('login');
@@ -153,6 +151,17 @@ function conf_load() {
   start_date.value=d.toISOString().split('T')[0];
 }
 
+function showCollapse(elt, show) {
+  if (show) {
+    elt.setAttribute('left-arrow', '⮚');
+    elt.setAttribute('right-arrow', '⮘');
+  } else {
+    elt.setAttribute('left-arrow', '⮛');
+    elt.setAttribute('right-arrow', '⮛');
+  }
+}
+
+
 window.addEventListener('load', () => {
   //localStorage.clear(); // Clear all localStorage values
   // List all localStorage
@@ -164,6 +173,7 @@ window.addEventListener('load', () => {
     if (elt.hasAttribute('id')) {
       divs=elt.parentElement.getElementsByClassName("collapsable");
       if (divs.length > 0) divs[0].hidden=getBoolItemOrDefault(elt.id+".collapsed", false);
+      showCollapse(elt, divs[0].hidden);
     }
 
     //console.log("elt "+elt);
@@ -176,6 +186,7 @@ window.addEventListener('load', () => {
       if (divs.length > 0) {
         avH=divs[0].offsetHeight;
         divs[0].hidden=!divs[0].hidden;
+        showCollapse(elt, divs[0].hidden);
 
         // Preserve contributors list height
         webapp_get_pos().then(pos => {

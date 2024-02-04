@@ -79,3 +79,9 @@ patch webview.h <../patch_webview_linux
   * nmake /f Makefile.vc mode=static
   
   * copy ..\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel where you need it.
+
+
+
+ToDo :
+
+Faire des tests avec Dom Examples : [GitHub - mdn/dom-examples: Code examples that accompany various MDN DOM and Web API documentation pages](https://github.com/mdn/dom-examples.git)

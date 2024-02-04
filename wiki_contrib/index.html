@@ -16,29 +16,29 @@
     </div>
     <div>
       <fieldset>
-        <legend id="wiki" class="collapser">Confluence wiki:</legend>
+        <legend id="wiki" class="collapser">Confluence wiki</legend>
         <div class="collapsable">
           <label for="url">url:</label>
-          <input id="url" size="50" onchange="conf_update('url')">
+          <input id="url" style="width:60%" onchange="conf_update('url')">
           &nbsp;&nbsp;&nbsp;
           <label for="space">space:</label>
-        <input id="space" size="10" onchange="conf_update('space')">
+        <input id="space" style="width:20%" onchange="conf_update('space')">
         </div>
       </fieldset>
 
       <fieldset>
-        <legend id="cred" class="collapser">Credentials:</legend>
+        <legend id="cred" class="collapser">Credentials</legend>
         <div class="collapsable">
           <label for="login">login:</label>
-          <input id="login" onchange="conf_update('login')">
-          &nbsp;&nbsp;&nbsp;
+          <input id="login" style="width:25%" onchange="conf_update('login')">
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <label for="psswd">password:</label>
-          <input id="psswd" type="password" onchange="conf_update('psswd')">
+          <input id="psswd" type="password" style="width:40%" placeholder="Your password input will be hidden." onchange="conf_update('psswd')">
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Scan period:</legend>
+        <legend>Scan period</legend>
       <label for="start">Start:</label>
       <input type="date" id="start_date" onchange="check_period()">
       &nbsp;&nbsp;&nbsp;
@@ -51,9 +51,8 @@
       </fieldset>
 
       <fieldset id="contributors">
-        <legend>Contributors:</legend>
+        <legend title="Users SIA csv list whose contributions should be scanned.">Contributors</legend>
         <div>
-      <label for="userlist">SIA comma separated list of users whose contributions should be scanned:</label>
       <textarea id="userlist" onchange="conf_update('userlist')"></textarea>
         </div>
       </fieldset>
