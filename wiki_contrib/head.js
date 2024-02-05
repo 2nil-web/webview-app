@@ -140,7 +140,7 @@ function conf_load() {
   psswd.value=localStorage.getItem('psswd');
   //console.log("login "+login.value+", password "+psswd.value);
 
-  userlist.value=getItemOrDefault('userlist', "alkadea,arnones,capous,cavallc,chaumia1,essaydh,fresnew,guyonnt,kouachb,lalannd2,leleut,moninn,monnete,nottea,ropold,thurona,tourel,xsii077,xsii076");
+  userlist.value=getItemOrDefault('userlist', "alkadea,arnones,borelg,capous,cavallc,chaumia1,essaydh,fresnew,guyonnt,kouachb,lalannd2,leleut,lennex,moninn,monnete,nottea,picards3,ropold,roppold,thurona,tourel,xsii076,xsii077");
 
   // preset the period
   var d=new Date(); // current date
