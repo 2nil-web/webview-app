@@ -15,7 +15,6 @@ version_check.txt : FORCE
 	@if diff new_$@ $@ >/dev/null 2>&1; then rm -f new_$@; else mv -f new_$@ $@; rm -f ${PREFIX}.iss ${PREFIX}-standalone.iss; fi
 
 cfg :
-	@echo "root_dir ${root_dir}"
 	@echo "PGF ${PGF}"
 	@echo "PGF86 ${PGF86}"
 	@echo "PATH"
@@ -27,6 +26,10 @@ cfg :
 	@echo "TEMP ${TEMP}"
 	@echo "tmp ${tmp}"
 	@echo "temp ${temp}"
+	@echo "root_dir ${root_dir}"
+	@echo "mkfile_path ${mkfile_path}"
+	@echo "mkfile_dir ${mkfile_dir}"
+	@echo "current_dir ${current_dir}"
 
 ALL_SRCS=$(wildcard *.cpp) $(wildcard *.hpp) $(wildcard *.h)
 format :

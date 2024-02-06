@@ -36,6 +36,10 @@ PATH:=${PATH}:${PGF86}/Inno Setup 6
 PATH:=${PATH}:${PGF}/Inkscape/bin
 PATH:=${PATH}:${PGF86}/Pandoc
 
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
+current_dir := $(notdir $(mkfile_dir))
+
 ifneq (${OS},Linux)
  MAGICK=magick
 endif
@@ -48,11 +52,7 @@ COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo 'Unknown_commit')
 DECORATION=Nawak-Bidon
 ISO8601 := $(shell date +%Y-%m-%dT%H:%M:%SZ)
 
-ifeq (${root_dir},)
-	root_dir=.
-endif
-
-#WVDIR=${root_dir}/webview
+#WVDIR=${mkfile_dir}/webview
 #WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 
@@ -63,6 +63,7 @@ ifeq ($(STATIC_CURL),1)
 CPPFLAGS += -DCURL_STATICLIB
 endif
 endif
+CPPFLAGS += -I ${mkfile_dir}
 #CPPFLAGS += -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
 
 CXXFLAGS += -std=c++20 -g
@@ -81,7 +82,7 @@ endif
 PANDOC=pandoc
 else
 EXEXT=.exe
-CPPFLAGS += --include=webview_mingw_support.h
+CPPFLAGS += --include=${mkfile_dir}/webview_mingw_support.h
 LDFLAGS += -mwindows
 LDFLAGS += -static
 

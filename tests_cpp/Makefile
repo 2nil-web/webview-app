@@ -5,6 +5,8 @@ include ${root_dir}/header.mk
 
 SRCS=$(wildcard *.cpp)
 SRCS:=$(filter-out TemplateApp.cpp, $(SRCS))
+SRCS:=$(filter-out httpget.cpp, $(SRCS))
+SRCS:=$(filter-out my_curl.cpp, $(SRCS))
 
 EXES=${SRCS:.cpp=${EXEXT}}
 
