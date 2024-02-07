@@ -1,4 +1,24 @@
 (() => {
+  var appName="Wiki contributors";
+if (typeof webapp_restore === "function") {
+
+  window.webapp_set_title(appName);
+  // To be called with -m option
+  webapp_restore();
+  // Define minimum bounds
+  webapp_set_size(540, 160);
+  webapp_hints(1);
+  //webapp_set_size(560, 200);
+  // Set size
+  webapp_set_pos(680, 400);
+  /*
+    0 Width and height are default size
+    1 Width and height are minimum bounds
+    2 Width and height are maximum bounds
+    3 Window size is fixed
+  */
+}
+
   // Store the calculated ciphertext here, so we can decrypt the message later.
   let ciphertext;
 
