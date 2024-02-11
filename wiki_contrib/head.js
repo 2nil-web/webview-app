@@ -165,7 +165,7 @@ function showCollapse(elt, show) {
 
 
 window.addEventListener('load', () => {
-  localStorage.clear(); // Clear all localStorage values
+  //localStorage.clear(); // Clear all localStorage values
   // List all localStorage
   //for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); } console.log("");
 
