@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <string>
+#include <filesystem>
 
 #include "my_webview.h"
 
@@ -61,14 +62,33 @@ void CALLBACK webview_wrapper::HandleWinEvent(HWINEVENTHOOK hook, DWORD event, H
   }
 }
 
+void TryToChangeIcon(HWND hw, std::string icPfx, int icSz) {
+  std::string icFn=icPfx+std::to_string(icSz)+".ico";
+  std::string icFnAbs = std::filesystem::absolute(icFn).generic_string();
+
+  if (std::filesystem::is_regular_file(icFnAbs)) {
+    HICON hIc=(HICON)LoadImage(GetModuleHandle(NULL), icFnAbs.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+    if (hIc) {
+      std::cout << "Changing app icon of size " << icSz << " with icon file " << icFnAbs << std::endl;
+      SendMessage(hw, WM_SETICON, ICON_BIG, (LPARAM)hIc);
+      SendMessage(GetWindow(hw, GW_OWNER), WM_SETICON, ICON_BIG, (LPARAM)hIc);
+    }
+  }
+}
+
+  
+
 void webview_wrapper::InitSpy()
 {
 #ifdef DO_WINHOOK
   CoInitialize(NULL);
   g_hook = SetWinEventHook(EVENT_MIN, EVENT_MAX, NULL, &HandleWinEvent, GetProcessId(GetCurrentProcess()), 0, 0);
 #else
-  std::cout << "Create HWND " << (HWND)WP->window() << std::endl;
-  SetWindowSubclass((HWND)WP->window(), myWindowProc, 0, 0);
+  HWND hw=(HWND)WP->window();
+  std::cout << "Create HWND " << hw << std::endl;
+  TryToChangeIcon(hw, "app_", GetSystemMetrics(SM_CXICON));
+  TryToChangeIcon(hw, "app_", GetSystemMetrics(SM_CXSMICON));
+  SetWindowSubclass(hw, myWindowProc, 0, 0);
   me=this;
 #endif
 }
@@ -96,6 +116,19 @@ LRESULT webview_wrapper::myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
           me->eval(me->on_exit_func);
         }
         break;
+        /*
+      case WM_SETICON:
+      {
+        std::string ico_fn = std::filesystem::absolute("app.ico").generic_string();
+        if (std::filesystem::is_regular_file(ico_fn)) {
+        if (wParam == ICON_BIG) { } else { }
+          HICON hic=(HICON)LoadImage(GetModuleHandle(NULL), ico_fn.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+          std::cout << "Loading icon image " << ico_fn << std::endl;
+          return (LRESULT)hic;
+        }
+      }
+      return NULL;*/
+
       case WM_MOVE:
         if (me->on_move_func != "") {
           std::cout << "on move " << me->on_move_func << std::endl;

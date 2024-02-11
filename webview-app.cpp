@@ -109,8 +109,25 @@ std::vector<run_opt> r_opts = {
      [](char, std::string, std::string val) -> void { hints = std::stoi(val); }},
 };
 
+
+std::vector<std::string> idxs = {
+  "index.min.html",
+  "index.html",
+  "index.min.js",
+  "index.js"
+};
 std::string get_index()
 {
+  for (auto& sidx : idxs) {
+    std::string idx = std::filesystem::absolute(sidx).generic_string();
+    if (std::filesystem::is_regular_file(idx))
+    {
+      std::cout << "Found index file: " << idx << std::endl;
+      return idx;
+    }
+  }
+
+#ifdef NOCMP
   // std::cout << "get_index" << std::endl;
 
   std::string idx = std::filesystem::absolute("index.html").generic_string();
@@ -126,7 +143,7 @@ std::string get_index()
     // std::cout << "js " << idx << std::endl;
     return idx;
   }
-
+#endif
   return "";
 }
 
