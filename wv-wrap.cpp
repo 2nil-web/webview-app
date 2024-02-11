@@ -62,18 +62,23 @@ void CALLBACK webview_wrapper::HandleWinEvent(HWINEVENTHOOK hook, DWORD event, H
   }
 }
 
-void TryToChangeIcon(HWND hw, std::string icPfx, int icSz) {
-  std::string icFn=icPfx+std::to_string(icSz)+".ico";
+bool TryToChangeIcon(HWND hw, std::string icPfx, int icMet, int icTyp) {
+  std::string icFn=icPfx;
+  if (icMet > 0) icFn+=std::to_string(GetSystemMetrics(icMet));
+  icFn+=".ico";
+
   std::string icFnAbs = std::filesystem::absolute(icFn).generic_string();
 
   if (std::filesystem::is_regular_file(icFnAbs)) {
     HICON hIc=(HICON)LoadImage(GetModuleHandle(NULL), icFnAbs.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
     if (hIc) {
-      std::cout << "Changing app icon of size " << icSz << " with icon file " << icFnAbs << std::endl;
-      SendMessage(hw, WM_SETICON, ICON_BIG, (LPARAM)hIc);
-      SendMessage(GetWindow(hw, GW_OWNER), WM_SETICON, ICON_BIG, (LPARAM)hIc);
+      std::cout << "Changing app icon type " << icTyp << " with file " << icFnAbs << std::endl;
+      SendMessage(hw, WM_SETICON, icTyp, (LPARAM)hIc);
+      SendMessage(GetWindow(hw, GW_OWNER), WM_SETICON, icTyp, (LPARAM)hIc);
+      return true;
     }
   }
+  return false;
 }
 
   
@@ -86,8 +91,8 @@ void webview_wrapper::InitSpy()
 #else
   HWND hw=(HWND)WP->window();
   std::cout << "Create HWND " << hw << std::endl;
-  TryToChangeIcon(hw, "app_", GetSystemMetrics(SM_CXICON));
-  TryToChangeIcon(hw, "app_", GetSystemMetrics(SM_CXSMICON));
+  if (!TryToChangeIcon(hw, "app_", SM_CXICON, ICON_BIG)) TryToChangeIcon(hw, "app", 0, ICON_BIG);
+  if (!TryToChangeIcon(hw, "app_", SM_CXSMICON, ICON_SMALL)) TryToChangeIcon(hw, "app", 0, ICON_SMALL);
   SetWindowSubclass(hw, myWindowProc, 0, 0);
   me=this;
 #endif
