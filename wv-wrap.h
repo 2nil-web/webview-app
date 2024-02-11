@@ -55,6 +55,7 @@ public:
   void restore();
   void minimize();
   void set_title(const std::string &);
+  void set_icon(const std::string);
   void set_pos(int, int);
   void get_pos(int&, int&);
 

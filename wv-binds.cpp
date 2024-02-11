@@ -702,6 +702,14 @@ void create_binds(webview_wrapper& w)
     return "";
   });
 
+  // Change window top left icon
+  w.bind_doc("webapp_set_icon", "set window top left icon.", [&](const std::string &req) -> std::string {
+//    auto params = json_parse(req, "", 0);
+    auto file=json_parse(req, "", 0);
+    w.set_icon(file);
+    return "";
+  });
+
   /* Get window position
   w.bind_doc("webapp_get_size", "get window size.",
             [&](const std::string &seq, const std::string &req, void *) {

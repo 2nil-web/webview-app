@@ -50,10 +50,12 @@ if (typeof webapp_restore === "function") {
   winY=getItemOrDefault(`${appName}.y`, 390);
   //console.log(`GET POS ${winX}, ${winY}`);
   winW=getItemOrDefault(`${appName}.outerWidth`, 640);
-  winH=getItemOrDefault(`${appName}.outerHeight`, 360)-3;
+  winH=getItemOrDefault(`${appName}.outerHeight`, 360);//-3;
   //console.log(`GET DIM ${winW}, ${winH}`);
 
   window.webapp_set_title(appName);
+  window.webapp_set_icon("app.ico");
+
   // To be called with -m option
   webapp_restore();
   // Define minimum bounds
@@ -163,7 +165,7 @@ function showCollapse(elt, show) {
 
 
 window.addEventListener('load', () => {
-  //localStorage.clear(); // Clear all localStorage values
+  localStorage.clear(); // Clear all localStorage values
   // List all localStorage
   //for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); } console.log("");
 

@@ -91,8 +91,8 @@ void webview_wrapper::InitSpy()
 #else
   HWND hw=(HWND)WP->window();
   std::cout << "Create HWND " << hw << std::endl;
-  if (!TryToChangeIcon(hw, "app_", SM_CXICON, ICON_BIG)) TryToChangeIcon(hw, "app", 0, ICON_BIG);
-  if (!TryToChangeIcon(hw, "app_", SM_CXSMICON, ICON_SMALL)) TryToChangeIcon(hw, "app", 0, ICON_SMALL);
+  //if (!TryToChangeIcon(hw, "app_", SM_CXICON, ICON_BIG)) TryToChangeIcon(hw, "app", 0, ICON_BIG);
+  //if (!TryToChangeIcon(hw, "app_", SM_CXSMICON, ICON_SMALL)) TryToChangeIcon(hw, "app", 0, ICON_SMALL);
   SetWindowSubclass(hw, myWindowProc, 0, 0);
   me=this;
 #endif
@@ -109,7 +109,7 @@ void webview_wrapper::ExitSpy()
 
 LRESULT webview_wrapper::myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
   if (me && ((webview::webview *)(me->w))->window() == hWnd && wm_map.count(uMsg)) {
-    std::cout << wm_map[uMsg] << std::endl;
+    //std::cout << wm_map[uMsg] << std::endl;
     switch (uMsg) {
       case WM_CLOSE:
       case WM_QUIT:
@@ -189,7 +189,6 @@ void webview_wrapper::create(bool debug, void *wnd)
   });
 }
 
-
 webview_wrapper::webview_wrapper(bool debug, void *wnd)
 {
   create(debug, wnd);
@@ -263,6 +262,33 @@ void webview_wrapper::set_title(const std::string &title)
 {
   WP->set_title(title);
 }
+
+bool LoadIconIfExists(HWND hw, std::string ico) {
+  std::string icoAbs = std::filesystem::absolute(ico).generic_string();
+  std::cout << "Trying to load icon file " << ico << '(' << icoAbs << ')' << std::endl;
+
+  if (std::filesystem::is_regular_file(icoAbs)) {
+    std::cout << "Found icon file " << icoAbs << std::endl;
+    HICON hIc=(HICON)LoadImage(GetModuleHandle(NULL), icoAbs.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+    if (hIc) {
+      std::cout << "Changing app icon with file " << icoAbs << std::endl;
+      SendMessage(hw, WM_SETICON, ICON_BIG, (LPARAM)hIc);
+      SendMessage(GetWindow(hw, GW_OWNER), WM_SETICON, ICON_BIG, (LPARAM)hIc);
+      SendMessage(hw, WM_SETICON, ICON_SMALL, (LPARAM)hIc);
+      SendMessage(GetWindow(hw, GW_OWNER), WM_SETICON, ICON_SMALL, (LPARAM)hIc);
+      return true;
+    }
+  }
+  return false;
+}
+
+void webview_wrapper::set_icon(std::string file) {
+#ifdef _WIN32
+  HWND hw = (HWND)WP->window();
+  LoadIconIfExists(hw, file);
+#endif
+}
+
 
 void webview_wrapper::hide()
 {

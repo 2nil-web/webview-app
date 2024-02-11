@@ -126,24 +126,6 @@ std::string get_index()
       return idx;
     }
   }
-
-#ifdef NOCMP
-  // std::cout << "get_index" << std::endl;
-
-  std::string idx = std::filesystem::absolute("index.html").generic_string();
-  if (std::filesystem::is_regular_file(idx))
-  {
-    // std::cout << "html " << idx << std::endl;
-    return idx;
-  }
-
-  idx = std::filesystem::absolute("index.js").generic_string();
-  if (std::filesystem::is_regular_file(idx))
-  {
-    // std::cout << "js " << idx << std::endl;
-    return idx;
-  }
-#endif
   return "";
 }
 
@@ -288,9 +270,10 @@ void webview_run(std::string url, std::string title = "", std::string init_js = 
 // ./webview-app.exe -r "for(i=0; i < 10; i++) writeln(i);" # under a
 // cygwin/mingw mintty console start /wait webview-app.exe -r "for(i=0; i < 10;
 // i++) writeln(i);" # under a windows cmd
-#ifdef _WIN32
 
-/* From https://github.com/MicrosoftEdge/WebView2Feedback/issues/4166, env var "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS" with following values :
+
+/* Because of CORS we have to disable web security with WebView2 in order to alow to send http queries from the app to remote servers
+ From https://github.com/MicrosoftEdge/WebView2Feedback/issues/4166, env var "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS" with following values :
 --disable-web-security # Tested fetch works with wiki.space.thales
 --allow-insecure-localhost
 --unsafely-treat-insecure-origin-as-secure=http:*
@@ -306,13 +289,15 @@ void webview_run(std::string url, std::string title = "", std::string init_js = 
  See there : https://observablehq.com/@mbostock/fetch-with-basic-auth
 */
 
-
+#ifndef _WIN32
+int main(int argc, char **argv, char **)
+{
+#else
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/)
 {
   LPSTR *argv;
   int argc;
   argv = CommandLineToArgv(GetCommandLine(), &argc);
-  getopt_init(argc, argv, r_opts, "WebView app.", "", "(c) Denis LALANNE. Provided as is. NO WARRANTY of any kind.");
 
   // Set default value of WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS to --disable-web-security
   if (add_bro_args == "") my_setenv("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--disable-web-security");
@@ -320,14 +305,12 @@ int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLi
   else my_setenv("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", add_bro_args);
   // Eventuellement voir ICoreWebView2EnvironmentOptions, put_AdditionalBrowserArguments
   // Dans https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2environmentoptions?view=webview2-1.0.2210.55
-#else
-int main(int argc, char **argv, char **)
-{
-  getopt_init(argc, argv, r_opts, "WebView app.", "", "(c) Denis LALANNE. Provided as is. NO WARRANTY of any kind.");
-#endif
   // extern std::string do_fstat(std::string sp);
   // std::cout << "fstat1" << std::endl;
   // do_fstat(url);
+#endif
+
+  getopt_init(argc, argv, r_opts, "WebView app.", "", "(c) Denis LALANNE. Provided as is. NO WARRANTY of any kind.");
 
   if (url.empty())
   {
