@@ -5,7 +5,8 @@
 #include <winber.h>
 
 // This subroutine must have validated credentials (name and password) passed to it.
-int MyLDAPSearch(std::string ip, int port, std::string binddn, std::string password, std::string base, std::string filter)
+//Exemple : ./myldsrch 172.16.3.94 1403 'uid=adm_sts,ou=Directory Administrators,o=ASPI.fr' 'adm_sts password' 'uid=lalannd2, ou=utilisateur,o=ASPI.fr' '(&(objectclass=persondsi))'
+int MyLDAPSearch(std::string ip, int port, std::string binddn, std::string password, std::string base, std::string filter, ULONG numReturns=10)
 {
   // Initialize a session. LDAP_PORT is the default port, 389.
   LDAP* pLdapConnection=NULL;
@@ -20,7 +21,7 @@ int MyLDAPSearch(std::string ip, int port, std::string binddn, std::string passw
   
   // Set session options.
   ULONG version=LDAP_VERSION3;
-  ULONG numReturns=10;
+  ;
   ULONG lRtn=0;
   
   // Set the version to 3.0 (default is 2.0).

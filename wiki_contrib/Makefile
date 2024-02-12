@@ -1,7 +1,13 @@
 
 PATH:=${PATH}:/c/Program Files/Inkscape/bin
 
-HTMINIFY=/c/Users/casal/AppData/Roaming/npm/html-minifier --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype --minify-css true --minify-js true --continue-on-parse-error
+ifeq ($(USERDOMAIN),ESPACECPT)
+	PATH:=${PATH}:/c/Users/lalannd2/MyApps/inkscape/bin/inkscape:/c/Software/node.js
+else
+	PATH:=${PATH}:${APPDATA}/npm
+endif
+
+HTMINIFY=html-minifier --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype --minify-css true --minify-js true --continue-on-parse-error
 
 COMPONENTS=index.html head.js loaders.css style.css
 TARGET=index.min.html
