@@ -1,4 +1,4 @@
-# WebView Application template
+## WebView Application template
 
 Application using the : [webview library](https://github.com/webview/webview.git).
 
@@ -79,8 +79,6 @@ patch webview.h <../patch_webview_linux
   * nmake /f Makefile.vc mode=static
   
   * copy ..\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel where you need it.
-
-
 
 ToDo :
 

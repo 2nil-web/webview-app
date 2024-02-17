@@ -300,7 +300,7 @@ int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/, LPSTR /*lpCmdLi
   argv = CommandLineToArgv(GetCommandLine(), &argc);
 
   // Set default value of WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS to --disable-web-security
-  if (add_bro_args == "") my_setenv("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--disable-web-security");
+  if (add_bro_args == "") my_setenv("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--disable-web-security --unsafely-treat-insecure-origin-as-secure=http:* --unsafely-treat-insecure-origin-as-secure=https:*");
   // Or to the ones provided through repetitive call to the -b options
   else my_setenv("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", add_bro_args);
   // Eventuellement voir ICoreWebView2EnvironmentOptions, put_AdditionalBrowserArguments
