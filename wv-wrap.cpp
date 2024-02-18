@@ -28,10 +28,10 @@ line 2484 : class win32_edge_engine
 line 2890 : using browser_engine = detail::win32_edge_engine;
 */
 
+webview_wrapper *webview_wrapper::me;
 #ifdef _WIN32
 #include <oleacc.h>
 #pragma comment(lib,"Oleacc.lib")
-webview_wrapper *webview_wrapper::me;
 
 void DisplayWindowRect(HWND hw) {
   RECT rc;
@@ -263,6 +263,7 @@ void webview_wrapper::set_title(const std::string &title)
   WP->set_title(title);
 }
 
+#ifdef _WIN32
 bool LoadIconIfExists(HWND hw, std::string ico) {
   std::string icoAbs = std::filesystem::absolute(ico).generic_string();
   std::cout << "Trying to load icon file " << ico << '(' << icoAbs << ')' << std::endl;
@@ -281,6 +282,7 @@ bool LoadIconIfExists(HWND hw, std::string ico) {
   }
   return false;
 }
+#endif
 
 void webview_wrapper::set_icon(std::string file) {
 #ifdef _WIN32
@@ -313,6 +315,8 @@ void webview_wrapper::restore()
 
 void webview_wrapper::get_pos(int& x, int& y)
 {
+  x=0;
+  y=0;
 #ifdef _WIN32
   HWND hw=(HWND)WP->window();
   RECT rc;

@@ -7,7 +7,7 @@ channel.postMessage('another-'+appName);
 channel.addEventListener('message', (msg) => {
   if (msg.data === 'another-'+appName) {
     // Exitting from 2nd instance of appName
-    webapp_exit();;
+    webapp_exit();
   }
 });
 
@@ -33,45 +33,36 @@ function save_pos() {
   webapp_get_pos().then(pos => {
     localStorage.setItem(`${appName}.x`, pos.x);
     localStorage.setItem(`${appName}.y`, pos.y);
-    //console.log(`SAVE POS ${pos.x}, ${pos.y}`);
+    console.log(`SAVE POS ${pos.x}, ${pos.y}`);
   });
 }
 
 function save_dim() {
   localStorage.setItem(`${appName}.outerWidth`, window.outerWidth);
   localStorage.setItem(`${appName}.outerHeight`, window.outerHeight);
-  //console.log(`SAVE DIM ${window.outerWidth}, ${window.outerHeight}`);
+  console.log(`SAVE DIM ${window.outerWidth}, ${window.outerHeight}`);
 }
 
-if (typeof webapp_restore === "function") {
-  var winX, winY, winW, winH;
-  // Load geometry
-  winX=getItemOrDefault(`${appName}.x`, 640);
-  winY=getItemOrDefault(`${appName}.y`, 390);
-  //console.log(`GET POS ${winX}, ${winY}`);
-  winW=getItemOrDefault(`${appName}.outerWidth`, 640);
-  winH=getItemOrDefault(`${appName}.outerHeight`, 360);//-3;
-  //console.log(`GET DIM ${winW}, ${winH}`);
+var winX, winY, winW, winH;
+// Load geometry
+winX=getItemOrDefault(`${appName}.x`, 640);
+winY=getItemOrDefault(`${appName}.y`, 390);
+console.log(`GET POS ${winX}, ${winY}`);
+winW=getItemOrDefault(`${appName}.outerWidth`, 640);
+winH=getItemOrDefault(`${appName}.outerHeight`, 360);//-3;
+console.log(`GET DIM ${winW}, ${winH}`);
 
-  window.webapp_set_title(appName);
-  window.webapp_set_icon("app.ico");
 
-  // To be called with -m option
-  webapp_restore();
-  // Define minimum bounds
-  webapp_set_size(560, 290, 1);
-  // Set size
-  webapp_set_size(winW, winH);
-  webapp_set_pos(winX, winY);
-  //webapp_hints(3);
-  /*
-    0 Width and height are default size
-    1 Width and height are minimum bounds
-    2 Width and height are maximum bounds
-    3 Window size is fixed
-  */
-  webapp_on_move('save_pos()');
-}
+webapp.set_title(appName);
+// To be called with -m option
+webapp.restore();
+webapp.set_icon("app.ico");
+// Define minimum bounds
+webapp.set_size(560, 290, 1);
+webapp.set_size(winW, winH);
+webapp.set_pos(winX, winY);
+webapp.on_move('save_pos()');
+//webapp.hints(3);
 
 function about () {
   info="Wiki contrib 1.0.0, includes:\n";
@@ -121,8 +112,19 @@ function windowSize() {
     lastDocCliH=document.documentElement.clientHeight;
     localStorage.setItem(`${appName}.outerHeight`, lastDocCliH);
   }
-  //console.log(`dim ${lastDocCliW}, ${lastDocCliH}`);
+  console.log(`dim ${lastDocCliW}, ${lastDocCliH}`);
 }
+
+function save_conf() {
+  save_pos();
+  save_dim();
+}
+
+function save_conf_and_exit() {
+  save_conf();
+  webapp_exit();
+}
+
 
 function conf_load() {
   url.value=getItemOrDefault('url', "https://wiki.space.thales");

@@ -21,16 +21,17 @@ const id = {
 }
 
 function infobox (msg) {
-  console.log ("[["+document.title+"]]");
-//  if (document.title === "")
+  if (client_system() == "Windows")
     window.webapp_get_title().then(wtitle => { msgbox(msg, stem(wtitle), mb.ok); });
-//  else msgbox(msg, document.title, mb.ok);
+  else
+    alert(msg);
 }
 
 // Tester retour msgbox ...
 function confirmbox (msg) {
-  if (document.title == "")
+  if (client_system() == "Windows")
     window.webapp_get_title().then(wtitle => { msgbox(msg, document.title, mb.okcancel); });
-  else msgbox(msg, document.title, mb.okcancel);
+  else
+    confirm(msg);
 }
 

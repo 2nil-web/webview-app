@@ -22,8 +22,8 @@ class webview_wrapper
 {
 
 private:
-#ifdef _WIN32
   static webview_wrapper *me;
+#ifdef _WIN32
 #endif
   std::string on_move_func="", on_exit_func="";
   void *w = nullptr;
