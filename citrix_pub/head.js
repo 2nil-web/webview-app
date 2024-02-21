@@ -78,10 +78,10 @@ function about () {
   });
 }
 
-function conf_update(elt_id) {
-  elt=document.getElementById(elt_id);
-  //console.log(elt_id+' '+elt.value);
-  localStorage.setItem(elt_id, elt.value);
+function conf_update(elt) {
+  elt=document.getElementById(elt.id);
+  //console.log(elt.id+' '+elt.value);
+  localStorage.setItem(elt.id, elt.value);
 }
 
 function adjustToWindowHeight(elemId) {
@@ -131,6 +131,7 @@ function conf_load() {
   }
 
   psswd.value=localStorage.getItem('psswd');
+  url.value=getItemOrDefault ('url', "http://tlpalcorr01.aes.alcatel.fr:8090/agl/backends-list");
   //console.log("login "+login.value+", password "+psswd.value);
   cred.style.display=localStorage.getItem(`${appName}.cred`, "block");
 }
@@ -192,12 +193,18 @@ function show_backends (json) {
 }
 
 
-url="http://tlpalcorr01.aes.alcatel.fr:8090/agl/backends-list";
 
-async function load_pub (pubname) {
 
-  if (login.value !== "" && psswd.value !== "") {
-    endp=url+'/'+pubname+'.json';
+async function load_pub (elt) {
+  Array.from(document.getElementsByClassName("topnavsel")).forEach((elt) =>{
+    //elt.classList.add("..");
+    elt.classList.remove("topnavsel");
+  });
+  elt.classList.add("topnavsel");
+
+  //console.log("Element "+elt.textContent);
+  if (url.value !== "" && login.value !== "" && psswd.value !== "") {
+    endp=url.value+'/'+elt.id+'.json';
     let response = await fetch(endp, {method:'GET', headers: {'Authorization': 'Basic ' + btoa(`${login.value}:${psswd.value}`)}});
     let txt = await response.text();
     var lines = txt.split("\n");
@@ -205,7 +212,7 @@ async function load_pub (pubname) {
     document.getElementById("publi_title").innerHTML=pubtitle;
     var json = lines.join("\n");
     
-    if (pubname === 'BEF_ListeBackEndDetails') show_backends(json);
+    if (elt.id === 'BEF_ListeBackEndDetails') show_backends(json);
     else show_publi(json);
   }
 }

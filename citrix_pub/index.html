@@ -16,19 +16,22 @@
   <body>
     <div class="topnav">
       <a onclick="save_conf_and_exit()">Quit</a>
-      <a onclick="show_hide_cred()">Show/Hide credential</a>
-      <a onclick='load_pub("NEXT_ListePublicationsAndVMInfo")'>Next publishing and VM info</a>
-      <a onclick='load_pub("BEF_ListePublicationsAndVMInfo")'>BEF  publishing and VM info</a>
-      <a onclick='load_pub("BEF_ListeBackEndDetails")'>Backends info</a>
+      <a onclick="show_hide_cred()">Show/Hide configuration</a>
+      <a id='NEXT_ListePublicationsAndVMInfo' onclick="load_pub(this)">Next publishing and VM info</a>
+      <a id='BEF_ListePublicationsAndVMInfo' onclick="load_pub(this)">BEF  publishing and VM info</a>
+      <a id='BEF_ListeBackEndDetails' onclick="load_pub(this)">Backends info</a>
       <a onclick="about()" >About</a>
     </div>
       <fieldset id="cred">
         <legend>Credentials</legend>
+          <label for="url">url:</label>
+          <input id="url" style="width:50%" onchange="conf_update(this)">
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <label for="login">login:</label>
-          <input id="login" style="width:30%" onchange="conf_update('login')">
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <input id="login" style="width:10%" onchange="conf_update(this)">
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <label for="psswd">password:</label>
-          <input id="psswd" type="password" style="width:30%" placeholder="Your password input will be hidden." onchange="conf_update('psswd')">
+          <input id="psswd" type="password" style="width:10%" placeholder="Your password input will be hidden." onchange="conf_update(this)">
       </fieldset>
       <div id="publi_title" style="text-align:center; font-weight:bold"></div>
       <div id="publi_view"></div>
