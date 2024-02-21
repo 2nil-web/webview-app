@@ -146,63 +146,10 @@ function show_hide_cred () {
   localStorage.setItem(`${appName}.cred`, cred.style.display);
 }
 
-function show_publi(json) {
-  var table = new Tabulator("#publi_view", {
-    // set height of table (in CSS or here), this enables the Virtual DOM
-    // and improves render speed dramatically (can be any valid css height value)
-//    height:140,
-    data:json, //assign data to table
-    layout:"fitColumns", //fit columns to width of table (optional)
-    //Define Table Columns
-    columns:[
-      {title:"DeliveryController", field:"DeliveryController", width:100},
-      {title:"Worker", field:"Worker", width:100},
-      {title:"AgentVersion", field:"AgentVersion", width:100},
-      {title:"Publication", field:"Publication", width:150},
-      {title:"DeliveryGroup", field:"DeliveryGroup", width:150},
-      {title:"Members", field:"Members", width:500},
-      {title:"Day", field:"Day", width:100},
-      {title:"Frequency", field:"Frequency", width:60},
-      {title:"StartTime", field:"StartTime", width:100},
-      {title:"Cpu", field:"NumCpu", width:60},
-      {title:"Mem", field:"MemoryGB", width:70},
-      {title:"InfosDisk", field:"InfosDisk"},
-    ],
-  });
-}
-
-function show_backends (json) {
-   //create Tabulator on DOM element with id "example-table"
-  var table = new Tabulator("#publi_view", {
-    // set height of table (in CSS or here), this enables the Virtual DOM
-    // and improves render speed dramatically (can be any valid css height value)
-    data:json, //assign data to table
-    layout:"fitColumns", //fit columns to width of table (optional)
-    //Define Table Columns
-    columns:[
-      {title:"VM name", field:"VMName"},
-      {title:"Guest name", field:"GuestName"},
-      {title:"Power", field:"Powerstate"},
-      {title:"Cpu", field:"NumCpu"},
-      {title:"Mem GB", field:"MemoryGB"},
-      {title:"IP address", field:"IPAddress"},
-      {title:"OS version", field:"OSVersion", hozAlign:"right"},
-      {title:"UpTime", field:"UpTime", sorter:"UpTime", sorter: "number"},
-    ],
-  });
-}
-
-
-
-
 async function load_pub (elt) {
-  Array.from(document.getElementsByClassName("topnavsel")).forEach((elt) =>{
-    //elt.classList.add("..");
-    elt.classList.remove("topnavsel");
-  });
+  Array.from(document.getElementsByClassName("topnavsel")).forEach((elt) =>{ elt.classList.remove("topnavsel"); });
   elt.classList.add("topnavsel");
 
-  //console.log("Element "+elt.textContent);
   if (url.value !== "" && login.value !== "" && psswd.value !== "") {
     endp=url.value+'/'+elt.id+'.json';
     let response = await fetch(endp, {method:'GET', headers: {'Authorization': 'Basic ' + btoa(`${login.value}:${psswd.value}`)}});
@@ -211,9 +158,41 @@ async function load_pub (elt) {
     pubtitle=lines.shift();
     document.getElementById("publi_title").innerHTML=pubtitle;
     var json = lines.join("\n");
-    
-    if (elt.id === 'BEF_ListeBackEndDetails') show_backends(json);
-    else show_publi(json);
+    var cols;
+    // Define Table Columns
+    if (elt.id === 'BEF_ListeBackEndDetails') {
+      cols=[
+        {title:"VM name", field:"VMName", headerFilter:"input"},
+        {title:"Guest name", field:"GuestName", headerFilter:"input"},
+        {title:"Power", field:"Powerstate", headerFilter:"input"},
+        {title:"Cpu", field:"NumCpu", headerFilter:"input"},
+        {title:"Mem GB", field:"MemoryGB", headerFilter:"input"},
+        {title:"IP address", field:"IPAddress", headerFilter:"input"},
+        {title:"OS version", field:"OSVersion", hozAlign:"right", headerFilter:"input"},
+        {title:"UpTime", field:"UpTime", sorter:"UpTime", sorter: "number", headerFilter:"input"},
+      ]
+    } else {
+      cols=[
+        {title:"DeliveryController", field:"DeliveryController", width:100, headerFilter:"input"},
+        {title:"Worker", field:"Worker", width:100, headerFilter:"input"},
+        {title:"AgentVersion", field:"AgentVersion", width:100, headerFilter:"input"},
+        {title:"Publication", field:"Publication", width:150, headerFilter:"input"},
+        {title:"DeliveryGroup", field:"DeliveryGroup", width:150, headerFilter:"input"},
+        {title:"Members", field:"Members", width:500, headerFilter:"input"},
+        {title:"Day", field:"Day", width:100, headerFilter:"input"},
+        {title:"Frequency", field:"Frequency", width:60, headerFilter:"input"},
+        {title:"StartTime", field:"StartTime", width:100, headerFilter:"input"},
+        {title:"Cpu", field:"NumCpu", width:60, headerFilter:"input"},
+        {title:"Mem", field:"MemoryGB", width:70, headerFilter:"input"},
+        {title:"InfosDisk", field:"InfosDisk", headerFilter:"input"},
+      ]
+    }
+
+    var table = new Tabulator("#publi_view", {
+      data:json, //assign data to table
+      layout:"fitColumns", //fit columns to width of table (optional)
+      columns:cols,
+    });
   }
 }
 
