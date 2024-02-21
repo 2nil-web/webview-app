@@ -145,7 +145,7 @@ function show_hide_cred () {
   localStorage.setItem(`${appName}.cred`, cred.style.display);
 }
 
-function show_publi(title, json) {
+function show_publi(json) {
   var table = new Tabulator("#publi_view", {
     // set height of table (in CSS or here), this enables the Virtual DOM
     // and improves render speed dramatically (can be any valid css height value)
@@ -170,7 +170,7 @@ function show_publi(title, json) {
   });
 }
 
-function show_backends (title, json) {
+function show_backends (json) {
    //create Tabulator on DOM element with id "example-table"
   var table = new Tabulator("#publi_view", {
     // set height of table (in CSS or here), this enables the Virtual DOM
@@ -195,18 +195,18 @@ function show_backends (title, json) {
 url="http://tlpalcorr01.aes.alcatel.fr:8090/agl/backends-list";
 
 async function load_pub (pubname) {
-  endp=url+'/'+pubname+'.json';
 
   if (login.value !== "" && psswd.value !== "") {
+    endp=url+'/'+pubname+'.json';
     let response = await fetch(endp, {method:'GET', headers: {'Authorization': 'Basic ' + btoa(`${login.value}:${psswd.value}`)}});
     let txt = await response.text();
     var lines = txt.split("\n");
-    title=lines.shift();
-    //document.getElementById("publi_title").innerHTML=title;
+    pubtitle=lines.shift();
+    document.getElementById("publi_title").innerHTML=pubtitle;
     var json = lines.join("\n");
     
-    if (pubname === 'BEF_ListeBackEndDetails') show_backends(title, json);
-    else show_publi(title, json);
+    if (pubname === 'BEF_ListeBackEndDetails') show_backends(json);
+    else show_publi(json);
   }
 }
 

@@ -61,3 +61,5 @@ tmp_test/
 wiki_contrib/wiki_contrib.min.json
 *.min.html
 *.nomin.html
+tests_cpp/*.txt
+*.lnk
