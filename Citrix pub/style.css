@@ -1,0 +1,71 @@
+
+body {
+  overflow: hidden;
+}
+
+.topnav {
+  overflow: hidden;
+  border-bottom: 1px solid black;
+  user-select: none;
+}
+
+.topnav a {
+  float: left;
+  /*color: #f2f2f2;*/
+  color: #0;
+  text-align: center;
+  padding: 2px 12px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a:hover {
+  cursor: pointer;
+  /*background-color: #ddd;*/
+  background-color: #aaffaa;
+  color: blue;
+}
+
+fieldset, legend {
+  text-align: center;
+  margin: 0 0 0 0;
+  padding: 0 0 2 0;
+}
+
+.collapser {
+  width: 40%;
+  border: 1px solid #0F0;
+  padding: 0 0 0 0;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: center;
+  margin-bottom: 4px;
+}
+
+.collapser::before {
+  content: attr(left-arrow);
+  float: left;
+}
+.collapser::after {
+  content: attr(right-arrow);
+  float: right;
+}
+.collapser::before,.collapser::after {
+  /* ⮜ ⮝ ⮞ ⮟ */
+  /* ⮘ ⮚ ⮛ ⮙ */
+  margin: 0 0 0 0;
+  border: 1px solid #0F0;
+  padding: 0 0 0 0;
+  font-size:14px;
+}
+
+fieldset {
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+}
+
+#userlist {
+  width: 100%;
+  resize: none;
+}
+

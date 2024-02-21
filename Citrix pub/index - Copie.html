@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/plain; charset=utf-8">
+    <title>List of available citrix publishing</title>
+    <link href="dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="dist/js/tabulator.min.js"></script>  </head>
+  <body>
+    <div id="nxt-publi-head" style="font-weight: bold; text-align:center;"></div>
+    <div id="nxt-publi-table"></div>
+
+    <div id="bef-publi-head" style="font-weight: bold; text-align:center;"></div>
+    <div id="bef-publi-table"></div>
+
+    <div id="backends-head" style="font-weight: bold; text-align:center;"></div>
+    <div id="backends-table"></div>
+    <script>
+function getFirstLine(text) {
+    var index = text.indexOf("\n");
+    if (index === -1) index = undefined;
+    return text.substring(0, index);
+}
+       function nxt_publi_table () {
+          fetch("NEXT_ListePublicationsAndVMInfo.json").then(response => { if (response.ok) return response.text(); }).then(txt => {
+	    var lines = txt.split("\n");
+	    document.getElementById("nxt-publi-head").innerHTML=lines.shift(); 
+	    var tbldat = lines.join("\n");
+
+             //create Tabulator on DOM element with id "example-table"
+            var table = new Tabulator("#nxt-publi-table", {
+              // set height of table (in CSS or here), this enables the Virtual DOM
+              // and improves render speed dramatically (can be any valid css height value)
+              height:140,
+              data:tbldat, //assign data to table
+              layout:"fitColumns", //fit columns to width of table (optional)
+              //Define Table Columns
+              columns:[
+		{title:"DeliveryController", field:"DeliveryController", width:100},
+		{title:"Worker", field:"Worker", width:100},
+		{title:"AgentVersion", field:"AgentVersion", width:100},
+		{title:"Publication", field:"Publication", width:150},
+		{title:"DeliveryGroup", field:"DeliveryGroup", width:150},
+		{title:"Members", field:"Members", width:500},
+		{title:"Day", field:"Day", width:100},
+		{title:"Frequency", field:"Frequency", width:60},
+		{title:"StartTime", field:"StartTime", width:100},
+		{title:"Cpu", field:"NumCpu", width:60},
+		{title:"Mem", field:"MemoryGB", width:70},
+		{title:"InfosDisk", field:"InfosDisk"},
+              ],
+            });
+          });
+        }
+
+       function bef_publi_table () {
+          fetch("BEF_ListePublicationsAndVMInfo.json").then(response => { if (response.ok) return response.text(); }).then(txt => {
+            var lines = txt.split("\n");
+            document.getElementById("bef-publi-head").innerHTML=lines.shift();
+            var tbldat = lines.join("\n");
+
+             //create Tabulator on DOM element with id "example-table"
+            var table = new Tabulator("#bef-publi-table", {
+              // set height of table (in CSS or here), this enables the Virtual DOM
+              // and improves render speed dramatically (can be any valid css height value)
+              height:500,
+              data:tbldat, //assign data to table
+              layout:"fitColumns", //fit columns to width of table (optional)
+              //Define Table Columns
+              columns:[
+		{title:"DeliveryController", field:"DeliveryController", width:100},
+		{title:"Worker", field:"Worker", width:100},
+		{title:"AgentVersion", field:"AgentVersion", width:100},
+		{title:"Publication", field:"Publication", width:150},
+		{title:"DeliveryGroup", field:"DeliveryGroup", width:150},
+		{title:"Members", field:"Members", width:500},
+		{title:"Day", field:"Day", width:100},
+		{title:"Frequency", field:"Frequency", width:60},
+		{title:"StartTime", field:"StartTime", width:100},
+		{title:"Cpu", field:"NumCpu", width:60},
+		{title:"Mem", field:"MemoryGB", width:70},
+		{title:"InfosDisk", field:"InfosDisk"},
+              ],
+            });
+          });
+        }
+
+       function bef_backends_table () {
+          tname="BEF_ListeBackEndDetails";
+          fetch("BEF_ListeBackEndDetails.json").then(response => { if (response.ok) return response.text(); }).then(txt => {
+            var lines = txt.split("\n");
+            document.getElementById("backends-head").innerHTML=lines.shift();
+            var tbldat = lines.join("\n");
+
+             //create Tabulator on DOM element with id "example-table"
+            var table = new Tabulator("#backends-table", {
+              // set height of table (in CSS or here), this enables the Virtual DOM
+              // and improves render speed dramatically (can be any valid css height value)
+              height:220,
+              data:tbldat, //assign data to table
+              layout:"fitColumns", //fit columns to width of table (optional)
+              //Define Table Columns
+              columns:[
+                {title:"VM name", field:"VMName"},
+                {title:"Guest name", field:"GuestName"},
+                {title:"Power", field:"Powerstate"},
+                {title:"Cpu", field:"NumCpu"},
+                {title:"Mem GB", field:"MemoryGB"},
+                {title:"IP address", field:"IPAddress"},
+                {title:"OS version", field:"OSVersion", hozAlign:"right"},
+                {title:"UpTime", field:"UpTime", sorter:"UpTime", sorter: "number"},
+              ],
+            });
+          });
+        }
+
+       nxt_publi_table();
+       bef_publi_table();
+       bef_backends_table();
+    </script>
+  </body>
+</html>
+
