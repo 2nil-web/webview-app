@@ -21,15 +21,16 @@ const id = {
 }
 
 function infobox (msg) {
-  if (client_system() == "Windows")
+  if (is_webview() === true) {
     window.webapp_get_title().then(wtitle => { msgbox(msg, stem(wtitle), mb.ok); });
-  else
+  } else {
     alert(msg);
+  }
 }
 
 // Tester retour msgbox ...
 function confirmbox (msg) {
-  if (client_system() == "Windows")
+  if (is_webview())
     window.webapp_get_title().then(wtitle => { msgbox(msg, document.title, mb.okcancel); });
   else
     confirm(msg);

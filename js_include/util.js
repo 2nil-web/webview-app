@@ -57,7 +57,7 @@ function getParams(prom_func) {
 }
 
 function basename(str) {
-  console.log(`PATH ${str}`);
+  //console.log(`PATH ${str}`);
   return str.replace(/.*\/|\.[^.]*$/g, '');  
 //  return str.substr(str.lastIndexOf('/') + 1)
 //  return str.split('/').reverse()[0];
