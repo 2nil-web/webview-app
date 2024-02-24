@@ -111,6 +111,8 @@ std::vector<run_opt> r_opts = {
 
 
 std::vector<std::string> idxs = {
+  "webview.min.html",
+  "webview.html",
   "index.min.html",
   "index.html",
   "index.min.js",
