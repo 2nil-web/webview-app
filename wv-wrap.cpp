@@ -345,9 +345,17 @@ void webview_wrapper::get_size(int& wi, int& he)
 #endif
 }
 
+void disp_hints() {
+  return;
+  std::cout << "WEBVIEW_HINT_NONE "  << WEBVIEW_HINT_NONE  << std::endl;
+  std::cout << "WEBVIEW_HINT_MIN "   << WEBVIEW_HINT_MIN   << std::endl;
+  std::cout << "WEBVIEW_HINT_MAX "   << WEBVIEW_HINT_MAX   << std::endl;
+  std::cout << "WEBVIEW_HINT_FIXED " << WEBVIEW_HINT_FIXED << std::endl;
+}
 
 void webview_wrapper::set_size(int width, int height, int hints)
 {
+  disp_hints();
   //std::cout << "set_size w " << width << ", h " << height << ", hints " << hints << std::endl;
   if (hints < 0) {
 #ifdef _WIN32
@@ -357,17 +365,18 @@ void webview_wrapper::set_size(int width, int height, int hints)
 #else
   hints=0;
 #endif
-  } else WP->set_size(width, height, hints);
+  } else WP->set_size(width, height, (webview_hint_t)hints);
 }
 
 void webview_wrapper::set_hints(int hints)
 {
+  disp_hints();
   if (hints > -1 && hints < 4) {
 #ifdef _WIN32
     RECT rc;
     HWND hw=(HWND)WP->window();
     GetWindowRect(hw, &rc);
-    WP->set_size(rc.right-rc.left, rc.bottom-rc.top, hints);
+    WP->set_size(rc.right-rc.left, rc.bottom-rc.top, (webview_hint_t)hints);
 #endif
   }
 }

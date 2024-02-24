@@ -7,7 +7,7 @@ channel.postMessage('another-'+appName);
 channel.addEventListener('message', (msg) => {
   if (msg.data === 'another-'+appName) {
     // Exitting from 2nd instance of appName
-    webapp_exit();
+    webapp.exit();
   }
 });
 
@@ -30,7 +30,7 @@ function getBoolItemOrDefault (itemId, defVal) {
 };
 
 function save_pos() {
-  webapp_get_pos().then(pos => {
+  webapp.get_pos().then(pos => {
     localStorage.setItem(`${appName}.x`, pos.x);
     localStorage.setItem(`${appName}.y`, pos.y);
     console.log(`SAVE POS ${pos.x}, ${pos.y}`);
@@ -47,10 +47,10 @@ var winX, winY, winW, winH;
 // Load geometry
 winX=getItemOrDefault(`${appName}.x`, 640);
 winY=getItemOrDefault(`${appName}.y`, 390);
-console.log(`GET POS ${winX}, ${winY}`);
+//console.log(`GET POS ${winX}, ${winY}`);
 winW=getItemOrDefault(`${appName}.outerWidth`, 640);
 winH=getItemOrDefault(`${appName}.outerHeight`, 360);//-3;
-console.log(`GET DIM ${winW}, ${winH}`);
+//console.log(`GET DIM ${winW}, ${winH}`);
 
 
 webapp.set_title(appName);
@@ -122,7 +122,7 @@ function save_conf() {
 
 function save_conf_and_exit() {
   save_conf();
-  webapp_exit();
+  webapp.exit();
 }
 
 
@@ -171,7 +171,7 @@ window.addEventListener('load', () => {
   // List all localStorage
   //for (const key of Object.keys(localStorage)) { console.log("Onloaded "+key, localStorage.getItem(key)); } console.log("");
 
-  document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp_exit(); } });
+  document.addEventListener("keyup", (event) => { if (event.keyCode === 27) { webapp.exit(); } });
 
   Array.from(document.getElementsByClassName('collapser')).forEach((elt) => {
     if (elt.hasAttribute('id')) {
@@ -193,13 +193,13 @@ window.addEventListener('load', () => {
         showCollapse(elt, divs[0].hidden);
 
         // Preserve contributors list height
-        webapp_get_pos().then(pos => {
-          webapp_get_size().then(siz => {
-            //webapp_hide();
+        webapp.get_pos().then(pos => {
+          webapp.get_size().then(siz => {
+            //webapp.hide();
             newH=window.outerHeight+divs[0].offsetHeight-avH;
-            webapp_set_size(window.outerWidth, newH);
-            webapp_set_pos(pos.x, pos.y);
-            //webapp_restore();
+            webapp.set_size(window.outerWidth, newH);
+            webapp.set_pos(pos.x, pos.y);
+            //webapp.restore();
           });
         });
 
@@ -312,11 +312,11 @@ if (true) {
     xlFileName=`${currdir}/Wiki contributions from ${d1s} until ${d2s}.xlsx`;
     //console.log(`${scriptName}\n${xlFileName}`);
 
-    webapp_shell(scriptName).then( () => {
+    webapp.shell(scriptName).then( () => {
         exists(xlFileName).then(res => {
           //console.log("RES "+res);
           if (res) {
-            webapp_shell(xlFileName);//.then(() => { setLoader(false); });
+            webapp.shell(xlFileName);//.then(() => { setLoader(false); });
           } else {
             alert(`The expected file '${xlFileName}' does not exist check for any possible troubles`);
           }
