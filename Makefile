@@ -67,6 +67,7 @@ export setupRadix=${PREFIX}
 export setupFile=${setupRadix}.exe
 export setupFileTimeStamp=${setupRadix}.${VERSION}+${COMMIT}.${TMSTAMP}
 export DelivToken="glpat-2CyrcZPDNsW5sSMnijz4"
+export TokenGLDLA="glpat-jCCb4i7ksTPhW_x1SQwK"
 # To get project id
 # curl -sXGET --header "PRIVATE-TOKEN: ${DelivToken}" "https://gitlab.com/api/v4/projects?owned=true" | jq -r '.[] | [.id,.name] | @csv'
 PrjId=53627029
