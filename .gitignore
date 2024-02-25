@@ -7,7 +7,6 @@ webview
 !webview-app.sln
 !webview-app_curl.sln
 !tests/TemplateApp.sln
-
 # ignore all .sln except webview-app.sln and tests/TemplateApp.sln
 *.vcxproj
 !webview-app.vcxproj
