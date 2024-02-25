@@ -63,3 +63,4 @@ wiki_contrib/wiki_contrib.min.json
 *.nomin.html
 tests_cpp/*.txt
 *.lnk
+*.zip

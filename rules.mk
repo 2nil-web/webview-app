@@ -31,6 +31,23 @@ cfg :
 	@echo "mkfile_dir ${mkfile_dir}"
 	@echo "current_dir ${current_dir}"
 
+help :
+	@echo -e "$(shell tput smul)What to do to build and/or deliver a new version?$(shell tput rmul)"
+	@echo "To build it, under MSys2, type 'make'"
+	@echo -e "It can be compiled with GNU gcc or GNU g++ or Visual Studio. Default is Visual Studio when there is else gcc."
+	@echo =e "If Visual Studio is correctly set in the makefile then it will be the default compiler else gcc."
+	@echo -e "To force the use of gcc type 'make gcc'."
+	@echo "For delivery"
+	@echo -e "1-Check remote tags   : git ls-remote --tags origin"
+	@echo -e "2-Check local tags    : git describe --abbrev=0 --tags"
+	@echo -e "3-New version tag     : git tag -a X.Y.Z-nom_de_la_prerelease -m 'commentaire' # De préférence un tag annoté (-a)."
+	@echo -e "4-Push a tag          : git push --tags"
+	@echo -e "5-Build application   : make ..., make strip, make upx"
+	@echo -e "6-Build the setup     : make setup # (ToDo)"
+	@echo -e "7-Delivery            : make deliv # (ToDo)"
+	@echo -e "For versioning, respect Semantic Versioning (see semver.org, i.e.: MAJOR.MINOR.PATCH-pre_release+metadata ...)"
+
+
 ALL_SRCS=$(wildcard *.cpp) $(wildcard *.hpp) $(wildcard *.h)
 format :
 	@echo "Formatting the following files: ${ALL_SRCS}"

@@ -51,6 +51,7 @@ VERSION=$(shell git describe --abbrev=0 --tags 2>/dev/null || echo 'Unknown_vers
 COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo 'Unknown_commit')
 DECORATION=Nawak-Bidon
 ISO8601 := $(shell date +%Y-%m-%dT%H:%M:%SZ)
+TMSTAMP := $(shell date +%Y%m%d%H%M%S)
 
 #WVDIR=${mkfile_dir}/webview
 #WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38

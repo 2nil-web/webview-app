@@ -3,14 +3,33 @@ root_dir=..
 
 include ${root_dir}/header.mk
 
+PREFIX=monitorsinfo
 SRCS=$(wildcard *.cpp)
-SRCS:=$(filter-out TemplateApp.cpp, $(SRCS))
-SRCS:=$(filter-out httpget.cpp, $(SRCS))
-SRCS:=$(filter-out my_curl.cpp, $(SRCS))
 
-EXES=${SRCS:.cpp=${EXEXT}}
+OBJS+=$(SRCS:.cpp=.o)
+TARGET=${PREFIX}${EXEXT}
 
-all : ${EXES}
+.PHONY: FORCE
+
+ifeq ($(DO_MSBUILD),1)
+ARCH=x64
+CONF=Release
+MSVC_SLN=monitorsinfo.sln
+
+all : ${TARGET}
+
+${TARGET} : ${ARCH}/${CONF}/${TARGET}
+	cp ${ARCH}/${CONF}/${TARGET} .
+
+${ARCH}/${CONF}/${TARGET} : ${PREFIX}.ico ${SRCS} ${RES_SRC}
+	${MSBUILD} ${MSVC_SLN} -p:Configuration=${CONF}
+
+else
+all : ${TARGET}
+
+${TARGET} : ${OBJS}
+	$(LINK.cc) ${OBJS} $(LOADLIBES) $(LDLIBS) -o $@
+endif
 
 gcc : all
 
@@ -21,10 +40,10 @@ upx : strip
 	upx *.exe | true
 
 ifeq ($(MAKECMDGOALS),clean)
-TORM=$(filter-out TemplateApp.sln,$(wildcard *.sln)) $(filter-out TemplateApp.vcxproj,$(wildcard *.vcxproj)) $(filter-out TemplateApp.vcxproj.user,$(wildcard *.vcxproj.user))
+TORM=$(fwildcard *.vcxproj.user)
 endif
 clean :
-	rm -f ${EXES} *.mslog $(TORM)
+	rm -f *.mslog $(TORM)
 	@rm -rf x64 .vs
 
 include ${root_dir}/rules.mk
