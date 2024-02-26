@@ -1,4 +1,6 @@
 
+
+#.SUFFIXES: ,v #s.%
 # intégrer js check + minify
 
 # Bug d'affichage avec uname sous clang64 ...
@@ -13,6 +15,10 @@ else
 endif
 
 ifneq (${WITH_CURL},)
+	CPPFLAGS += -DWITH_CURL
+ifeq ($(STATIC_CURL),1)
+	CPPFLAGS += -DCURL_STATICLIB
+endif
 ifeq (${MSYSTEM},UCRTW64)
 	STATIC_CURL=0
 else
@@ -25,24 +31,21 @@ endif
 OS=$(shell ${UNAME} -s)
 
 ifneq (${OS},Linux)
-ECHO=echo -e
+	ECHO=echo -e
+	PGF=$(subst \,/,$(subst C:\,/c/,$(PROGRAMFILES)))
+	PGF86=${PGF} (x86)
+	PATH:=${PATH}:${PGF86}/Inno Setup 6
+	PATH:=${PATH}:${PGF}/Inkscape/bin
+	PATH:=${PATH}:${PGF86}/Pandoc
+	MAGICK=magick
 else
-ECHO=echo
+	ECHO=echo
 endif
-
-PGF=$(subst \,/,$(subst C:\,/c/,$(PROGRAMFILES)))
-PGF86=${PGF} (x86)
-PATH:=${PATH}:${PGF86}/Inno Setup 6
-PATH:=${PATH}:${PGF}/Inkscape/bin
-PATH:=${PATH}:${PGF86}/Pandoc
 
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
-current_dir := $(notdir $(mkfile_dir))
+#current_dir := $(notdir $(mkfile_dir))
 
-ifneq (${OS},Linux)
- MAGICK=magick
-endif
 RC=windres
 STRIP=strip
 UPX=upx
@@ -57,13 +60,6 @@ TMSTAMP := $(shell date +%Y%m%d%H%M%S)
 #WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38
 CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 
-
-ifneq (${WITH_CURL},)
-CPPFLAGS += -DWITH_CURL
-ifeq ($(STATIC_CURL),1)
-CPPFLAGS += -DCURL_STATICLIB
-endif
-endif
 CPPFLAGS += -I ${mkfile_dir}
 #CPPFLAGS += -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
 

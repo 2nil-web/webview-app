@@ -1,4 +1,10 @@
 
+ifndef MAKEFLAGS
+#CPUS ?= $(shell nproc)
+CPUS=8
+MAKEFLAGS += --no-builtin-rules -j $(CPUS) -l $(CPUS) -s
+endif
+
 # Génération du version.h intégré dans l'appli
 version.h : version_check.txt
 	@${ECHO} "Building C++ header $@"
@@ -31,6 +37,7 @@ cfg :
 	@echo "mkfile_dir ${mkfile_dir}"
 	@echo "current_dir ${current_dir}"
 
+#	./help.sh
 help :
 	@echo -e "$(shell tput smul)What to do to build and/or deliver a new version?$(shell tput rmul)"
 	@echo "To build it, under MSys2, type 'make'"
@@ -46,7 +53,6 @@ help :
 	@echo -e "6-Build the setup     : make setup # (ToDo)"
 	@echo -e "7-Delivery            : make deliv # (ToDo)"
 	@echo -e "For versioning, respect Semantic Versioning (see semver.org, i.e.: MAJOR.MINOR.PATCH-pre_release+metadata ...)"
-
 
 ALL_SRCS=$(wildcard *.cpp) $(wildcard *.hpp) $(wildcard *.h)
 format :
