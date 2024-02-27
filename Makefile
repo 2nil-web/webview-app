@@ -1,5 +1,11 @@
 
 #WITH_CURL=1
+#export MSYSTEM=CLANG64
+# Compile en clang64 ou ucrt64 mais pas mingw64
+#export GCC_PATH=/clang64/bin
+export GCC_PATH=/ucrt64/bin
+export PATH:=${GCC_PATH}:${PATH}
+
 include header.mk
 
 PREFIX=webview-app
@@ -85,7 +91,8 @@ endif
 deliv : ${setupFileTimeStamp}.zip
 	@${ECHO} "Delivery of package ${PREFIX}, version ${VERSION}, commit ${COMMIT}, created_at ${ISO8601}"
 	@curl --header "PRIVATE-TOKEN: ${DelivToken}" --upload-file ${setupFileTimeStamp}.zip "https://gitlab.com/api/v4/projects/${PrjId}/packages/generic/${PREFIX}/${VERSION}+${COMMIT}/${setupFileTimeStamp}.zip"
-	@echo -e "\nNew package delivery available here https://gitlab.com/dplalanne/webview-app/-/packages"
+	@echo -e "\nNew package delivery available here https://gitlab.com/dplalanne/webview-app/-/packages (Deploy >> Package Registry)"
+	rm -f ${setupFileTimeStamp}.zip
 
 clean :
 	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET)

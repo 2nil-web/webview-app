@@ -2,7 +2,7 @@
 ifndef MAKEFLAGS
 #CPUS ?= $(shell nproc)
 CPUS=8
-MAKEFLAGS += --no-builtin-rules -j $(CPUS) -l $(CPUS) -s
+MAKEFLAGS += -j $(CPUS) -l $(CPUS) # --no-builtin-rules -s
 endif
 
 # Génération du version.h intégré dans l'appli
@@ -80,6 +80,13 @@ endif
 
 %.ico : %.svg
 	${MAGICK} convert -background none $< $@
+
+%.o: %.c
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
+
+%.o: %.cpp
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
+
 
 %${EXEXT}: %.o
 	$(LINK.cpp) $^ $(LOADLIBES) $(LDLIBS) -o $@

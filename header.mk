@@ -1,17 +1,15 @@
 
-
-#.SUFFIXES: ,v #s.%
 # intégrer js check + minify
 
 # Bug d'affichage avec uname sous clang64 ...
 ifeq (${MSYSTEM},CLANG64)
 	UNAME=/usr/bin/uname
-	CC=clang
-	CXX=clang++
+	CC=${GCC_PATH}/clang
+	CXX=${GCC_PATH}/clang++
 else
 	UNAME=uname
-	CC=gcc
-	CXX=g++
+	CC=${GCC_PATH}/gcc
+	CXX=${GCC_PATH}/g++
 endif
 
 ifneq (${WITH_CURL},)
@@ -63,10 +61,10 @@ CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 CPPFLAGS += -I ${mkfile_dir}
 #CPPFLAGS += -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
 
-CXXFLAGS += -std=c++20 -g
+CXXFLAGS += -std=c++20 -O #-g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
 CXXFLAGS += -Wno-unknown-pragmas
-LDFLAGS += -g
+LDFLAGS += -O #-g
 
 ifeq (${OS},Linux)
 CXXFLAGS += $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-4.1)
