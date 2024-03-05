@@ -62,6 +62,7 @@ int width=-1, height=-1, hints=-1;
 int xpos=-1, ypos=-1;
 bool minimized=false;
 #endif
+std::string icon_file="";
 
 std::vector<run_opt> r_opts = {
 #ifdef _WIN32
@@ -89,6 +90,8 @@ std::vector<run_opt> r_opts = {
      }},
     {"debug", 'd', opt_only, no_argument, "Activate the developper mode in the webview.",
      [](char, std::string, std::string) -> void { devmode = true; }},
+    {"icon", 'n', opt_only, required_argument, "Set windows icon with the provided .ico file.",
+     [](char, std::string, std::string val) -> void { icon_file=val; }},
 #ifdef _WIN32
     {"xpos", 'x', opt_only, required_argument, "Set webview windows initial x position.",
      [](char, std::string, std::string val) -> void { xpos = std::stoi(val); }},
@@ -179,6 +182,7 @@ void webview_run(std::string url, std::string title = "", std::string init_js = 
   // std::cout << "URL " << url << ", TITLE " << title << ", JS " << init_js <<
   // std::endl;
   w.set_title(title);
+  if (icon_file != "") w.set_icon(icon_file);
 
   if (run_and_exit)
   {
