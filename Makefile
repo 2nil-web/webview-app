@@ -85,17 +85,18 @@ ifneq ($(DLLDEPS),)
 	@echo "Bringing DLL dependencies."
 	@cp ${DLLDEPS} .
 endif
+	@echo "Preparing package"
 	zip ${setupFileTimeStamp}.zip ${TARGET} ${DLLDEPS}
 
 # Delivery on gitlab.com
 deliv : ${setupFileTimeStamp}.zip
 	@${ECHO} "Delivery of package ${PREFIX}, version ${VERSION}, commit ${COMMIT}, created_at ${ISO8601}"
-	@curl --header "PRIVATE-TOKEN: ${DelivToken}" --upload-file ${setupFileTimeStamp}.zip "https://gitlab.com/api/v4/projects/${PrjId}/packages/generic/${PREFIX}/${VERSION}+${COMMIT}/${setupFileTimeStamp}.zip"
+	curl --header "PRIVATE-TOKEN: ${DelivToken}" --upload-file ${setupFileTimeStamp}.zip "https://gitlab.com/api/v4/projects/${PrjId}/packages/generic/${PREFIX}/${VERSION}+${COMMIT}/${setupFileTimeStamp}.zip"
 	@echo -e "\nNew package delivery available here https://gitlab.com/dplalanne/webview-app/-/packages (Deploy >> Package Registry)"
 	rm -f ${setupFileTimeStamp}.zip
 
 clean :
-	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET)
+	rm -f *~ *.d ${PREFIX}.ico *.o $(OBJS) $(TARGET) ${PREFIX}.vcxproj.user
 ifeq ($(DO_MSBUILD),1)
 	rm -rf ${ARCH} README.docx
 endif
