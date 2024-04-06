@@ -31,15 +31,12 @@ Application using the : [webview library](https://github.com/webview/webview.git
    - Or build the webview-app.sln under MS Visual Studio.
    
    - And from time to time check the webview header and merge with my_webview.h
-
-
-
 6. libcurl (optional)
 * Download
   
   * git clone https://github.com/curl/curl.git
 
-* Static build under visual studio "x64 Native Tools COmmand Prompt for VS 2022"
+* Static build under visual studio "x64 Native Tools Command Prompt for VS 2022"
   
   * rename src/tool_hugehelp.c.cvs to src/tool_hugehelp.c
   

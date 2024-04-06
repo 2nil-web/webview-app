@@ -14,18 +14,19 @@
 #include "wv-wrap.h"
 
 #define WP ((webview::webview *)w)
+//#define WP (static_cast<webview::webview *>(w))
 
 
 /*
-webview.h 
-line 879 : class gtk_webkit_engine
-line 1077 : using browser_engine = detail::gtk_webkit_engine;
+my_webview.h 
+class gtk_webkit_engine
+using browser_engine = detail::gtk_webkit_engine;
 
-line 1170 : class cocoa_wkwebview_engine
-line 1565 : using browser_engine = detail::cocoa_wkwebview_engine;
+class cocoa_wkwebview_engine
+using browser_engine = detail::cocoa_wkwebview_engine;
 
-line 2484 : class win32_edge_engine
-line 2890 : using browser_engine = detail::win32_edge_engine;
+class win32_edge_engine
+using browser_engine = detail::win32_edge_engine;
 */
 
 webview_wrapper *webview_wrapper::me;
@@ -42,7 +43,8 @@ void DisplayWindowRect(HWND hw) {
 // Callback functions that handles events.
 void CALLBACK webview_wrapper::HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime)
 {
-  if (me && me->g_hook == hook && ((webview::webview *)(me->w))->window() == hwnd) {
+#ifdef DO_WINHOOK
+  if (me && me->g_hook == hook && ((webview::webview *)(me->w))->window() == (webview::result<void*>)hwnd) {
     //static bool firstEvent=true; if (firstEvent) { firstEvent=false; }
 
     // Cf. winuser.h
@@ -60,6 +62,7 @@ void CALLBACK webview_wrapper::HandleWinEvent(HWINEVENTHOOK hook, DWORD event, H
       startCloseButton=false;
     }
   }
+#endif
 }
 
 bool TryToChangeIcon(HWND hw, std::string icPfx, int icMet, int icTyp) {
@@ -89,7 +92,7 @@ void webview_wrapper::InitSpy()
   CoInitialize(NULL);
   g_hook = SetWinEventHook(EVENT_MIN, EVENT_MAX, NULL, &HandleWinEvent, GetProcessId(GetCurrentProcess()), 0, 0);
 #else
-  HWND hw=(HWND)WP->window();
+  HWND hw=(HWND)webview_get_window(w);
   std::cout << "Create HWND " << hw << std::endl;
   //if (!TryToChangeIcon(hw, "app_", SM_CXICON, ICON_BIG)) TryToChangeIcon(hw, "app", 0, ICON_BIG);
   //if (!TryToChangeIcon(hw, "app_", SM_CXSMICON, ICON_SMALL)) TryToChangeIcon(hw, "app", 0, ICON_SMALL);
@@ -108,7 +111,10 @@ void webview_wrapper::ExitSpy()
 }
 
 LRESULT webview_wrapper::myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
-  if (me && ((webview::webview *)(me->w))->window() == hWnd && wm_map.count(uMsg)) {
+  if (me &&
+//      ((webview::webview *)(me->w))->window() == hWnd &&
+      (HWND)webview_get_window(me->w) == hWnd &&
+      wm_map.count(uMsg)) {
     //std::cout << wm_map[uMsg] << std::endl;
     switch (uMsg) {
       case WM_CLOSE:
@@ -239,7 +245,7 @@ void webview_wrapper::run()
 
 void *webview_wrapper::window()
 {
-  return WP->window();
+  return webview_get_window(w);
 }
 
 void webview_wrapper::terminate()
@@ -286,7 +292,7 @@ bool LoadIconIfExists(HWND hw, std::string ico) {
 
 void webview_wrapper::set_icon(std::string file) {
 #ifdef _WIN32
-  HWND hw = (HWND)WP->window();
+  HWND hw = (HWND)webview_get_window(w);
   LoadIconIfExists(hw, file);
 #endif
 }
@@ -295,21 +301,21 @@ void webview_wrapper::set_icon(std::string file) {
 void webview_wrapper::hide()
 {
 #ifdef _WIN32
-  ShowWindow((HWND)WP->window(), SW_HIDE);
+  ShowWindow((HWND)webview_get_window(w), SW_HIDE);
 #endif
 }
 
 void webview_wrapper::minimize()
 {
 #ifdef _WIN32
-  ShowWindow((HWND)WP->window(), SW_SHOWMINIMIZED);
+  ShowWindow((HWND)webview_get_window(w), SW_SHOWMINIMIZED);
 #endif
 }
 
 void webview_wrapper::restore()
 {
 #ifdef _WIN32
-  ShowWindow((HWND)WP->window(), SW_RESTORE);
+  ShowWindow((HWND)webview_get_window(w), SW_RESTORE);
 #endif
 }
 
@@ -318,7 +324,7 @@ void webview_wrapper::get_pos(int& x, int& y)
   x=0;
   y=0;
 #ifdef _WIN32
-  HWND hw=(HWND)WP->window();
+  HWND hw=(HWND)webview_get_window(w);
   RECT rc;
   GetWindowRect(hw, &rc);
   x=rc.left;
@@ -329,7 +335,7 @@ void webview_wrapper::get_pos(int& x, int& y)
 void webview_wrapper::set_pos(int x, int y)
 {
 #ifdef _WIN32
-  HWND hw=(HWND)WP->window();
+  HWND hw=(HWND)webview_get_window(w);
   SetWindowPos(hw, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 #endif
 }
@@ -337,7 +343,7 @@ void webview_wrapper::set_pos(int x, int y)
 void webview_wrapper::get_size(int& wi, int& he)
 {
 #ifdef _WIN32
-  HWND hw=(HWND)WP->window();
+  HWND hw=(HWND)webview_get_window(w);
   RECT rc;
   GetWindowRect(hw, &rc);
   wi=rc.right-rc.left;
@@ -359,7 +365,7 @@ void webview_wrapper::set_size(int width, int height, int hints)
   //std::cout << "set_size w " << width << ", h " << height << ", hints " << hints << std::endl;
   if (hints < 0) {
 #ifdef _WIN32
-  //HWND hw=(HWND)WP->window();
+  //HWND hw=(HWND)webview_get_window(w);
   //SetWindowPos(hw, NULL, 0, 0, width, height, SWP_NOREPOSITION | SWP_NOZORDER);
   WP->my_set_size(width, height);
 #else
@@ -374,7 +380,7 @@ void webview_wrapper::set_hints(int hints)
   if (hints > -1 && hints < 4) {
 #ifdef _WIN32
     RECT rc;
-    HWND hw=(HWND)WP->window();
+    HWND hw=(HWND)webview_get_window(w);
     GetWindowRect(hw, &rc);
     WP->set_size(rc.right-rc.left, rc.bottom-rc.top, (webview_hint_t)hints);
 #endif

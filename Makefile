@@ -3,7 +3,8 @@
 #export MSYSTEM=CLANG64
 # Compile en clang64 ou ucrt64 mais pas mingw64
 #export GCC_PATH=/clang64/bin
-export GCC_PATH=/ucrt64/bin
+#export GCC_PATH=/ucrt64/bin
+export GCC_PATH=/mingw64/bin
 export PATH:=${GCC_PATH}:${PATH}
 
 include header.mk
