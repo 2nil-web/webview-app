@@ -18,9 +18,14 @@ int json_unescape(const char *s, size_t n, char *out);
 constexpr bool is_json_special_char(unsigned int c);
 constexpr bool is_control_char(unsigned int c);
 
+
+struct webview_conf {
+  bool debug, status, zoom, ctx_menu, psw_sav, auto_fill;
+
+};
+
 class webview_wrapper
 {
-
 private:
   static webview_wrapper *me;
 #ifdef _WIN32
@@ -30,6 +35,8 @@ private:
   std::vector<pair_of_string> func_help = {};
 
 public:
+  static webview_conf conf;
+
   webview_wrapper();
   webview_wrapper(bool debug, void *wnd = nullptr);
   void create(bool debug = false, void *wnd = nullptr);

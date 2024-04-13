@@ -4111,6 +4111,7 @@ private:
       return error_info{WEBVIEW_ERROR_INVALID_STATE};
     }
     ICoreWebView2Settings *settings = nullptr;
+
     auto res = m_webview->get_Settings(&settings);
     if (res != S_OK) {
       return error_info{WEBVIEW_ERROR_UNSPECIFIED, "get_Settings failed"};
@@ -4125,6 +4126,8 @@ private:
       return error_info{WEBVIEW_ERROR_UNSPECIFIED,
                         "put_IsStatusBarEnabled failed"};
     }
+
+
     add_init_script("function(message) {\n\
   return window.chrome.webview.postMessage(message);\n\
 }");
@@ -4135,6 +4138,9 @@ private:
     if (m_owns_window) {
       focus_webview();
     }
+
+    extern bool my_configure(ICoreWebView2 *mwv, ICoreWebView2Controller *mctl);
+    my_configure(m_webview, m_controller);
     return {};
   }
 

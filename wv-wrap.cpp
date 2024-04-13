@@ -84,7 +84,6 @@ bool TryToChangeIcon(HWND hw, std::string icPfx, int icMet, int icTyp) {
   return false;
 }
 
-  
 
 void webview_wrapper::InitSpy()
 {
@@ -93,7 +92,7 @@ void webview_wrapper::InitSpy()
   g_hook = SetWinEventHook(EVENT_MIN, EVENT_MAX, NULL, &HandleWinEvent, GetProcessId(GetCurrentProcess()), 0, 0);
 #else
   HWND hw=(HWND)webview_get_window(w);
-  std::cout << "Create HWND " << hw << std::endl;
+//  std::cout << "Create HWND " << hw << std::endl;
   //if (!TryToChangeIcon(hw, "app_", SM_CXICON, ICON_BIG)) TryToChangeIcon(hw, "app", 0, ICON_BIG);
   //if (!TryToChangeIcon(hw, "app_", SM_CXSMICON, ICON_SMALL)) TryToChangeIcon(hw, "app", 0, ICON_SMALL);
   SetWindowSubclass(hw, myWindowProc, 0, 0);
@@ -156,8 +155,13 @@ LRESULT webview_wrapper::myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 
 #endif
 
+webview_conf webview_wrapper::conf = { true, true, true, true, true };
+
+
 void webview_wrapper::create(bool debug, void *wnd)
 {
+  conf.debug=debug;
+
   if (w != nullptr)
     return;
   w = new webview::webview(debug, wnd);
@@ -390,7 +394,7 @@ void webview_wrapper::set_hints(int hints)
 void webview_wrapper::set_on_move(const std::string js)
 {
   on_move_func=js;
-  std::cout << "set_on_move " << on_move_func << std::endl;
+//  std::cout << "set_on_move " << on_move_func << std::endl;
 }
 
 void webview_wrapper::set_on_exit(const std::string js)
@@ -446,5 +450,64 @@ std::string webview_wrapper::version()
 {
   return std::string(webview_version()->version_number) + std::string(webview_version()->pre_release) +
          std::string(webview_version()->build_metadata);
+}
+
+bool my_configure(ICoreWebView2 *mwv, ICoreWebView2Controller *mctl) {
+  if (mwv == nullptr || mctl == nullptr) return false;
+
+  ICoreWebView2Settings *settings = nullptr;
+  auto res = mwv->get_Settings(&settings);
+  if (res != S_OK) {
+    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings failed" << std::endl;
+    return false;
+  } else {
+    res = settings->put_AreDevToolsEnabled(webview_wrapper::conf.debug ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_AreDevToolsEnabled failed" << std::endl;
+      return false;
+    }
+
+    res = settings->put_IsStatusBarEnabled(webview_wrapper::conf.status ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsStatusBarEnabled failed" << std::endl;
+      return false;
+    }
+
+    res = settings->put_IsZoomControlEnabled(webview_wrapper::conf.zoom ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsZoomControlEnabled failed" << std::endl;
+      return false;
+    }
+
+    res = settings->put_AreDefaultContextMenusEnabled	(webview_wrapper::conf.ctx_menu ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_AreDefaultContextMenusEnabled	 failed" << std::endl;
+      return false;
+    }
+  }
+
+  ICoreWebView2Settings4 *settings4 = nullptr;
+  res = ((ICoreWebView2_4 *)mwv)->get_Settings((ICoreWebView2Settings **)&settings4);
+  if (res != S_OK) {
+    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings4 failed" << std::endl;
+    return false;
+  } else {
+    res = settings4->put_IsPasswordAutosaveEnabled(webview_wrapper::conf.psw_sav ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsPasswordAutosaveEnabled  failed" << std::endl;
+      return false;
+    }
+
+    res = settings4->put_IsGeneralAutofillEnabled (webview_wrapper::conf.auto_fill ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsGeneralAutofillEnabled failed" << std::endl;
+      return false;
+    }
+  }
+
+  //mctl->put_IsVisible(TRUE);
+
+  std::cout << "my_configure ok" << std::endl;
+  return true;
 }
 

@@ -98,7 +98,7 @@ std::vector<run_opt> r_opts = {
     {"ypos", 'y', opt_only, required_argument, "Set webview windows initial y position.",
      [](char, std::string, std::string val) -> void { ypos = std::stoi(val); }},
     {"minimized", 'm', opt_only, no_argument,
-     "The webview window will be minimized at startup, a javascript call to the function 'webapp_restore()' will necessary to restore it to its normal size.",
+     "The webview window will be minimized at startup, a javascript call to the function 'webapp_restore()' will be necessary to restore it to its normal size.",
      [](char, std::string, std::string) -> void { minimized = true; }},
 #endif
     {"width", 'w', opt_only, required_argument, "Set webview windows initial witdh.",
@@ -127,7 +127,7 @@ std::string get_index()
     std::string idx = std::filesystem::absolute(sidx).generic_string();
     if (std::filesystem::is_regular_file(idx))
     {
-      std::cout << "Found index file: " << idx << std::endl;
+//      std::cout << "Found index file: " << idx << std::endl;
       return idx;
     }
   }
@@ -137,6 +137,7 @@ std::string get_index()
 webview_wrapper w;
 
 HWND *wnd=nullptr;
+
 
 bool run_and_exit = false;
 void webview_set(bool devmode = false, bool _run_and_exit = false)
@@ -160,7 +161,6 @@ void webview_set(bool devmode = false, bool _run_and_exit = false)
     }
   }
 #endif
-
   w.create(devmode, (void *)wnd);
   create_binds(w);
 }
