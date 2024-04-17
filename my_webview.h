@@ -4139,7 +4139,10 @@ private:
       focus_webview();
     }
 
-    extern bool my_configure(ICoreWebView2 *mwv, ICoreWebView2Controller *mctl);
+#ifndef __GNUC__
+    extern
+#endif
+    bool my_configure(ICoreWebView2 *mwv, ICoreWebView2Controller *mctl);
     my_configure(m_webview, m_controller);
     return {};
   }

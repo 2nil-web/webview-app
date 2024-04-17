@@ -28,8 +28,7 @@ class webview_wrapper
 {
 private:
   static webview_wrapper *me;
-#ifdef _WIN32
-#endif
+
   std::string on_move_func="", on_exit_func="";
   void *w = nullptr;
   std::vector<pair_of_string> func_help = {};
@@ -37,8 +36,10 @@ private:
 public:
   static webview_conf conf;
 
+  void out_conf();
   webview_wrapper();
   webview_wrapper(bool debug, void *wnd = nullptr);
+  void create(void *wnd = nullptr);
   void create(bool debug = false, void *wnd = nullptr);
   ~webview_wrapper();
   void bind(const std::string &name, sync_binding_t fn);

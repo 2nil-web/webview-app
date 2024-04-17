@@ -30,6 +30,9 @@ using browser_engine = detail::win32_edge_engine;
 */
 
 webview_wrapper *webview_wrapper::me;
+//webview_conf webview_wrapper::conf = { true, true, true, true, true };
+webview_conf webview_wrapper::conf;
+
 #ifdef _WIN32
 #include <oleacc.h>
 #pragma comment(lib,"Oleacc.lib")
@@ -152,19 +155,199 @@ LRESULT webview_wrapper::myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
   return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 }
 
+ICoreWebView2 *curr_mwv=nullptr;
+ICoreWebView2Controller *curr_mctl=nullptr;
+#ifdef __GNUC__
+namespace webview {
+namespace detail {
+#endif
+bool my_configure(ICoreWebView2 *mwv, ICoreWebView2Controller *mctl) {
+  if (mwv == nullptr || mctl == nullptr) return false;
 
+  curr_mwv=mwv;
+  curr_mctl=mctl;
+
+  ICoreWebView2Settings *settings = nullptr;
+  auto res = mwv->get_Settings(&settings);
+  if (res != S_OK) {
+    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings failed" << std::endl;
+    return false;
+  } else {
+    res = settings->put_AreDevToolsEnabled(webview_wrapper::conf.debug ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_AreDevToolsEnabled failed" << std::endl;
+      return false;
+    }
+
+    res = settings->put_IsStatusBarEnabled(webview_wrapper::conf.status ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsStatusBarEnabled failed" << std::endl;
+      return false;
+    }
+
+    res = settings->put_IsZoomControlEnabled(webview_wrapper::conf.zoom ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsZoomControlEnabled failed" << std::endl;
+      return false;
+    }
+
+    res = settings->put_AreDefaultContextMenusEnabled	(webview_wrapper::conf.ctx_menu ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_AreDefaultContextMenusEnabled	 failed" << std::endl;
+      return false;
+    }
+  }
+
+  ICoreWebView2Settings4 *settings4 = nullptr;
+  res = ((ICoreWebView2_4 *)mwv)->get_Settings((ICoreWebView2Settings **)&settings4);
+  if (res != S_OK) {
+    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings4 failed" << std::endl;
+    return false;
+  } else {
+    res = settings4->put_IsPasswordAutosaveEnabled(webview_wrapper::conf.psw_sav ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsPasswordAutosaveEnabled  failed" << std::endl;
+      return false;
+    }
+
+    res = settings4->put_IsGeneralAutofillEnabled (webview_wrapper::conf.auto_fill ? TRUE : FALSE);
+    if (res != S_OK) {
+      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsGeneralAutofillEnabled failed" << std::endl;
+      return false;
+    }
+  }
+
+  //mctl->put_IsVisible(TRUE);
+
+  std::cout << "my_configure ok" << std::endl;
+  return true;
+}
+#ifdef __GNUC__
+}
+}
 #endif
 
-webview_conf webview_wrapper::conf = { true, true, true, true, true };
+bool do_is_set(HRESULT (*wv2get_set)(BOOL *), std::string sset) {
+  BOOL is_set;
+  auto res=wv2get_set(&is_set);
+  if (res == S_OK) {
+    std::cout << sset << " is" << (is_set?"":"not ") << "set" << std::endl;
+  } else {
+    std::cout << sset << " feature does not exist" << std::endl;
+  }
+
+  return false;
+}
+
+#define bool_set(fset, sset) { \
+  std::cout << sset << std::endl; \
+  BOOL is_set; \
+  res=fset(&is_set); \
+  if (res == S_OK) { \
+    std::cout << " is " << (is_set?"":"not ") << "set" << std::endl; \
+  } else std::cout << " feature does not exist" << std::endl; \
+}
+
+#define str_set(fset, sset) { \
+  std::string str_set; \
+  res=fset(&str_set); \
+  if (res == S_OK) { \
+    std::cout << sset << " string value is " << str_set << std::endl; \
+  } else std::cout << sset << " feature does not exist" << std::endl; \
+}
+
+#define get_set(ICW2, ICW2ST, setn, n) \
+  ICW2ST *settings = nullptr; \
+  res = ((ICW2 *)mwv)->get_Settings((ICW2ST **)&setn); \
+  if (res != S_OK) { \
+    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings" << n << " failed" << std::endl; \
+    return ; \
+  }
+
+void get_settings(ICoreWebView2 *mwv, ICoreWebView2Controller *mctl=nullptr) {
+  // Settings
+  HRESULT res;
+  ICoreWebView2Settings *settings = nullptr;
+  res = mwv->get_Settings(&settings);
+  if (res != S_OK) {
+    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings failed" << std::endl;
+    return ;
+  }
+std::cout << "ap get_set" << std::endl;
+  std::cout << "IsScriptEnabled " << std::endl; 
+  BOOL is_set=TRUE; 
+std::cout << "av get_is" << std::endl;
+  res=settings->get_IsScriptEnabled(&is_set); 
+std::cout << "ap get_is" << std::endl;
+  if (res == S_OK) {
+    std::cout << "is ";
+    if (is_set != TRUE) std::cout << "not ";
+    std::cout << "set" << std::endl; 
+  } else {
+    std::cout << "feature does not exist" << std::endl; 
+    return;
+  }
+
+  //get_set(ICoreWebView2, ICoreWebView2Settings, settings, 2);
+  /* Settings2
+  ICoreWebView2Settings *settings2 = nullptr;
+  res = ((ICoreWebView2_2 *)mwv)->get_Settings((ICoreWebView2Settings **)&settings2);
+  if (res != S_OK) {
+    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings2 failed" << std::endl;
+    return ;
+  }
+
+  ICoreWebView2Settings9 *settings9 = nullptr;
+  res = ((ICoreWebView2_9 *)mwv)->get_Settings((ICoreWebView2Settings **)&settings9);
+  if (res != S_OK) {
+    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings9 failed" << std::endl;
+    return ;
+  }*/
 
 
-void webview_wrapper::create(bool debug, void *wnd)
+  //bool_set(settings->get_IsScriptEnabled, "IsScriptEnabled");
+  /*bool_set(settings->get_IsWebMessageEnabled, "IsWebMessageEnabled");
+  bool_set(settings->get_AreDefaultScriptDialogsEnabled, "AreDefaultScriptDialogsEnabled");
+  bool_set(settings->get_IsStatusBarEnabled, "IsStatusBarEnabled");
+  bool_set(settings->get_AreDevToolsEnabled, "AreDevToolsEnabled");
+  bool_set(settings->get_AreDefaultContextMenusEnabled, "AreDefaultContextMenusEnabled");
+  bool_set(settings->get_AreHostObjectsAllowed, "AreHostObjectsAllowed");
+  bool_set(settings->get_IsZoomControlEnabled, "IsZoomControlEnabled");
+  bool_set(settings->get_IsBuiltInErrorPageEnabled, "IsBuiltInErrorPageEnabled");*/
+  //str_set(settings2->get_UserAgent, "UserAgent");
+  /*
+  bool_set(settings9->get_AreBrowserAcceleratorKeysEnabled, "AreBrowserAcceleratorKeysEnabled");
+  bool_set(settings9->get_IsPasswordAutosaveEnabled, "IsPasswordAutosaveEnabled");
+  bool_set(settings9->get_IsGeneralAutofillEnabled, "IsGeneralAutofillEnabled");
+  bool_set(settings9->get_IsPinchZoomEnabled, "IsPinchZoomEnabled");
+  bool_set(settings9->get_IsSwipeNavigationEnabled, "IsSwipeNavigationEnabled");
+  bool_set(settings9->get_IsReputationCheckingRequired, "IsReputationCheckingRequired");
+  bool_set(settings9->get_IsNonClientRegionSupportEnabled, "IsNonClientRegionSupportEnabled");*/
+  //bool_set(settings9->get_HiddenPdfToolbarItems, "HiddenPdfToolbarItems");
+}
+#endif
+
+void webview_wrapper::out_conf() {
+#ifdef _WIN32
+  //get_settings(curr_mwv, curr_mctl);
+#endif /* _WIN32 */
+  if (!conf.debug) return;
+  std::cout << "conf.debug: " << conf.debug << std::endl;
+  std::cout << "conf.status: " << conf.status << std::endl;
+  std::cout << "conf.zoom: " << conf.zoom << std::endl;
+  std::cout << "conf.ctx_menu: " << conf.ctx_menu << std::endl;
+  std::cout << "conf.psw_sav: " << conf.psw_sav << std::endl;
+  std::cout << "conf.auto_fill: " << conf.auto_fill << std::endl;
+}
+
+
+void webview_wrapper::create(void *wnd)
 {
-  conf.debug=debug;
+  out_conf();
 
   if (w != nullptr)
     return;
-  w = new webview::webview(debug, wnd);
+  w = new webview::webview(conf.debug, wnd);
 
 #ifdef _WIN32
   InitSpy();
@@ -197,6 +380,11 @@ void webview_wrapper::create(bool debug, void *wnd)
     // std::cout << res << std::endl;
     return res;
   });
+}
+
+void webview_wrapper::create(bool debug, void *wnd) {
+  conf.debug=debug;
+  create(wnd);
 }
 
 webview_wrapper::webview_wrapper(bool debug, void *wnd)
@@ -450,64 +638,5 @@ std::string webview_wrapper::version()
 {
   return std::string(webview_version()->version_number) + std::string(webview_version()->pre_release) +
          std::string(webview_version()->build_metadata);
-}
-
-bool my_configure(ICoreWebView2 *mwv, ICoreWebView2Controller *mctl) {
-  if (mwv == nullptr || mctl == nullptr) return false;
-
-  ICoreWebView2Settings *settings = nullptr;
-  auto res = mwv->get_Settings(&settings);
-  if (res != S_OK) {
-    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings failed" << std::endl;
-    return false;
-  } else {
-    res = settings->put_AreDevToolsEnabled(webview_wrapper::conf.debug ? TRUE : FALSE);
-    if (res != S_OK) {
-      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_AreDevToolsEnabled failed" << std::endl;
-      return false;
-    }
-
-    res = settings->put_IsStatusBarEnabled(webview_wrapper::conf.status ? TRUE : FALSE);
-    if (res != S_OK) {
-      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsStatusBarEnabled failed" << std::endl;
-      return false;
-    }
-
-    res = settings->put_IsZoomControlEnabled(webview_wrapper::conf.zoom ? TRUE : FALSE);
-    if (res != S_OK) {
-      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsZoomControlEnabled failed" << std::endl;
-      return false;
-    }
-
-    res = settings->put_AreDefaultContextMenusEnabled	(webview_wrapper::conf.ctx_menu ? TRUE : FALSE);
-    if (res != S_OK) {
-      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_AreDefaultContextMenusEnabled	 failed" << std::endl;
-      return false;
-    }
-  }
-
-  ICoreWebView2Settings4 *settings4 = nullptr;
-  res = ((ICoreWebView2_4 *)mwv)->get_Settings((ICoreWebView2Settings **)&settings4);
-  if (res != S_OK) {
-    std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, get_Settings4 failed" << std::endl;
-    return false;
-  } else {
-    res = settings4->put_IsPasswordAutosaveEnabled(webview_wrapper::conf.psw_sav ? TRUE : FALSE);
-    if (res != S_OK) {
-      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsPasswordAutosaveEnabled  failed" << std::endl;
-      return false;
-    }
-
-    res = settings4->put_IsGeneralAutofillEnabled (webview_wrapper::conf.auto_fill ? TRUE : FALSE);
-    if (res != S_OK) {
-      std::cerr << "WEBVIEW_ERROR_UNSPECIFIED, put_IsGeneralAutofillEnabled failed" << std::endl;
-      return false;
-    }
-  }
-
-  //mctl->put_IsVisible(TRUE);
-
-  std::cout << "my_configure ok" << std::endl;
-  return true;
 }
 
