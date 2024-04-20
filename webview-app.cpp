@@ -161,8 +161,8 @@ void webview_set(bool devmode = false, bool _run_and_exit = false)
     }
   }
 #endif
-  w.conf.debug = devmode;
-  //w.conf.debug = { devmode, true, true, true, true, true };
+  //w.conf.debug = devmode;
+  w.conf = { devmode, true, true, true, true, true };
   w.create((void *)wnd);
   create_binds(w);
 }
