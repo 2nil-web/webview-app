@@ -1,16 +1,15 @@
 
-# intégrer js check + minify
-
 # Bug d'affichage avec uname sous clang64 ...
 ifeq (${MSYSTEM},CLANG64)
 	UNAME=/usr/bin/uname
-	CC=${GCC_PATH}/clang
-	CXX=${GCC_PATH}/clang++
 else
 	UNAME=uname
-	CC=${GCC_PATH}/gcc
-	CXX=${GCC_PATH}/g++
 endif
+
+OS=$(shell ${UNAME} -s)
+
+#WITH_CURL=1
+# intégrer js check + minify
 
 ifneq (${WITH_CURL},)
 	CPPFLAGS += -DWITH_CURL
@@ -26,9 +25,24 @@ endif
 STATIC_CURL=0
 endif
 
-OS=$(shell ${UNAME} -s)
 
 ifneq (${OS},Linux)
+#export MSYSTEM=CLANG64
+# Compile en clang64 ou ucrt64 mais pas mingw64
+#export GCC_PATH=/clang64/bin
+#export GCC_PATH=/ucrt64/bin
+export GCC_PATH=/mingw64/bin
+export PATH:=${GCC_PATH}:${PATH}
+
+# Bug d'affichage avec uname sous clang64 ...
+ifeq (${MSYSTEM},CLANG64)
+	CC=${GCC_PATH}/clang
+	CXX=${GCC_PATH}/clang++
+else
+	CC=${GCC_PATH}/gcc
+	CXX=${GCC_PATH}/g++
+endif
+
 	ECHO=echo -e
 	PGF=$(subst \,/,$(subst C:\,/c/,$(PROGRAMFILES)))
 	PGF86=${PGF} (x86)
