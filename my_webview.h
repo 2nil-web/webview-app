@@ -1,3 +1,4 @@
+// GITHUB_WEBVIEW_REPO_COMMIT=93be13a
 /*
  * MIT License
  *
@@ -462,7 +463,7 @@ WEBVIEW_API const webview_version_info_t *webview_version(void);
 #include <cstring>
 
 #if defined(_WIN32)
-#ifndef  WIN32_LEAN_AND_MEAN
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
@@ -4111,7 +4112,6 @@ private:
       return error_info{WEBVIEW_ERROR_INVALID_STATE};
     }
     ICoreWebView2Settings *settings = nullptr;
-
     auto res = m_webview->get_Settings(&settings);
     if (res != S_OK) {
       return error_info{WEBVIEW_ERROR_UNSPECIFIED, "get_Settings failed"};
@@ -4126,8 +4126,6 @@ private:
       return error_info{WEBVIEW_ERROR_UNSPECIFIED,
                         "put_IsStatusBarEnabled failed"};
     }
-
-
     add_init_script("function(message) {\n\
   return window.chrome.webview.postMessage(message);\n\
 }");
