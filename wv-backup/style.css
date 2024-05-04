@@ -1,0 +1,37 @@
+
+body {
+  overflow: hidden;
+}
+
+.topnav {
+  overflow: hidden;
+  border-bottom: 1px solid black;
+  user-select: none;
+}
+
+.topnav div {
+  float: left;
+  color: #0;
+  text-align: center;
+  padding: 2px 12px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav div:hover {
+  cursor: pointer;
+  background-color: lightgrey;
+  color: cornflowerblue;
+}
+
+.topnavsel,.topnav div:active {
+  cursor: pointer;
+  background-color: lightgrey;
+}
+
+.topnav .align_right {
+  position: relative;
+  float: right;
+}
+
+

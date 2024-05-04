@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/plain; charset=utf-8">
+    <title>Rsync backup</title>
+    <link href="../tabulator/css/tabulator.min.css" rel="stylesheet" id="table_theme">
+    <script type="text/javascript" src="../tabulator/js/tabulator.min.js"></script>  </head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="../js_include/webapp.js"></script>
+    <script type="text/javascript" src="../js_include/msgbox.js"></script>
+    <script type="text/javascript" src="../js_include/util.js"></script>
+    <script type="text/javascript" src="../js_include/time.js"></script>
+    <script type="text/javascript" src="../js_include/filesystem.js"></script>
+    <script type="text/javascript" src="head.js"></script>
+  </head>
+  <body>
+    <div id="menu_bar" class="topnav">
+      <div id="backup_menu" onclick="run_backup()">Backup selected items</div>
+      <div id="about_menu" onclick="about()" >About</div>
+      <div id="quit_menu" class="align_right" onclick="save_conf_and_exit()">Quit</div>
+    </div>
+    <div id="backup-list" style="overflow: auto; border: solid 1px black">
+      <backup-element src="C:\Users\Public\Famille" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/E"/><br/>
+      <backup-element src="C:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/C"/><br/>
+      <backup-element src="D:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/D"/><br/>
+      <backup-element src="C:\Users\Public\Famille" dst="/e"/><br/>
+    </div>
+  </body>
+</html>
+
