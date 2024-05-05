@@ -108,7 +108,23 @@ function save_conf_and_exit() {
 }
 
 
-class BackupElement extends HTMLElement  {
+var backupCount=0;
+var backupTable;
+function addTdObj(tr, obj) {
+  var td = document.createElement("td");
+  obj.style="display: block;";
+  td.appendChild(obj);
+  tr.appendChild(td);
+}
+
+function addTdLabel(tr, forId, txt) {
+  var lab = document.createElement("label");
+  lab.htmlFor=forId;
+  lab.innerHTML=txt;
+  addTdObj(tr, lab);
+}
+
+class BackupElement extends HTMLElement {
   static observedAttributes = ["src", "dst"];
 
   constructor() {
@@ -117,23 +133,33 @@ class BackupElement extends HTMLElement  {
 
   create=function() {
     // Create checkbox
+    var tr = document.createElement("tr");
+    tr.style="outline:thin solid; user-select: none";
+
     var cbox = document.createElement("input");
     cbox.type = "checkbox";
-    // Create label
-    var label = document.createElement("label");
-    // Wrap checkbox within label
-    label.style.border="solid 1px";
-    label.appendChild(cbox);
-    //label.innerHTML=cbox+this.getAttribute("src")+"==>"+this.getAttribute("dst");
-    var txt=document.createTextNode(this.getAttribute("src")+"\t\t"+this.getAttribute("dst"));
-    txt.fontFamily="Lucida Console, Courier New, monospace";
-    label.appendChild(txt);
-    // Add label to backup element
-    this.appendChild(label);
+    cbox.id = "bakCB"+backupCount;
+    addTdObj(tr, cbox);
+
+    // Create label for src
+    addTdLabel(tr, cbox.id, this.getAttribute("src"));
+    // Create label for arrow
+    addTdLabel(tr, cbox.id, "&#x1F449;");
+    // Create label for dst
+    addTdLabel(tr, cbox.id, this.getAttribute("dst"));
+
+    if (backupCount === 0) {
+      backupTable=document.createElement("table");
+      backupTable.style="border-collapse:separate; border-spacing: 4px 4px;";
+      this.appendChild(backupTable);
+    }
+    backupTable.appendChild(tr);
+    backupCount++;
+
+    console.log(`${backupCount},${this.getAttribute("src")},${this.getAttribute("dst")}`);
   }
 
   connectedCallback() {
-    console.log(`backup-element added with src: "${this.getAttribute("src")}" and dst: "${this.getAttribute("dst")}".`);
     this.create();
   }
 }
