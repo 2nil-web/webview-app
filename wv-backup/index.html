@@ -13,18 +13,11 @@
     <script type="text/javascript" src="../js_include/filesystem.js"></script>
     <script type="text/javascript" src="head.js"></script>
   </head>
-  <style>
-    .flxd {
-        display: flex;
-        width: 300px;
-        border: solid 1px black;
-    }
-  </style>
   <body>
     <div id="menu_bar" class="topnav">
       <div id="backup_menu" onclick="run_backup()">Backup selected items</div>
-      <div id="about_menu" onclick="about()" >About</div>
-      <div id="quit_menu" class="align_right" onclick="save_conf_and_exit()">Quit</div>
+      <div id="quit_menu" >Quit</div>
+      <div id="about_menu" onclick="about()" class="align_right" onclick="save_conf_and_exit()">About</div>
     </div>
     <div id="backup-list" style="overflow: auto; border: solid 1px black">
       <bak-ln src="C:\Users\Public\Famille" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/F"></bak-ln>
@@ -32,7 +25,6 @@
       <bak-ln src="D:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/D"></bak-ln>
       <bak-ln src="C:\Users\Public\Famille" dst="/e"></bak-ln>
     </div>
-    <button>OK</button>
   </body>
 </html>
 

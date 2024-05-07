@@ -50,9 +50,8 @@ webapp.set_title(appName);
 // To be called with -m option
 webapp.restore();
 webapp.set_icon("app.ico");
-// Define minimum bounds
-webapp.set_size(560, 290, 1);
-webapp.set_size(winW, winH);
+webapp.set_size(640, 200, 1); // Define minimum bounds (third option to 1)
+webapp.set_size(winW, winH);  // Define actual size
 webapp.set_pos(winX, winY);
 webapp.on_move('save_pos()');
 
@@ -85,7 +84,7 @@ function adjustToWindowHeight(elemId) {
 
 var lastDocCliW=-1, lastDocCliH=-1;
 function windowSize() {
-  adjustToWindowHeight("backup-list");
+  //adjustToWindowHeight("backup-list");
   if (lastDocCliW !== document.documentElement.clientWidth) {
     lastDocCliW=document.documentElement.clientWidth;
     localStorage.setItem(`${appName}.outerWidth`, lastDocCliW);
@@ -149,7 +148,8 @@ class BakLn extends HTMLElement {
     console.log(`cbId: ${cbId}`);
     backupTable.dataset.cbIdCount++;
 
-    tr.style="outline:thin solid; user-select: none";
+    //tr.style="outline:thin solid; user-select: none";
+    tr.style="user-select: none;";
 
     function addTdObj(obj) {
       var td = document.createElement("td");
@@ -172,6 +172,7 @@ class BakLn extends HTMLElement {
     addTdObj(cbox);
     console.log(`${this.tagName}[${cbox.id}]:[${this.innerHTML}]`);
     this.innerHTML='';
+    this.style="position: absolute;left:0px; top:0px; width:0px; height:0px;";
 
     // Add a second cell for the src of the backup
     addTdLabel(this.getAttribute("src"));
