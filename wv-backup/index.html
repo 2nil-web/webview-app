@@ -19,11 +19,15 @@
       <div id="quit_menu" >Quit</div>
       <div id="about_menu" onclick="about()" class="align_right" onclick="save_conf_and_exit()">About</div>
     </div>
-    <div id="backup-list" style="overflow: auto; border: solid 1px black">
+    <div id="backup-list" style="overflow: auto; border: solid 0px black">
       <bak-ln src="C:\Users\Public\Famille" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/F"></bak-ln>
       <bak-ln src="C:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/C"></bak-ln>
       <bak-ln src="D:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/D"></bak-ln>
-      <bak-ln src="C:\Users\Public\Famille" dst="/e"></bak-ln>
+      <bak-ln src="C:\Users\Public\Famille" dst="/e" type="fam"></bak-ln>
+    </div>
+    <div>
+      <textarea id="output" placeholder="" disabled></textarea>
+      <!--span id="tout_warn">&nbsp;</span-->
     </div>
   </body>
 </html>

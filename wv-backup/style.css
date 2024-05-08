@@ -34,4 +34,8 @@ body {
   float: right;
 }
 
+#output {
+  width: 99%;
+  resize: none;
+}
 
