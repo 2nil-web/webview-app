@@ -1,0 +1,8 @@
+- *~ 
+- *.o 
+- .AndroidStudio2.3 
+- .android 
+- VirtualBox\ VMs 
+- .dl 
+- Backup 
+- NoBackup/

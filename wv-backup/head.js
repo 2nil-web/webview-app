@@ -45,6 +45,12 @@ winY=getItemOrDefault(`${appName}.y`, 2);
 winW=getItemOrDefault(`${appName}.outerWidth`, 1900);
 winH=getItemOrDefault(`${appName}.outerHeight`, 1060);//-3;
 
+const allBak = document.getElementsByTagName("bak-ln");
+for (i=0; i < allBak.length; i++) {
+  chkd=getBoolItemOrDefault (`${appName}.bak-ln.${i}.checked`, false);
+  console.log(`${appName}.bak-ln.${i}.checked: ${chkd}`);
+}
+
 
 webapp.set_title(appName);
 // To be called with -m option
@@ -115,6 +121,8 @@ class BakLn extends HTMLElement {
     super();
   }
 
+  static bakLnCbCount=0;
+
   create=function() {
     var backupTable;
 
@@ -123,17 +131,12 @@ class BakLn extends HTMLElement {
       //console.log("Creating a new table");
       backupTable=document.createElement("table");
       backupTable.style="border-collapse:separate; border-spacing: 4px 4px;";
-      backupTable.dataset.cbUniqPfx=Date.now().toString(36);
-      backupTable.dataset.cbIdCount=0;
       this.parentNode.prepend(backupTable);
     } else backupTable=this.parentNode.firstChild;
 
     // Add a row
     //console.log(Date.now().toString(36)+", "+Date.now().valueOf()+", "+new Date().valueOf());
-    var tr=this.parentNode.firstChild.insertRow(-1), cbId=Math.random().toString(16).slice(2);
-    cbId=backupTable.dataset.cbUniqPfx+'.'+backupTable.dataset.cbIdCount.toString();
-    //console.log(`cbId: ${cbId}`);
-    backupTable.dataset.cbIdCount++;
+    var tr=this.parentNode.firstChild.insertRow(-1);
 
     //tr.style="outline:thin solid; user-select: none";
     tr.style="user-select: none;";
@@ -147,7 +150,7 @@ class BakLn extends HTMLElement {
 
     function addTdLabel(txt) {
       var lab = document.createElement("label");
-      lab.htmlFor=cbId;
+      lab.htmlFor=BakLn.bakLnCbCount;
       lab.innerHTML=txt;
       addTdObj(lab);
     }
@@ -155,7 +158,8 @@ class BakLn extends HTMLElement {
     // Create a checkbox as the first cell of the row
     var cbox = document.createElement("input");
     cbox.type = "checkbox";
-    cbox.id = cbId;
+    cbox.id = BakLn.bakLnCbCount;
+    cbox.checked=getBoolItemOrDefault (`${appName}.bak-ln.${cbox.id}.checked`, false);
     addTdObj(cbox);
     //console.log(`${this.tagName}[${cbox.id}]:[${this.innerHTML}]`);
     this.innerHTML='';
@@ -169,17 +173,23 @@ class BakLn extends HTMLElement {
     addTdLabel(this.getAttribute("dst"));
     // Add backup type as a dataset field
     tr.dataset.type=this.getAttribute("type");
-    // Add a fifth cell for the type of the backup
-    //addTdLabel(this.getAttribute("type"));
+
+    cbox.addEventListener('change', function() {
+      //console.log(`${appName}.bak-ln.${this.id}.checked: ${this.checked}`);
+      localStorage.setItem(`${appName}.bak-ln.${this.id}.checked`, this.checked);
+    });
+
+    BakLn.bakLnCbCount++;
+    //console.log(`bakLnCbCount:${BakLn.bakLnCbCount}`);
   }
 
   connectedCallback() {
-//    this.create();
     addEventListener("load", (event) => {
       this.create();
     });
   }
 }
+
 customElements.define("bak-ln", BakLn);
 
 
@@ -208,17 +218,14 @@ function exec_cmd(run_cmd, cmd_value, output_area) {
     });
 }
 
-function run_backupRES() {
-  const allBak = document.getElementsByTagName("bak-ln");
-  for (i=0; i < allBak.length; i++) {
-    console.log("SRC: "+allBak.item(i).getAttribute("src")+", DST: "+allBak.item(i).getAttribute("dst")+", TYPE: "+allBak.item(i).getAttribute("type"));
-  }
-}
-
 function run_backup() {
   bakLst=document.getElementById("backup-list");
   const rows = bakLst.getElementsByTagName("table").item(0).rows;
   params="";
+  shell_cmds="";
+  user="##Nextcloud ##OneDrive ##'OneDrive - AKKA' ##*~ ##*.o ##*.mp3 ##*.ogg ##*.m4a ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup ##AppData ##AFaire ##Downloads ##NL ##bad_roms ##Audio ##Lecture ##'Bibliothéque Calibre' ##ManiaPlanet ##TmForever ##ntuser.dat* ##NTUSER.DAT* ##Nextcloud* ##OneDrive* ##casal/vim/";
+  fam="##*~ ##*.o ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup/";
+
   for (i=0; i < rows.length; i++) {
     cells=rows[i].cells;
     cbx=cells[0].firstChild;
@@ -226,22 +233,37 @@ function run_backup() {
     dst=cells[3].firstChild;
     typ=rows[i].dataset.type;
     if (cbx.checked === true) {
-      params+=src.textContent+" "+dst.textContent+" ";
+      params+="'"+src.textContent+"' '"+dst.textContent+"' ";
       if (typ == 'null') params+="user";
       else params+=typ;
       params+=" ";
+
+      if (shell_cmds !== "") shell_cmds+=" && ";
+      shell_cmds+='/usr/bin/rsync --progress -avu --chmod=755 --chown=nobody:nogroup -e "ssh -i $HOME/.ssh/id_rsa" ';
+      if (typ == 'null' || typ == 'user') shell_cmds+=user.replace(/##/g, "--exclude=");
+      else shell_cmds+=fam.replace(/##/g, "--exclude=");
+      shell_cmds+=` "${src.textContent}" "${dst.textContent}"`;
     }
 
-    console.log(`ROW[${i}][0]: ${cbx.checked}`);
-    console.log(`ROW[${i}][1]: ${src.textContent}`);
-    console.log(`ROW[${i}][3]: ${dst.textContent}`);
-    console.log(`ROW[${i}].type: ${rows[i].dataset.type}`);
-    console.log("");
+    // console.log(`ROW[${i}][0]: ${cbx.checked}, ROW[${i}][1]: ${src.textContent}, ROW[${i}][3]: ${dst.textContent, ROW[${i}].type: ${rows[i].dataset.type}`);
   }
 
-  console.log("params: "+params);
-//  exec_cmd(backup_menu, "echo OK; read a", 
-// D:\UnixTools\msys64\usr\bin\mintty.exe -o Charset=UTF-8 -i app.ico -p 600,640 -s 100,20 -t "Sauvegarde en cours" -e /bin/bash --login -i -c mysync.sh 
+  currPath=window.location.pathname;
+  currPath=currPath.substring(1, currPath.lastIndexOf("/")+1);
+
+  //shell_cmds=shell_cmds.replace(/\\/g, "\\\\");
+  //cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "${shell_cmds} && echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
+//cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "cd ${currPath} && ls && echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
+
+  params=params.replace(/\\/g, "\\\\");
+  cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "cd ${currPath} && ./mysync.sh ${params} && echo -n -e '\\nSauvegarde terminée, appuyer sur <Entrée>'"`;
+
+  exec_cmd(backup_menu, cmd, output);
+}
+
+function double_set_size() {
+  webapp.set_size(winW, winH-1);
+  webapp.set_size(winW, winH);
 }
 
 window.addEventListener('load', () => {
@@ -259,9 +281,8 @@ window.addEventListener('load', () => {
   }
 
   window.onresize = windowSize;
-  // The following 2 commands to trigger a correct resize
-  webapp.set_size(winW, winH-1);
-  webapp.set_size(winW, winH);
+  double_set_size();
 });
 
 
+//D:\UnixTools\msys64\usr\bin\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/echo toto tutu tata
