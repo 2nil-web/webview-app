@@ -221,7 +221,6 @@ function exec_cmd(run_cmd, cmd_value, output_area) {
 function run_backup() {
   bakLst=document.getElementById("backup-list");
   const rows = bakLst.getElementsByTagName("table").item(0).rows;
-  params="";
   shell_cmds="";
   user="##Nextcloud ##OneDrive ##'OneDrive - AKKA' ##*~ ##*.o ##*.mp3 ##*.ogg ##*.m4a ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup ##AppData ##AFaire ##Downloads ##NL ##bad_roms ##Audio ##Lecture ##'Bibliothéque Calibre' ##ManiaPlanet ##TmForever ##ntuser.dat* ##NTUSER.DAT* ##Nextcloud* ##OneDrive* ##casal/vim/";
   fam="##*~ ##*.o ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup/";
@@ -232,17 +231,15 @@ function run_backup() {
     src=cells[1].firstChild;
     dst=cells[3].firstChild;
     typ=rows[i].dataset.type;
-    if (cbx.checked === true) {
-      params+="'"+src.textContent+"' '"+dst.textContent+"' ";
-      if (typ == 'null') params+="user";
-      else params+=typ;
-      params+=" ";
 
-      if (shell_cmds !== "") shell_cmds+=" && ";
-      shell_cmds+='/usr/bin/rsync --progress -avu --chmod=755 --chown=nobody:nogroup -e "ssh -i $HOME/.ssh/id_rsa" ';
+    if (cbx.checked === true) {
+      if (shell_cmds !== "") shell_cmds+="; ";
+      shell_cmds+="echo; tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; /usr/bin/rsync --progress -avu --chmod=755 --chown=nobody:nogroup ";
+      //-e "ssh -i $HOME/.ssh/id_rsa" ';
       if (typ == 'null' || typ == 'user') shell_cmds+=user.replace(/##/g, "--exclude=");
       else shell_cmds+=fam.replace(/##/g, "--exclude=");
-      shell_cmds+=` "${src.textContent}" "${dst.textContent}"`;
+      cygsrc="/"+src.innerText.replace(/\\/g, "\/").replace(/:/, "");
+      shell_cmds+=` "${cygsrc}" "${dst.textContent}"`;
     }
 
     // console.log(`ROW[${i}][0]: ${cbx.checked}, ROW[${i}][1]: ${src.textContent}, ROW[${i}][3]: ${dst.textContent, ROW[${i}].type: ${rows[i].dataset.type}`);
@@ -251,13 +248,8 @@ function run_backup() {
   currPath=window.location.pathname;
   currPath=currPath.substring(1, currPath.lastIndexOf("/")+1);
 
-  //shell_cmds=shell_cmds.replace(/\\/g, "\\\\");
-  //cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "${shell_cmds} && echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
-//cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "cd ${currPath} && ls && echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
-
-  params=params.replace(/\\/g, "\\\\");
-  cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "cd ${currPath} && ./mysync.sh ${params} && echo -n -e '\\nSauvegarde terminée, appuyer sur <Entrée>'"`;
-
+  cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "${shell_cmds}; echo; tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
+  //console.log("CMD: "+cmd);
   exec_cmd(backup_menu, cmd, output);
 }
 
