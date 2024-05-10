@@ -192,30 +192,28 @@ class BakLn extends HTMLElement {
 
 customElements.define("bak-ln", BakLn);
 
-
 function decodeEntities(html) {
     var txt = document.createElement("textarea");
     txt.innerHTML = html;
     return txt.value;
 }
 
-function exec_cmd_no_return(run_cmd, cmd_value, duration) {
-  if (run_cmd.disabled === true) {
-    console.log('Command ['+cmd_value+'] did not return after '+duration/1000+' seconds.');
-    run_cmd.disabled=false;
-  }
+function exec_cmd_no_return() {
+  console.log('2-'+window.getComputedStyle(backup_menu).getPropertyValue("pointer-events")+', RESULT: '+output.value);
 }
 
 function exec_cmd(run_cmd, cmd_value, output_area) {
-    run_cmd.disabled = true;
-    cmd_value=cmd_value.trim();
-    tmout=3000;
-    setTimeout(exec_cmd_no_return, tmout, run_cmd, cmd_value, tmout);
-    window.webapp_exec(cmd_value, true).then(result => {
-      output_area.value += decodeEntities(result.value);
-      output_area.scrollTop=output_area.scrollHeight;
-      run_cmd.disabled=false;
-    });
+  backup_menu.style = "pointer-events:none;";
+  console.log('1-'+window.getComputedStyle(backup_menu).getPropertyValue("pointer-events")+', RESULT: '+output.value);
+  cmd_value=cmd_value.trim();
+  tmout=3000;
+  setTimeout(exec_cmd_no_return, tmout);
+  window.webapp_exec(cmd_value, true).then(result => {
+    console.log("VALUE "+result.value);
+    output_area.value += decodeEntities(result.value);
+    output_area.scrollTop=output_area.scrollHeight;
+    backup_menu.style = "pointer-events:auto;";
+  });
 }
 
 function run_backup() {
@@ -234,10 +232,13 @@ function run_backup() {
 
     if (cbx.checked === true) {
       if (shell_cmds !== "") shell_cmds+="; ";
+
       shell_cmds+="echo; tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; /usr/bin/rsync --progress -avu --chmod=755 --chown=nobody:nogroup ";
       //-e "ssh -i $HOME/.ssh/id_rsa" ';
+
       if (typ == 'null' || typ == 'user') shell_cmds+=user.replace(/##/g, "--exclude=");
       else shell_cmds+=fam.replace(/##/g, "--exclude=");
+
       cygsrc="/"+src.innerText.replace(/\\/g, "\/").replace(/:/, "");
       shell_cmds+=` "${cygsrc}" "${dst.textContent}"`;
     }
@@ -249,8 +250,9 @@ function run_backup() {
   currPath=currPath.substring(1, currPath.lastIndexOf("/")+1);
 
   cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "${shell_cmds}; echo; tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
-  //console.log("CMD: "+cmd);
-  exec_cmd(backup_menu, cmd, output);
+  window.webapp_exec(cmd);
+
+  //exec_cmd(backup_menu, 'D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -e /bin/bash -c \'read -p "Appuyer sur <Entrée>"; echo "FIN###NIF"\'', output);
 }
 
 function double_set_size() {
