@@ -1,29 +1,29 @@
-- Nextcloud 
-- OneDrive 
-- OneDrive\ -\ AKKA 
-- *~ 
-- *.o 
-- *.mp3 
-- *.ogg 
-- *.m4a 
-- .AndroidStudio2.3 
-- .android 
-- VirtualBox\ VMs 
-- .dl 
-- Backup 
-- NoBackup 
-- AppData 
-- AFaire 
-- Downloads 
-- NL 
-- bad_roms 
-- Audio 
-- Lecture 
-- Bibliothéque\ Calibre 
-- ManiaPlanet 
-- TmForever 
-- ntuser.dat* 
-- NTUSER.DAT* 
-- Nextcloud* 
-- OneDrive* 
-- casal/vim/
+Nextcloud 
+OneDrive 
+OneDrive - AKKA 
+*~ 
+*.o 
+*.mp3 
+*.ogg 
+*.m4a 
+.AndroidStudio2.3 
+.android 
+VirtualBox VMs 
+.dl 
+Backup 
+NoBackup 
+AppData 
+AFaire 
+Downloads 
+NL 
+bad_roms 
+Audio 
+Lecture 
+Bibliothéque Calibre 
+ManiaPlanet 
+TmForever 
+ntuser.dat* 
+NTUSER.DAT* 
+Nextcloud* 
+OneDrive* 
+casal/vim/

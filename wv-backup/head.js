@@ -216,11 +216,33 @@ function exec_cmd(run_cmd, cmd_value, output_area) {
   });
 }
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+const yourFunction = async (fname) => {
+  await delay(2000);
+  return "Waited 2s: "+fname;
+};
+
+function readfile (filename, obj=null) {
+  obj.value="toto";
+  txt=window.freadi(filename).then(res => {
+    txt=res.text;
+    if (obj instanceof HTMLElement) obj.value+=txt;
+    console.log(txt);
+  });
+}
+
 function run_backup() {
   bakLst=document.getElementById("backup-list");
   const rows = bakLst.getElementsByTagName("table").item(0).rows;
   shell_cmds="";
-  user="##Nextcloud ##OneDrive ##'OneDrive - AKKA' ##*~ ##*.o ##*.mp3 ##*.ogg ##*.m4a ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup ##AppData ##AFaire ##Downloads ##NL ##bad_roms ##Audio ##Lecture ##'Bibliothéque Calibre' ##ManiaPlanet ##TmForever ##ntuser.dat* ##NTUSER.DAT* ##Nextcloud* ##OneDrive* ##casal/vim/";
+  currPath=window.location.pathname;
+  console.log(currPath);
+  currPath=currPath.substring(1, currPath.lastIndexOf("/")+1);
+
+  //readfile("exclude_for_famille.txt", output);
+  //return;
+  user="##.vs ##Nextcloud ##OneDrive ##'OneDrive - AKKA' ##*~ ##*.o ##*.mp3 ##*.ogg ##*.m4a ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup ##AppData ##AFaire ##Downloads ##NL ##bad_roms ##Audio ##Lecture ##'Bibliothéque Calibre' ##ManiaPlanet ##TmForever ##ntuser.dat* ##NTUSER.DAT* ##Nextcloud* ##OneDrive* ##casal/vim/";
   fam="##*~ ##*.o ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup/";
 
   for (i=0; i < rows.length; i++) {
@@ -246,9 +268,7 @@ function run_backup() {
     // console.log(`ROW[${i}][0]: ${cbx.checked}, ROW[${i}][1]: ${src.textContent}, ROW[${i}][3]: ${dst.textContent, ROW[${i}].type: ${rows[i].dataset.type}`);
   }
 
-  currPath=window.location.pathname;
-  currPath=currPath.substring(1, currPath.lastIndexOf("/")+1);
-
+  console.log(`currPath: ${currPath}`);
   cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "${shell_cmds}; echo; tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
   window.webapp_exec(cmd);
 

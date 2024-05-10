@@ -456,6 +456,13 @@ void create_binds(webview_wrapper& w)
                }).detach();
              });
 
+  w.bind_doc("freadi", "read file with provided file name and return its content.", [&](const std::string &req) -> std::string {
+    std::string filename = json_parse(req, "", 0);
+    std::string res="{\"text\": \"" + fread(filename) +"\"}";
+    return res;
+  });
+
+
   w.bind_doc("fwrite", "truncate and write to file with provided file name.", [&](const std::string &req) -> std::string {
     std::string fn, s;
     int n = 0;
