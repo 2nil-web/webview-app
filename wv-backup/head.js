@@ -216,34 +216,35 @@ function exec_cmd(run_cmd, cmd_value, output_area) {
   });
 }
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
+const delay = ms => new Promise(res => setTimeout(res, 1));
 
-const yourFunction = async (fname) => {
-  await delay(2000);
-  return "Waited 2s: "+fname;
-};
-
-function readfile (filename, obj=null) {
-  obj.value="toto";
-  txt=window.freadi(filename).then(res => {
-    txt=res.text;
-    if (obj instanceof HTMLElement) obj.value+=txt;
-    console.log(txt);
+function readfile (filename, v) {
+  window.fread(filename).then(res => {
+    if (res.charAt(0) === '\n') res=res.slice(1);
+    if (res.slice(-1) !== '\n') res+='\n';//res.slice(0, -1);
+    v.txt=res.replace(/(.*)\n/g, "--exclude='$1' ").slice(0, -1);
   });
 }
 
-function run_backup() {
+async function run_backup() {
   bakLst=document.getElementById("backup-list");
   const rows = bakLst.getElementsByTagName("table").item(0).rows;
   shell_cmds="";
   currPath=window.location.pathname;
-  console.log(currPath);
-  currPath=currPath.substring(1, currPath.lastIndexOf("/")+1);
+  currPath=currPath.substring(1, currPath.lastIndexOf("/"));
+  //console.log(currPath);
 
-  //readfile("exclude_for_famille.txt", output);
-  //return;
-  user="##.vs ##Nextcloud ##OneDrive ##'OneDrive - AKKA' ##*~ ##*.o ##*.mp3 ##*.ogg ##*.m4a ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup ##AppData ##AFaire ##Downloads ##NL ##bad_roms ##Audio ##Lecture ##'Bibliothéque Calibre' ##ManiaPlanet ##TmForever ##ntuser.dat* ##NTUSER.DAT* ##Nextcloud* ##OneDrive* ##casal/vim/";
-  fam="##*~ ##*.o ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup/";
+  let fam={txt:null}, usr={txt:null};
+  readfile("exclude_for_famille.txt", fam);
+  readfile("exclude_for_user.txt", usr);
+  await delay();
+  fam=fam.txt;
+  usr=usr.txt;
+  console.log(`fam:[${fam}]`);
+  console.log(`usr:[${usr}]`);
+
+  //usr="##.vs ##Nextcloud ##OneDrive ##'OneDrive - AKKA' ##*~ ##*.o ##*.mp3 ##*.ogg ##*.m4a ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup ##AppData ##AFaire ##Downloads ##NL ##bad_roms ##Audio ##Lecture ##'Bibliothéque Calibre' ##ManiaPlanet ##TmForever ##ntuser.dat* ##NTUSER.DAT* ##Nextcloud* ##OneDrive* ##casal/vim/";
+  //fam="##*~ ##*.o ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup/";
 
   for (i=0; i < rows.length; i++) {
     cells=rows[i].cells;
@@ -258,8 +259,8 @@ function run_backup() {
       shell_cmds+="echo; tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; /usr/bin/rsync --progress -avu --chmod=755 --chown=nobody:nogroup ";
       //-e "ssh -i $HOME/.ssh/id_rsa" ';
 
-      if (typ == 'null' || typ == 'user') shell_cmds+=user.replace(/##/g, "--exclude=");
-      else shell_cmds+=fam.replace(/##/g, "--exclude=");
+      if (typ == 'null' || typ == 'usr') shell_cmds+=usr;
+      else shell_cmds+=fam;
 
       cygsrc="/"+src.innerText.replace(/\\/g, "\/").replace(/:/, "");
       shell_cmds+=` "${cygsrc}" "${dst.textContent}"`;

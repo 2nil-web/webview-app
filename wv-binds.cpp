@@ -448,17 +448,20 @@ void create_binds(webview_wrapper& w)
                }).detach();
              });
 
-  w.bind_doc("fread", "read file with provided file name and return its content.",
-             [&](const std::string &seq, const std::string &req, void *) {
+  w.bind_doc("fread", "read file with provided file name and return its content.", [&](const std::string &seq, const std::string &req, void *) {
                std::thread([&, seq, req] {
                  auto filename = json_parse(req, "", 0);
-                 w.resolve(seq, 0, '"' + fread(filename) + '"');
+                 std::cout << "freading " << filename << std::endl;
+                 std::string res = "\""+rep_crlf(fread(filename))+"\"";
+                 std::cout << "fread: " << res << std::endl;
+                 w.resolve(seq, 0, res);
                }).detach();
              });
 
   w.bind_doc("freadi", "read file with provided file name and return its content.", [&](const std::string &req) -> std::string {
     std::string filename = json_parse(req, "", 0);
-    std::string res="{\"text\": \"" + fread(filename) +"\"}";
+    std::string res="\""+rep_crlf(fread(filename))+"\"";
+    std::cout << "fread: " << res << std::endl;
     return res;
   });
 

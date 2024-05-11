@@ -187,10 +187,11 @@ void replace_all(std::wstring &s, std::wstring srch, std::wstring repl)
   }
 }
 
-void rep_crlf(std::string &s)
+std::string rep_crlf(std::string s)
 {
   replace_all(s, "\r", "\\r");
   replace_all(s, "\n", "\\n");
+  return s;
 }
 
 std::string temppath()
@@ -549,7 +550,7 @@ std::string rep_bs(std::string &s)
   std::string bs;
   bs = (char)92;
   replace_all(s, bs, "##BACKSLASH_CODE##");
-  rep_crlf(s);
+  s=rep_crlf(s);
   replace_all(s, "##BACKSLASH_CODE##", bs + bs);
   return s;
 }
