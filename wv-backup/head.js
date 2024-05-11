@@ -240,8 +240,8 @@ async function run_backup() {
   await delay();
   fam=fam.txt;
   usr=usr.txt;
-  console.log(`fam:[${fam}]`);
-  console.log(`usr:[${usr}]`);
+//  console.log(`fam:[${fam}]`);
+//  console.log(`usr:[${usr}]`);
 
   //usr="##.vs ##Nextcloud ##OneDrive ##'OneDrive - AKKA' ##*~ ##*.o ##*.mp3 ##*.ogg ##*.m4a ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup ##AppData ##AFaire ##Downloads ##NL ##bad_roms ##Audio ##Lecture ##'Bibliothéque Calibre' ##ManiaPlanet ##TmForever ##ntuser.dat* ##NTUSER.DAT* ##Nextcloud* ##OneDrive* ##casal/vim/";
   //fam="##*~ ##*.o ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup/";
