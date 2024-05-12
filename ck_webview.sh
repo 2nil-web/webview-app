@@ -40,7 +40,7 @@ NEW_COMMIT_FILE=webview.h.new_commit
 # If commits are different then retrieve new 
 if [ "${wv_new_commit}" = "${wv_actual_commit}" ]
 then
-  echo "No change in webview.h from webview github repo"
+  echo "No change in webview.h from the github webview repo"
   rm -f ../../${NEW_COMMIT_FILE}
 else
   echo "// GITHUB_WEBVIEW_REPO_COMMIT=$wv_new_commit" > ../../${NEW_COMMIT_FILE}
