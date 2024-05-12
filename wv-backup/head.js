@@ -210,8 +210,8 @@ async function run_backup() {
   currPath=currPath.substring(1, currPath.lastIndexOf("/"));
 
   let fam={txt:null}, usr={txt:null};
-  readfile("exclude_for_famille.txt", fam);
-  readfile("exclude_for_user.txt", usr);
+  readfile("famille.exclude_list", fam);
+  readfile("user.exclude_list", usr);
   await delay();
   fam=fam.txt;
   usr=usr.txt;
