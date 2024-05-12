@@ -1,9 +1,17 @@
 .vs/
+x64/
+x64/Release
+x64/Debug
 Nextcloud
 OneDrive
 OneDrive - AKKA
 *~
 *.o
+*.obj
+*.iobj
+*.pdb
+*.ipdb
+*.tlog
 *.mp3
 *.ogg
 *.m4a
