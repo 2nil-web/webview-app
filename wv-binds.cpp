@@ -775,6 +775,17 @@ void create_binds(webview_wrapper& w)
     }).detach();
   });
 
+  w.bind_doc("webapp_execi", "run an external command.", [&](const std::string &req) -> std::string {
+    auto cmd = json_parse(req, "", 0);
+    std::cout << "cmd: " << cmd << std::endl;
+    std::string res_cmd = exec_cmd(cmd);
+    std::cout << "res_cmd: " << res_cmd << std::endl;
+    rep_bs(res_cmd);
+    auto result = "{\"value\": \"" + res_cmd + "\"}";
+    std::cout << "result: " << result << std::endl;
+    return result;
+  });
+
   w.bind_doc("write", "write a string to stdout.", [&](const std::string &req) -> std::string {
     auto s = json_parse(req, "", 0);
     write_cons(w, s);

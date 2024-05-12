@@ -56,7 +56,7 @@ webapp.set_title(appName);
 // To be called with -m option
 webapp.restore();
 webapp.set_icon("app.ico");
-webapp.set_size(640, 250, 1); // Define minimum bounds (third option to 1)
+webapp.set_size(640, 200, 1); // Define minimum bounds (third option to 1)
 webapp.set_size(winW, winH);  // Define actual size
 webapp.set_pos(winX, winY);
 webapp.on_move('save_pos()');
@@ -192,31 +192,7 @@ class BakLn extends HTMLElement {
 
 customElements.define("bak-ln", BakLn);
 
-function decodeEntities(html) {
-    var txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
-}
-
-function exec_cmd_no_return() {
-  console.log('2-'+window.getComputedStyle(backup_menu).getPropertyValue("pointer-events")+', RESULT: '+output.value);
-}
-
-function exec_cmd(run_cmd, cmd_value, output_area) {
-  backup_menu.style = "pointer-events:none;";
-  console.log('1-'+window.getComputedStyle(backup_menu).getPropertyValue("pointer-events")+', RESULT: '+output.value);
-  cmd_value=cmd_value.trim();
-  tmout=3000;
-  setTimeout(exec_cmd_no_return, tmout);
-  window.webapp_exec(cmd_value, true).then(result => {
-    console.log("VALUE "+result.value);
-    output_area.value += decodeEntities(result.value);
-    output_area.scrollTop=output_area.scrollHeight;
-    backup_menu.style = "pointer-events:auto;";
-  });
-}
-
-const delay = ms => new Promise(res => setTimeout(res, 1));
+const delay = ms => new Promise(res => setTimeout(res, 400));
 
 function readfile (filename, v) {
   window.fread(filename).then(res => {
@@ -232,7 +208,6 @@ async function run_backup() {
   shell_cmds="";
   currPath=window.location.pathname;
   currPath=currPath.substring(1, currPath.lastIndexOf("/"));
-  //console.log(currPath);
 
   let fam={txt:null}, usr={txt:null};
   readfile("exclude_for_famille.txt", fam);
@@ -240,11 +215,8 @@ async function run_backup() {
   await delay();
   fam=fam.txt;
   usr=usr.txt;
-//  console.log(`fam:[${fam}]`);
-//  console.log(`usr:[${usr}]`);
-
-  //usr="##.vs ##Nextcloud ##OneDrive ##'OneDrive - AKKA' ##*~ ##*.o ##*.mp3 ##*.ogg ##*.m4a ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup ##AppData ##AFaire ##Downloads ##NL ##bad_roms ##Audio ##Lecture ##'Bibliothéque Calibre' ##ManiaPlanet ##TmForever ##ntuser.dat* ##NTUSER.DAT* ##Nextcloud* ##OneDrive* ##casal/vim/";
-  //fam="##*~ ##*.o ##.AndroidStudio2.3 ##.android ##'VirtualBox VMs' ##.dl ##Backup ##NoBackup/";
+  //console.log("Fam: "+fam);
+  //console.log("Usr: "+usr);
 
   for (i=0; i < rows.length; i++) {
     cells=rows[i].cells;
@@ -265,15 +237,13 @@ async function run_backup() {
       cygsrc="/"+src.innerText.replace(/\\/g, "\/").replace(/:/, "");
       shell_cmds+=` "${cygsrc}" "${dst.textContent}"`;
     }
-
-    // console.log(`ROW[${i}][0]: ${cbx.checked}, ROW[${i}][1]: ${src.textContent}, ROW[${i}][3]: ${dst.textContent, ROW[${i}].type: ${rows[i].dataset.type}`);
   }
 
-  console.log(`currPath: ${currPath}`);
-  cmd=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c "${shell_cmds}; echo; tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
-  window.webapp_exec(cmd);
-
-  //exec_cmd(backup_menu, 'D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -e /bin/bash -c \'read -p "Appuyer sur <Entrée>"; echo "FIN###NIF"\'', output);
+  cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c';
+  cmd=`${cmd_env} "${shell_cmds}; echo; tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
+  backup_menu.style = "pointer-events:none;";
+  window.webapp_execi(cmd);
+//  backup_menu.style = "pointer-events:auto;";
 }
 
 function double_set_size() {
