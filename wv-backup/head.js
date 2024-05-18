@@ -215,8 +215,8 @@ async function run_backup() {
   await delay();
   fam=fam.txt;
   usr=usr.txt;
-  //console.log("Fam: "+fam);
-  //console.log("Usr: "+usr);
+  console.log("Fam: "+fam);
+  console.log("Usr: "+usr);
 
   for (i=0; i < rows.length; i++) {
     cells=rows[i].cells;
@@ -228,7 +228,14 @@ async function run_backup() {
     if (cbx.checked === true) {
       if (shell_cmds !== "") shell_cmds+="; ";
 
-      shell_cmds+="echo; tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; /usr/bin/rsync --progress -avu --chmod=755 --chown=nobody:nogroup ";
+      if (typ.startsWith("win-")) {
+        typ=typ.slice(5);
+        linux_param="";
+      } else {
+        linux_param="--chown=nobody:nogroup";
+      }
+
+      shell_cmds+="echo; tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; /usr/bin/rsync --progress -avu --chmod=755 "+linux_param+" --delete ";
       //-e "ssh -i $HOME/.ssh/id_rsa" ';
 
       if (typ == 'null' || typ == 'usr') shell_cmds+=usr;
@@ -242,6 +249,7 @@ async function run_backup() {
   cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 110,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c';
   cmd=`${cmd_env} "${shell_cmds}; echo; tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
   backup_menu.style = "pointer-events:none;";
+  console.log("RSYNC CMD: "+cmd);
   window.webapp_execi(cmd);
 //  backup_menu.style = "pointer-events:auto;";
 }
