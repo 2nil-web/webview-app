@@ -238,7 +238,7 @@ async function run_backup() {
       shell_cmds+="echo; tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; /usr/bin/rsync --progress -avu --chmod=755 "+linux_param+" --delete ";
       //-e "ssh -i $HOME/.ssh/id_rsa" ';
 
-      if (typ == 'null' || typ == 'usr') shell_cmds+=usr;
+      if (typ == 'null' || typ == 'usr' || typ == 'user') shell_cmds+=usr;
       else shell_cmds+=fam;
 
       cygsrc="/"+src.innerText.replace(/\\/g, "\/").replace(/:/, "");
