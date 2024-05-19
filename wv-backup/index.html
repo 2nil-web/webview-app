@@ -16,17 +16,18 @@
   <body>
     <div id="menu_bar" class="topnav">
       <div id="backup_menu" onclick="run_backup()">Backup checked items</div>
+      <div id="backup_menu" onclick="run_backup(false)">Dry run</div>
       <div id="quit_menu" onclick="save_conf_and_exit()">Quit</div>
       <div id="about_menu" onclick="about()" class="align_right" onclick="save_conf_and_exit()">About</div>
     </div>
     <div id="backup-list" style="overflow: auto; border: solid 0px black">
-      <bak-ln src="C:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/C"></bak-ln>
-      <bak-ln src="C:\Users\Public\Famille" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/C/Public" type="fam"></bak-ln>
-      <bak-ln src="D:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backup/PC-Denis/D"></bak-ln>
+      <bak-ln src="C:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backups/PC-Denis/C/Users"></bak-ln>
+      <bak-ln src="C:\Users\Public\Famille" dst="root@home.dplalanne.fr:/dd1/public/Backups/PC-Denis/C/Users/Public" type="fam"></bak-ln>
+      <bak-ln src="D:\Users\casal" dst="root@home.dplalanne.fr:/dd1/public/Backups/PC-Denis/D/Users"></bak-ln>
 
-      <bak-ln src="C:\Users\casal" dst="/e/Backups/C" type="win-usr"></bak-ln>
-      <bak-ln src="C:\Users\Public\Famille" dst="/e/Backups/C/Public" type="win-fam"></bak-ln>
-      <bak-ln src="D:\Users\casal" dst="/e/Backups/D" type="win-usr"></bak-ln>
+      <bak-ln src="C:\Users\casal" dst="/e/Backups/C/Users" type="win-usr"></bak-ln>
+      <bak-ln src="C:\Users\Public\Famille" dst="/e/Backups/C/Users/Public" type="win-fam"></bak-ln>
+      <bak-ln src="D:\Users\casal" dst="/e/Backups/D/Users" type="win-usr"></bak-ln>
       
     </div>
     <div style="display:none">

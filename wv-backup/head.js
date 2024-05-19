@@ -138,8 +138,8 @@ class BakLn extends HTMLElement {
     //console.log(Date.now().toString(36)+", "+Date.now().valueOf()+", "+new Date().valueOf());
     var tr=this.parentNode.firstChild.insertRow(-1);
 
-    //tr.style="outline:thin solid; user-select: none";
-    tr.style="user-select: none;";
+    tr.style="outline:thin solid; user-select: none";
+    //tr.style="user-select: none;";
 
     function addTdObj(obj) {
       var td = document.createElement("td");
@@ -202,7 +202,7 @@ function readfile (filename, v) {
   });
 }
 
-async function run_backup() {
+async function run_backup(real_run=true) {
   bakLst=document.getElementById("backup-list");
   const rows = bakLst.getElementsByTagName("table").item(0).rows;
   shell_cmds="";
@@ -230,7 +230,7 @@ async function run_backup() {
 
     if (cbx.checked === true) {
 
-      if (shell_cmds !== "") shell_cmds+="; ";
+      //if (shell_cmds !== "") shell_cmds+="; ";
 
       if (typ.startsWith("win-")) {
         typ=typ.slice(4);
@@ -245,17 +245,20 @@ async function run_backup() {
         file_title=cyg_currPath+"/famille.exclude_list";
       }
 
-      shell_cmds1="/usr/bin/rsync --progress -avu "+opt_param+" --delete --exclude-from="+file_title;
+      rsync_cmd="/usr/bin/rsync --progress -au "+opt_param+" --delete --delete-excluded --exclude-from="+file_title;
+      cygsrc="/"+src.innerText.replace(/\\/g, "\/").replace(/:/, "");
+      rsync_cmd+=` "${cygsrc}" "${dst.textContent}"`;
       //-e "ssh -i $HOME/.ssh/id_rsa" ';
 
-      cygsrc="/"+src.innerText.replace(/\\/g, "\/").replace(/:/, "");
-      shell_cmds1+=` "${cygsrc}" "${dst.textContent}"`;
-      shell_cmds+="tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; "+shell_cmds1.replace(/\/usr\/bin\/rsync(.*)/, "echo rsync $1;")+shell_cmds1;
+      echo_cmd=rsync_cmd.replace(/\/usr\/bin\/rsync(.*)/, "echo rsync $1");
+      shell_cmds+="tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; ";
+      shell_cmds+=echo_cmd+';';
+      if (real_run) shell_cmds+=rsync_cmd+';';
     }
   }
 
-  cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p center -s 210,20 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c';
-  cmd=`${cmd_env} "${shell_cmds}; tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
+  cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 2,350 -s 270,40 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c';
+  cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
   backup_menu.style = "pointer-events:none;";
   console.log("RSYNC CMD: "+cmd);
   window.webapp_exec(cmd);

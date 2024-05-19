@@ -1,43 +1,43 @@
-casal/IntelGraphicsProfiles/
-casal/MyPrograms/
-.vs/
-.vscode/
-x64/
-x64/Release
-x64/Debug
+*.iobj
+*.ipdb
+*.m4a
+*.mp3
+*.o
+*.ogg
+*.pdb
+*.tlog
+*~
+.AndroidStudio2.3
+.VirtualBox
+.android
+.dl
+.vs
+.vscode
+AFaire
+AppData
+Application Data
+Audio
+Backup
+Bibliothéque Calibre
+Debug
+Downloads
+Lecture
+ManiaPlanet
+NL
+NTUSER.DAT*
 Nextcloud
+Nextcloud*
+NoBackup
 OneDrive
 OneDrive - AKKA
-*~
-*.o
-*.obj
-*.iobj
-*.pdb
-*.ipdb
-*.tlog
-*.mp3
-*.ogg
-*.m4a
-.AndroidStudio2.3
-.android
-VirtualBox VMs/
-.VirtualBox/
-.dl
-Backup
-NoBackup
-AppData
-Application Data/
-AFaire
-Downloads
-NL
-bad_roms
-Audio
-Lecture
-Bibliothéque Calibre
-ManiaPlanet
-TmForever
-ntuser.dat*
-NTUSER.DAT*
-Nextcloud*
 OneDrive*
-casal/vim/
+Release
+TmForever
+VirtualBox VMs
+bad_roms
+build
+casal/IntelGraphicsProfiles
+casal/MyPrograms
+casal/vim
+ntuser.dat*
+x64
