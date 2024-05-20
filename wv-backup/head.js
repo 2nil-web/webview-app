@@ -209,7 +209,7 @@ function tcap_center () {
 }
 
 async function run_backup(real_run=true) {
-  tcap_center(1, "toto");
+//  tcap_center(1, "toto");
 
   bakLst=document.getElementById("backup-list");
   const rows = bakLst.getElementsByTagName("table").item(0).rows;
@@ -259,36 +259,46 @@ async function run_backup(real_run=true) {
       //-e "ssh -i $HOME/.ssh/id_rsa" ';
 
       echo_cmd=rsync_cmd.replace(/\/usr\/bin\/rsync(.*)/, "echo rsync $1");
-      shell_cmds+="echo; tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; ";
+      shell_cmds+="echo; tput smso; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmso; ";
       shell_cmds+=echo_cmd;
       if (real_run) shell_cmds+="; "+rsync_cmd;
     }
   }
 
-  cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 10,350 -s 266,40 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c ';
+  term_width=266;
+  cmd_env=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 10,350 -s ${term_width},40 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c `;
   //cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
 
   cmd=cmd_env;
+  if (real_run) msg="  B A C K U P  I N  P R O G R E S S  ";
+  else msg="             D R Y  R U N            ";
+  spc=' '.repeat(msg.length);
+  col=Math.trunc((term_width-msg.length)/2);
+  console.log(col);
+
   cmd+='"';
-    if (!real_run) {
-      // Shows 255 colors in background for TERM=mintty: for ((i=0; i < 255; i++)); do tput setab $i; printf " %03d " "$i"; tput sgr0; done
-      cmd+=`export TERM=mintty;`;
-      // tput cup row col
-      cmd+=`tput cup 0 123 smul bold;      echo '                          ';`;
-      cmd+=`tput cup 1 123 rmul setab 124; echo '|                        |';`;
-      cmd+=`tput cup 2 123     ;           echo '|      D R Y  R U N      |';`;
-      cmd+=`tput cup 3 123 smul;           echo '|                        |';`;
-      cmd+='tput sgr0;';
-      cmd+=`echo;`;
-      cmd+=`echo;`;
-    }
+    // Shows 255 colors in background for TERM=mintty: for ((i=0; i < 255; i++)); do tput setab $i; printf " %03d " "$i"; tput sgr0; done
+    // tput cup row col
+    cmd+="export TERM=mintty;";
+    cmd+=`tput cup 0 ${col} bold;      echo '${spc}';`;
+    cmd+=`tput cup 1 ${col} setab 124; echo '${spc}';`;
+    cmd+=`tput cup 2 ${col};           echo '${msg}';`;
+    cmd+=`tput cup 3 ${col} ;          echo '${spc}';`;
+    cmd+="tput sgr0;";
+    cmd+="echo;";
+    cmd+="echo;";
+
     cmd+=` ${shell_cmds}; `;
+
+  msg=" Sauvegarde terminée, appuyer sur <Entrée> ";
+  spc=' '.repeat(msg.length);
+  col=Math.trunc((term_width-msg.length)/2);
     cmd+="echo; ";
     cmd+="tput u7; IFS=';' read -r -d R -a pos;row=$((${pos[0]:2} - 1)); row=${pos[0]:2}; ";
-    cmd+="tput bold setab 284; ";
-    cmd+="tput cup ${row}        113; echo '                                           '; ";
-    cmd+="tput cup $((${row}+1)) 113; echo ' Sauvegarde terminée, appuyer sur <Entrée> ';";
-    cmd+="tput cup $((${row}+2)) 113; echo '                                           ';";
+    cmd+=`tput bold setab 284; `;
+    cmd+=`tput cup \${row}        ${col}; echo '${spc}'; `;
+    cmd+=`tput cup $((\${row}+1)) ${col}; echo '${msg}';`;
+    cmd+=`tput cup $((\${row}+2)) ${col}; echo '${spc}';`;
   cmd+='"';
 
   backup_menu.style = "pointer-events:none;";
