@@ -202,7 +202,15 @@ function readfile (filename, v) {
   });
 }
 
+function tcap_center () {
+  for (i=0; i < arguments.length; i++) {
+    console.log("Arg"+i+": "+arguments[i])
+  }
+}
+
 async function run_backup(real_run=true) {
+  tcap_center(1, "toto");
+
   bakLst=document.getElementById("backup-list");
   const rows = bakLst.getElementsByTagName("table").item(0).rows;
   shell_cmds="";
@@ -257,14 +265,15 @@ async function run_backup(real_run=true) {
     }
   }
 
-  cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 10,350 -s 266,40 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c';
+  cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 10,350 -s 266,40 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c ';
   //cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
 
   cmd=cmd_env;
-  cmd+=' "';
+  cmd+='"';
     if (!real_run) {
       // Shows 255 colors in background for TERM=mintty: for ((i=0; i < 255; i++)); do tput setab $i; printf " %03d " "$i"; tput sgr0; done
       cmd+=`export TERM=mintty;`;
+      // tput cup row col
       cmd+=`tput cup 0 123 smul bold;      echo '                          ';`;
       cmd+=`tput cup 1 123 rmul setab 124; echo '|                        |';`;
       cmd+=`tput cup 2 123     ;           echo '|      D R Y  R U N      |';`;
@@ -274,7 +283,12 @@ async function run_backup(real_run=true) {
       cmd+=`echo;`;
     }
     cmd+=` ${shell_cmds}; `;
-    cmd+=`tput bold setab 284; echo; echo 'Sauvegarde terminée, appuyer sur <Entrée>'`;
+    cmd+="echo; ";
+    cmd+="tput u7; IFS=';' read -r -d R -a pos;row=$((${pos[0]:2} - 1)); row=${pos[0]:2}; ";
+    cmd+="tput bold setab 284; ";
+    cmd+="tput cup ${row}        113; echo '                                           '; ";
+    cmd+="tput cup $((${row}+1)) 113; echo ' Sauvegarde terminée, appuyer sur <Entrée> ';";
+    cmd+="tput cup $((${row}+2)) 113; echo '                                           ';";
   cmd+='"';
 
   backup_menu.style = "pointer-events:none;";
