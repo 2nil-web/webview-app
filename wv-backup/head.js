@@ -230,7 +230,7 @@ async function run_backup(real_run=true) {
 
     if (cbx.checked === true) {
 
-      //if (shell_cmds !== "") shell_cmds+="; ";
+      if (shell_cmds !== "") shell_cmds+="; ";
 
       if (typ.startsWith("win-")) {
         typ=typ.slice(4);
@@ -252,13 +252,22 @@ async function run_backup(real_run=true) {
 
       echo_cmd=rsync_cmd.replace(/\/usr\/bin\/rsync(.*)/, "echo rsync $1");
       shell_cmds+="tput smso smul; echo 'Sauvegarde "+src.innerText+" dans "+dst.innerText+"'; tput rmul rmso; ";
-      shell_cmds+=echo_cmd+';';
-      if (real_run) shell_cmds+=rsync_cmd+';';
+      shell_cmds+=echo_cmd;
+      if (real_run) shell_cmds+="; "+rsync_cmd;
     }
   }
 
-  cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 2,350 -s 270,40 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c';
-  cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
+  cmd_env='D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 2,350 -s 268,40 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c';
+  //cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
+
+  cmd=cmd_env;
+  cmd+=' "';
+    // Shows 255 colors in background for TERM=mintty: for ((i=0; i < 255; i++)); do tput setab $i; printf " %03d " "$i"; tput sgr0; done
+    if (!real_run) cmd+=` export TERM=mintty; tput setab 124; tput cup 0 124; echo '   === D R Y  R U N ===   '; tput sgr0;`;
+    cmd+=` ${shell_cmds}; `;
+    cmd+=`tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'`;
+  cmd+='"';
+
   backup_menu.style = "pointer-events:none;";
   console.log("RSYNC CMD: "+cmd);
   window.webapp_exec(cmd);
