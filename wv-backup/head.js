@@ -270,8 +270,8 @@ async function run_backup(real_run=true) {
   //cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
 
   cmd=cmd_env;
-  if (real_run) msg="  B A C K U P  I N  P R O G R E S S  ";
-  else msg="             D R Y  R U N            ";
+  if (real_run) msg="  B A C K U P   I N   P R O G R E S S  ";
+  else          msg="  D R Y   R U N  ";
   spc=' '.repeat(msg.length);
   col=Math.trunc((term_width-msg.length)/2);
   console.log(col);
@@ -285,14 +285,14 @@ async function run_backup(real_run=true) {
     cmd+=`tput cup 2 ${col};           echo '${msg}';`;
     cmd+=`tput cup 3 ${col} ;          echo '${spc}';`;
     cmd+="tput sgr0;";
-    cmd+="echo;";
-    cmd+="echo;";
+    cmd+="echo;echo;";
 
     cmd+=` ${shell_cmds}; `;
 
   msg=" Sauvegarde terminée, appuyer sur <Entrée> ";
   spc=' '.repeat(msg.length);
   col=Math.trunc((term_width-msg.length)/2);
+
     cmd+="echo; ";
     cmd+="tput u7; IFS=';' read -r -d R -a pos;row=$((${pos[0]:2} - 1)); row=${pos[0]:2}; ";
     cmd+=`tput bold setab 284; `;
