@@ -266,7 +266,7 @@ async function run_backup(real_run=true) {
   }
 
   term_width=266;
-  cmd_env=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 10,350 -s ${term_width},40 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c `;
+  cmd_env=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 10,350 -s ${term_width},44 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c `;
   //cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
 
   cmd=cmd_env;
@@ -285,7 +285,7 @@ async function run_backup(real_run=true) {
     cmd+=`tput cup 2 ${col};           echo '${msg}';`;
     cmd+=`tput cup 3 ${col} ;          echo '${spc}';`;
     cmd+="tput sgr0;";
-    cmd+="echo;echo;";
+    cmd+="echo;";
 
     cmd+=` ${shell_cmds}; `;
 
@@ -298,7 +298,7 @@ async function run_backup(real_run=true) {
     cmd+=`tput bold setab 284; `;
     cmd+=`tput cup \${row}        ${col}; echo '${spc}'; `;
     cmd+=`tput cup $((\${row}+1)) ${col}; echo '${msg}';`;
-    cmd+=`tput cup $((\${row}+2)) ${col}; echo '${spc}';`;
+    cmd+=`tput cup $((\${row}+2)) ${col}; echo -n '${spc}'; tput sgr0;`;
   cmd+='"';
 
   backup_menu.style = "pointer-events:none;";
