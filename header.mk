@@ -31,6 +31,7 @@ ifneq (${OS},Linux)
 # Compile en clang64 ou ucrt64 mais pas mingw64
 #export GCC_PATH=/clang64/bin
 #export GCC_PATH=/ucrt64/bin
+CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 export GCC_PATH=/mingw64/bin
 export PATH:=${GCC_PATH}:${PATH}
 
@@ -70,7 +71,6 @@ TMSTAMP := $(shell date +%Y%m%d%H%M%S)
 
 #WVDIR=${mkfile_dir}/webview
 #WV2SUBDIR=Microsoft.Web.WebView2.1.0.1150.38
-CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 
 CPPFLAGS += -I ${mkfile_dir}
 #CPPFLAGS += -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
@@ -81,9 +81,11 @@ CXXFLAGS += -Wno-unknown-pragmas
 LDFLAGS += -O #-g
 
 ifeq (${OS},Linux)
-CXXFLAGS += $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-4.1)
-LDFLAGS +=-L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1 -L/usr/lib/x86_64-linux-gnu/cmake/harfbuzz -L/usr/lib/python3/dist-packages/cairo -L/usr/lib/x86_64-linux-gnu/glib-2.0 -L/usr/lib/x86_64-linux-gnu/glib-2.0
-LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-4.1 webkit2gtk-web-extension-4.1)
+#WK2GV=4.1
+WK2GV=4.0
+CXXFLAGS += $(shell pkg-config --cflags gtk+-3.0 webkit2gtk-${WK2GV})
+LDFLAGS +=-L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/webkit2gtk-${WK2GV} -L/usr/lib/x86_64-linux-gnu/cmake/harfbuzz -L/usr/lib/python3/dist-packages/cairo -L/usr/lib/x86_64-linux-gnu/glib-2.0 -L/usr/lib/x86_64-linux-gnu/glib-2.0
+LDLIBS += $(shell pkg-config --libs gtk+-3.0 webkit2gtk-${WK2GV} webkit2gtk-web-extension-${WK2GV})
 ifneq (${WITH_CURL},)
 LDLIBS += $(shell pkg-config --libs libcurl)
 endif
