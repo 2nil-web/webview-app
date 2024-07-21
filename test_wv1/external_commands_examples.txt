@@ -1,9 +1,4 @@
 C:\\Windows\\System32\\OpenSSH\\ssh.exe -i C:\\Users\\casal\\.ssh\\id_rsa denis@home ls
-
-C:\Windows\System32\OpenSSH\ssh.exe -i C:\Users\casal\.ssh\id_rsa denis@home ls
-
-C:\Windows\System32\where.exe
-
 C:\\Windows\\System32\\where.exe
-
-C:\\Windows\\System32\\cmd.exe /C where
+C:\\Windows\\System32\\where.exe where
+C:\\Windows\\System32\\where.exe dir
