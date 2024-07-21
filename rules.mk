@@ -76,10 +76,10 @@ endif
 	pandoc -o $@ -f markdown -t docx $<
 
 %.ico : %.png
-	${MAGICK} convert -background none $< $@
+	${MAGICK} -background none $< $@
 
 %.ico : %.svg
-	${MAGICK} convert -background none $< $@
+	${MAGICK} -background none $< $@
 
 %.o: %.c
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<

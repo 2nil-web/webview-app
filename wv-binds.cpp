@@ -762,8 +762,12 @@ void create_binds(webview_wrapper& w)
   });
 
   // Run a local command and return an eventual result at a later time.
-  w.bind_doc("webapp_exec", "run an external command.", [&](const std::string &seq, const std::string &req, void *) {
-    std::thread([&, seq, req] {
+  w.bind_doc("webapp_exec", "run an external command.", [&](const std::string &seq, const std::string &ht_req, void *) {
+    std::thread([&, seq, ht_req] {
+      std::cout << "ht_req: " << ht_req << std::endl;
+      std::string req;
+      from_htent(ht_req, req);
+      std::cout << "req: " << req << std::endl;
       auto cmd = json_parse(req, "", 0);
       std::cout << "cmd: " << cmd << std::endl;
       std::string res_cmd = exec_cmd(cmd);

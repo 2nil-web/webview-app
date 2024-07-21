@@ -51,12 +51,14 @@ function exec_cmd_no_return(cmd_value, duration) {
   cmd.focus();
 }
 
-function exec_cmd(cmd_value) {
+function exec_cmd(p_cmd_value) {
     run_cmd.disabled = true;
+    cmd_value=encodeToEntities(p_cmd_value);
     cmd_value=cmd_value.trim();
     tout_warn.value='&nbsp;';
     setTimeout(exec_cmd_no_return, tout.value, cmd_value, tout.value);
     window.webapp_exec(cmd_value).then(result => {
+      s=decodeEntities(result.value);//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
       output.value += decodeEntities(result.value);//.replace(/(?:\r\n|\r|\n)/g, '<br/>');
       end_cmd();
     });

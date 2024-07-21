@@ -134,6 +134,14 @@ function decodeEntities(html) {
     return txt.value;
 }
 
+function encodeToEntities(s) {
+  res=s.replace(/[\u0000-\u9999<>\&]/g, function(i) {
+    return '&#'+i.charCodeAt(0)+';';
+  });
+
+  return res;
+}
+
 function cons_or_not(res, obj) {
   var hlp_msg="";
   Object.keys(res).forEach(key => { hlp_msg+=key+": "+res[key]+"\n"; });
