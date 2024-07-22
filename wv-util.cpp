@@ -2,6 +2,7 @@
 #ifdef _WIN32
 #include <tchar.h>
 #include <windows.h>
+#include <shlwapi.h>
 #include <shellapi.h>
 #else
 #include <string.h>
@@ -92,10 +93,19 @@ std::vector<std::string> split(const std::string &str, char delim)
   return strings;
 }
 
+const std::string ws = " \t\n\r\f\v";
 std::string trim(std::string &s)
 {
-  s.erase(0, s.find_first_not_of(" \n\r\t"));
-  s.erase(s.find_last_not_of(" \n\r\t") + 1);
+  s.erase(0, s.find_first_not_of(ws));
+  s.erase(s.find_last_not_of(ws) + 1);
+  return s;
+}
+
+const std::wstring wss = L" \t\n\r\f\v";
+std::wstring trim(std::wstring &s)
+{
+  s.erase(0, s.find_first_not_of(wss));
+  s.erase(s.find_last_not_of(wss) + 1);
   return s;
 }
 
@@ -159,6 +169,18 @@ std::string wfile2str(std::string filename)
 
   std::wifstream wifs(filename);
   return ws2s(wstream2wstr(wifs));
+}
+
+std::wstring wwfile2str(std::string filename)
+{
+  if (filename == "")
+    return L"File name cannot be empty";
+  if (!std::filesystem::exists(filename))
+    return s2ws("File " + filename + "does not exists");
+  // std::cout << "wfile2str_s " << filename << std::endl;
+
+  std::wifstream wifs(filename);
+  return wstream2wstr(wifs);
 }
 
 void replace_all(std::string &s, std::string srch, std::string repl)
@@ -309,7 +331,7 @@ bool must_convert_to_htent(wchar_t wc)
 }
 
 // Convert non ascii characters of a wstring to html entities form in decimal (default) or hexa &#[x]value;
-std::string to_htent(const std::wstring ws, bool dec_base)
+std::string RES_to_htent(const std::wstring ws, bool dec_base)
 {
   std::stringstream ss;
 
@@ -326,6 +348,24 @@ std::string to_htent(const std::wstring ws, bool dec_base)
     }
     else
       ss << (char)wc;
+  }
+
+  return ss.str();
+}
+
+// Convert non ascii characters of a wstring to html entities form in decimal (default) or hexa &#[x]value;
+std::string to_htent(const std::wstring ws, bool dec_base)
+{
+  std::stringstream ss;
+
+  for (auto wc : ws)
+  {
+    ss << "&#";
+    if (dec_base)
+      ss << std::dec;
+    else
+      ss << 'x' << std::hex;
+    ss << (unsigned int)wc << ';';
   }
 
   return ss.str();
@@ -506,11 +546,79 @@ std::string shell_cmd_wait(std::string cmd, std::string param, std::string dir, 
   return "";
 }
 
+
+// Découpe une chaine en 2 la partie commande et la partie arguments
+void split_cmd(const std::string& s, std::string* prog, std::string* params)
+{
+  std::string cmd(s);
+  trim(cmd);
+  size_t end_exe=0;
+
+  if(cmd[0] == '\"') {
+    end_exe=cmd.find_first_of('\"', 1);
+    if(std::string::npos != end_exe) {
+      *prog=cmd.substr(1, end_exe - 1);
+      *params=cmd.substr(end_exe + 1);
+    } else {
+      *prog=cmd.substr(1, end_exe);
+      *params="";
+    }
+  } else {
+    do {
+      end_exe=cmd.find_first_of(' ', end_exe);
+      if (end_exe > 0 && cmd[end_exe-1] == '\\') end_exe++;
+      else break;
+    } while (end_exe != std::string::npos);
+
+    *prog=cmd.substr(0, end_exe);
+    if(std::string::npos != end_exe) {
+      *params=cmd.substr(end_exe + 1);
+    } else {
+      *params="";
+    }
+  }
+}
+
+void split_cmd(const std::wstring& s, std::wstring* prog, std::wstring* params)
+{
+  std::wstring cmd(s);
+  trim(cmd);
+  size_t end_exe=0;
+
+  if(cmd[0] == L'\"') {
+    end_exe=cmd.find_first_of(L'\"', 1);
+    if(std::wstring::npos != end_exe) {
+      *prog=cmd.substr(1, end_exe - 1);
+      *params=cmd.substr(end_exe + 1);
+    } else {
+      *prog=cmd.substr(1, end_exe);
+      *params=L"";
+    }
+  } else {
+    do {
+      end_exe=cmd.find_first_of(L' ', end_exe);
+      if (end_exe > 0 && cmd[end_exe-1] == L'\\') end_exe++;
+      else break;
+    } while (end_exe != std::wstring::npos);
+
+    *prog=cmd.substr(0, end_exe);
+    if(std::wstring::npos != end_exe) {
+      *params=cmd.substr(end_exe + 1);
+    } else {
+      *params=L"";
+    }
+  }
+}
+
+
 std::string exec_cmd(std::string cmd)
 {
   std::string s;
 #ifdef _WIN32
-  std::wstring wcmd = s2ws("/C " + cmd);
+#ifndef DO_IGNORE
+  std::cout << "exec_cmd1: " << cmd << std::endl;
+  //std::wstring wcmd = s2ws("/C " + cmd);
+  std::wstring wcmd = s2ws(cmd);
   // std::wstring wcmd = s2ws(cmd);
   std::string tmpFile = tempfile();
   std::wstring wtmpFile = s2ws(tmpFile);
@@ -526,7 +634,20 @@ std::string exec_cmd(std::string cmd)
                              FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_TEMPORARY, 0);
   SetStdHandle(STD_OUTPUT_HANDLE, hFile);
   SetStdHandle(STD_ERROR_HANDLE, hFile);
-  CreateProcessW(getcmdw(), const_cast<wchar_t *>(wcmd.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
+
+  if (PathIsRelativeW(wcmd.c_str())) {
+    wcmd=L"/C "+wcmd;
+    std::wcout << L"wcmd: " << getcmdw() << " # " << wcmd << std::endl;
+    CreateProcessW(getcmdw(), const_cast<wchar_t *>(wcmd.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
+  } else {
+    // Découpe la chaine en programme et arguments et ajoute "/C" aux arguments
+    std::wstring s1, s2;
+    split_cmd(wcmd, &s1, &s2);
+    s2=L"/C "+s2;
+    std::wcout << L"s1 + s2: " << s1 << ' ' << s2 << std::endl;
+    CreateProcessW(const_cast<wchar_t *>(s1.c_str()), const_cast<wchar_t *>(s2.c_str()), 0, 0, 0, 0, 0, 0, &si, &pi);
+  }
+
   WaitForSingleObject(pi.hProcess, INFINITE);
   // FlushFileBuffers(GetStdHandle(STD_OUTPUT_HANDLE));
   // FlushFileBuffers(GetStdHandle(STD_ERROR_HANDLE));
@@ -537,11 +658,24 @@ std::string exec_cmd(std::string cmd)
   DeleteFile(tmpFile.c_str());
 #else
   std::string tf = tempfile();
+  std::string fullcmd = cmd + " > " + tf + " 2>&1";
+  std::system(fullcmd.c_str());
+  std::wstring ws=wwfile2str(tf);
+  replace_all(ws, L"ÿ", L" ");
+  std::filesystem::remove(tf);
+  //std::wcout << L"end exec_cmd: " << ws << std::endl;
+  std::string ss=ws2s(ws);
+  std::cout << "end exec_cmd: " << ss << std::endl;
+  return to_htent(ws);
+#endif
+#else
+  std::string tf = tempfile();
   std::string fullcmd = cmd + " > " + tf;
   std::system(fullcmd.c_str());
   s = file2str(tf);
   std::filesystem::remove(tf);
 #endif
+  std::cout << "end exec_cmd: " << s << std::endl;
   return to_htent(s);
 }
 

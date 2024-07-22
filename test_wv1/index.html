@@ -19,10 +19,10 @@
       <textarea style="" id="cmd" placeholder='Enter command and click "Run".'></textarea>
     </div>
 
-    <div id="dv2">
+    <div id="dv2" title='To correctly run a command under Windows, any non internal command must be provided with its absolute path and the path separator must be doubled (\\). For example to run the "where" external command, you must provided it like this: "C:\\Windows\\System32\\where.exe" or for "ssh", like that: "C:\\Windows\\System32\\OpenSSH\\ssh.exe"'>
     <input type="button" id="run_cmd" value="Run" />
     <label>
-      <input type="radio" id="as_js" name="run_as" value="JS" checked />As javascript
+      <input type="radio" id="as_js" name="run_as" value="JS" title="tot" checked />As javascript
     </label>
     <label>
       <input type="radio" id="as_sh" name="run_as" value="shell" />As shell
