@@ -23,6 +23,7 @@ version_check.txt : FORCE
 cfg :
 	@echo "PGF ${PGF}"
 	@echo "PGF86 ${PGF86}"
+	@echo "PGU ${PGU}"
 	@echo "PATH"
 	@echo "${PATH}" | sed 's/:/\n/g'
 	@echo "END PATH"

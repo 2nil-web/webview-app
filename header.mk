@@ -47,8 +47,11 @@ endif
 	ECHO=echo -e
 	PGF=$(subst \,/,$(subst C:\,/c/,$(PROGRAMFILES)))
 	PGF86=${PGF} (x86)
+	LOCAD=$(subst \,/,$(subst C:\,/c/,$(LOCALAPPDATA)))
+	PGU=${LOCAD}/Programs
 	PATH:=${PATH}:${PGF86}/Inno Setup 6
 	PATH:=${PATH}:${PGF}/Inkscape/bin
+	PATH:=${PATH}:${PGU}/Inkscape/bin
 	PATH:=${PATH}:${PGF86}/Pandoc
 	MAGICK=magick
 else
@@ -75,10 +78,10 @@ TMSTAMP := $(shell date +%Y%m%d%H%M%S)
 CPPFLAGS += -I ${mkfile_dir}
 #CPPFLAGS += -I${WVDIR}/build/external/libs/${WV2SUBDIR}/build/native/include
 
-CXXFLAGS += -std=c++20 -O #-g
+CXXFLAGS += -std=c++20 -O -s #-g
 CXXFLAGS += -Wall # -pedantic -Wextra # Utiliser ces 2 dernières options de temps en temps peut-être utile ...
 CXXFLAGS += -Wno-unknown-pragmas
-LDFLAGS += -O #-g
+LDFLAGS += -O -s #-g
 
 ifeq (${OS},Linux)
 #WK2GV=4.1
