@@ -266,45 +266,55 @@ async function run_backup(real_run=true) {
   }
 
   term_width=266;
-  cmd_env=`D:\\UnixTools\\msys64\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 10,350 -s ${term_width},44 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c `;
-  //cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
+  getenv("COMPUTERNAME").then((cn) => {
+    console.log(cn);
+    if (cn === "FRTLS-2765") {
+      msys_root="C:\\Users\\denis.lalanne\\AppData\\Local\\Programs\\msys64"
+    } else {
+      msys_root="D:\\UnixTools\\msys64"
+    }
 
-  cmd=cmd_env;
-  if (real_run) msg="  B A C K U P   I N   P R O G R E S S  ";
-  else          msg="  D R Y   R U N  ";
-  spc=' '.repeat(msg.length);
-  col=Math.trunc((term_width-msg.length)/2);
-  console.log(col);
+    //
+    cmd_env=`${msys_root}\\usr\\bin\\mintty.exe -o Charset=UTF-8 -i app.ico -p 10,350 -s ${term_width},44 -t "Sauvegarde en cours" -h always -e /bin/bash --login -i -c `;
+    //cmd=`${cmd_env} "${shell_cmds} tput smso smul; echo 'Sauvegarde terminée, appuyer sur <Entrée>'"`;
 
-  cmd+='"';
-    // Shows 255 colors in background for TERM=mintty: for ((i=0; i < 255; i++)); do tput setab $i; printf " %03d " "$i"; tput sgr0; done
-    // tput cup row col
-    cmd+="export TERM=mintty;";
-    cmd+=`tput cup 0 ${col} bold;      echo '${spc}';`;
-    cmd+=`tput cup 1 ${col} setab 124; echo '${spc}';`;
-    cmd+=`tput cup 2 ${col};           echo '${msg}';`;
-    cmd+=`tput cup 3 ${col} ;          echo '${spc}';`;
-    cmd+="tput sgr0;";
-    cmd+="echo;";
+    cmd=cmd_env;
+    if (real_run) msg="  B A C K U P   I N   P R O G R E S S  ";
+    else          msg="  D R Y   R U N  ";
+    spc=' '.repeat(msg.length);
+    col=Math.trunc((term_width-msg.length)/2);
+    console.log(col);
 
-    cmd+=` ${shell_cmds}; `;
+    cmd+='"';
+      // Shows 255 colors in background for TERM=mintty: for ((i=0; i < 255; i++)); do tput setab $i; printf " %03d " "$i"; tput sgr0; done
+      // tput cup row col
+      cmd+="export TERM=mintty;";
+      cmd+=`tput cup 0 ${col} bold;      echo '${spc}';`;
+      cmd+=`tput cup 1 ${col} setab 124; echo '${spc}';`;
+      cmd+=`tput cup 2 ${col};           echo '${msg}';`;
+      cmd+=`tput cup 3 ${col} ;          echo '${spc}';`;
+      cmd+="tput sgr0;";
+      cmd+="echo;";
 
-  msg=" Sauvegarde terminée, appuyer sur <Entrée> ";
-  spc=' '.repeat(msg.length);
-  col=Math.trunc((term_width-msg.length)/2);
+    if (shell_cmds !== '') cmd+=` ${shell_cmds}; `;
 
-    cmd+="echo; ";
-    cmd+="tput u7; IFS=';' read -r -d R -a pos;row=$((${pos[0]:2} - 1)); row=${pos[0]:2}; ";
-    cmd+=`tput bold setab 284; `;
-    cmd+=`tput cup \${row}        ${col}; echo '${spc}'; `;
-    cmd+=`tput cup $((\${row}+1)) ${col}; echo '${msg}';`;
-    cmd+=`tput cup $((\${row}+2)) ${col}; echo -n '${spc}'; tput sgr0;`;
-  cmd+='"';
+    msg=" Sauvegarde terminée, appuyer sur <Entrée> ";
+    spc=' '.repeat(msg.length);
+    col=Math.trunc((term_width-msg.length)/2);
 
-  backup_menu.style = "pointer-events:none;";
-  console.log("RSYNC CMD: "+cmd);
-  window.webapp_exec(cmd);
-//  backup_menu.style = "pointer-events:auto;";
+      cmd+="echo; ";
+      cmd+="tput u7; IFS=';' read -r -d R -a pos;row=$((${pos[0]:2} - 1)); ";//row=${pos[0]:2}; ";
+      cmd+=`tput bold setab 284; `;
+      cmd+=`tput cup \${row}        ${col}; echo '${spc}'; `;
+      cmd+=`tput cup $((\${row}+1)) ${col}; echo '${msg}';`;
+      cmd+=`tput cup $((\${row}+2)) ${col}; echo -n '${spc}'; tput sgr0;`;
+    cmd+='"';
+
+    backup_menu.style = "pointer-events:none;";
+    console.log("RSYNC CMD:\n"+cmd);
+    window.webapp_exec(cmd);
+  //  backup_menu.style = "pointer-events:auto;";
+  });
 }
 
 function double_set_size() {
