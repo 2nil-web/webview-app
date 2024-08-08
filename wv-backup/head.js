@@ -57,7 +57,7 @@ webapp.set_title(appName);
 // To be called with -m option
 webapp.restore();
 webapp.set_icon("app.ico");
-webapp.set_size(640, 200, 1); // Define minimum bounds (third option to 1)
+webapp.set_size(640, 150, 1); // Define minimum bounds (third option to 1)
 webapp.set_size(winW, winH);  // Define actual size
 webapp.set_pos(winX, winY);
 webapp.on_move('save_pos()');

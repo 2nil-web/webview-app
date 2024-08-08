@@ -43,3 +43,5 @@ casal/vim
 ntuser.dat*
 x64
 Excluded/
+euclid/.git/
+euclid/.gitignore
